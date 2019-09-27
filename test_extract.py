@@ -1,6 +1,6 @@
 import os
 import json
-from typing import Dict, List, Tuple, Any, Callable
+from typing import Dict, List, Tuple, Any, Callable, Set
 rootdir = './data'
 schema_desc = """
 term: (2018, 0) second item is 0 for SP, 2 for FA
@@ -32,16 +32,16 @@ class Student:
         # (course number, term)
         self.terms: List[Tuple[str, Term]] = []
         # (course number, term number)
-        self.term_numbers: List[Tuple[str, int]] = []
+        self.term_numbers: Dict[str, int] = {}
+
+    def hasTaken(course: str) -> bool:
+        return course in self.courses
 
     def __str__(self):
         return str({"id": self.id, "major": self.major, "courses": [c.name for c in self.courses], "terms": self.terms, "term_numbers": self.term_numbers})
 
-    def getCourseSemester(course:str) -> int:
-        for t in self.term_numbers:
-            if t[0] == course:
-                return t[1]
-        raise Exception("student did not take course")
+    def getCourseSemester(course: str) -> int:
+        return self.term_numbers[course]
 
     # return difference between semesters for course 1 and course 2
     # throws exception if student didn't take the courses
@@ -49,16 +49,17 @@ class Student:
     # it would output 2
     # if student took courses at the same time, output 0
     # if student took second course before first course then outputs negative
-    def compareCourses(course1:str, course2:str) -> int:
+    def compareCourses(course1: str, course2: str) -> int:
         s1 = self.getCourseSemester(course1)
         s2 = self.getCourseSemester(course2)
         return s2 - s1
 
-    def getCoursesForSemester(semester:int) -> Set[str]:
-        return set([t[0] for t in self.term_numbers if t[1] == semester])
+    def getCoursesForSemester(semester: int) -> Set[str]:
+        return set([self.term_numbers[k] for k in self.term_numbers if self.term_numbers[k] == semester])
 
-    def getCoursesBeforeSemester(semester:int) -> Set[str]:
-        return set([t[0] for t in self.term_numbers if t[1] < semester])
+    def getCoursesBeforeSemester(semester: int) -> Set[str]:
+        return set([k for k in self.term_numbers if self.term_numbers[k] < semester])
+
 
 class Course:
     def __init__(self, num: str, name: str):
@@ -73,8 +74,6 @@ class Course:
 
     def __str__(self):
         return str({"id": self.id, "name": self.name, "students": [s.id for s in self.students], "terms": self.terms, "term_numbers": self.term_numbers})
-
-
 
 
 class Data:
@@ -97,16 +96,16 @@ class Data:
                 self._processRow(r, lecs)
         self._processTerms()
 
-    def getStudents(self)->List[Student]:
+    def getStudents(self) -> List[Student]:
         return [self.students[s] for s in self.students]
 
-    def getCourses(self)->List[Course]:
+    def getCourses(self) -> List[Course]:
         return [self.courses[s] for s in self.courses]
 
-    def filterStudents(self, f: Callable[[Student], bool])->List[Student]:
+    def filterStudents(self, f: Callable[[Student], bool]) -> List[Student]:
         return [self.students[s] for s in self.students if f(self.students[s])]
 
-    def filterCourses(self, f: Callable[[Course], bool])->List[Course]:
+    def filterCourses(self, f: Callable[[Course], bool]) -> List[Course]:
         return [self.courses[s] for s in self.courses if f(self.courses[s])]
 
     def _getLecs(self, rows: List[str]):
@@ -174,13 +173,14 @@ class Data:
             for t in sorted_terms:
                 t_course, t_term = t
                 if t_term == current_term:
-                    student.term_numbers.append((t_course, c))
+                    student.term_numbers[t_course] = c
                     self.courses[t_course].term_numbers.append(c)
                 else:
                     c += 1
                     current_term = t_term
-                    student.term_numbers.append((t_course, c))
+                    student.term_numbers[t_course] = c
                     self.courses[t_course].term_numbers.append(c)
+
 
 '''
 to initialize:
