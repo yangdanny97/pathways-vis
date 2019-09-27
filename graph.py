@@ -57,3 +57,16 @@ class Graph:
         edges = [str(e) for e in self.edges if e.weight >= threshold]
         for e in edges:
             print(e)
+
+    def export_graph(self, name:str, threshold=0):
+        edges = [e for e in self.edges if e.weight >= threshold]
+        nodes = set([e.src for e in edges]).intersection(set([e.dest for e in edges]))
+        fname = name+".dot"
+        with open(fname, "w") as f:
+            f.write("digraph course_graph {\n")
+            for e in edges:
+                f.write('{} -> {} [ label = "{}" ];\n'.format(e.src, e.dest, e.weight))
+            for n in nodes:
+                f.write('{} [ label = "{}" ];\n'.format(n,n))
+        f.write("}\n")
+        print("done! exported as {}.dot".format(name))
