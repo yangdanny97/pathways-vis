@@ -18,25 +18,25 @@ class Edge:
 class Graph:
     def __init__(self):
         self.nodes: Set[str] = set()
-        self.edges: List[Edge] = []
+        self.edges: Dict[Tuple[str,str], Edge] = {}
 
     def addEdge(self, src: str, dest: str, weight: int, check=False):
         self.nodes.add(src)
         self.nodes.add(dest)
         if check:
             if not getEdge(src, dest):
-                self.edges.append(Edge(src, dest, weight))
+                self.edges[(src, dest)] = Edge(src, dest, weight)
         else:
-            self.edges.append(Edge(src, dest, weight))
+            self.edges[(src, dest)] = Edge(src, dest, weight)
 
     def getPreds(self, node: str) -> Set[str]:
-        return [e.src for e in self.edges if e.dest == node]
+        return [e.src for e in self.edges.values() if e.dest == node]
 
     def getSucc(self, node: str) -> Set[str]:
-        return [e.dest for e in self.edges if e.src == node]
+        return [e.dest for e in self.edges.values() if e.src == node]
 
     def filterEdges(self, fn: Callable[[Edge], bool]) -> List[Edge]:
-        return [e for e in self.edges if fn(e)]
+        return [e for e in self.edges.values() if fn(e)]
 
     def getInEdges(self, node: str) -> Set[str]:
         return self.filterEdges(lambda e: e.dest == node)
@@ -45,21 +45,21 @@ class Graph:
         return self.filterEdges(lambda e: e.src == node)
 
     def getEdge(self, src: str, dest: str):
-        filtered = self.filterEdges(lambda e: e.src == src and e.dest == dest)
-        if len(filtered) > 0:
-            return filtered[0]
-        return None
+        if (src,dest) in self.edges:
+            return self.edges[(src,dest)]
+        else:
+            return None
 
     def __str__(self):
-        return [str(e) for e in self.edges if e.weight >= threshold]
+        return [str(e) for e in self.edges.values() if e.weight >= threshold]
 
     def print(self, threshold=0):
-        edges = [str(e) for e in self.edges if e.weight >= threshold]
+        edges = [str(e) for e in self.edges.values() if e.weight >= threshold]
         for e in edges:
             print(e)
 
     def export_graph(self, name:str, threshold=0):
-        edges = [e for e in self.edges if e.weight >= threshold]
+        edges = [e for e in self.edges.values() if e.weight >= threshold]
         nodes = set([e.src for e in edges]).intersection(set([e.dest for e in edges]))
         fname = name+".dot"
         with open(fname, "w") as f:
@@ -68,5 +68,5 @@ class Graph:
                 f.write('{} -> {} [ label = "{}" ];\n'.format(e.src, e.dest, e.weight))
             for n in nodes:
                 f.write('{} [ label = "{}" ];\n'.format(n,n))
-        f.write("}\n")
+            f.write("}\n")
         print("done! exported as {}.dot".format(name))
