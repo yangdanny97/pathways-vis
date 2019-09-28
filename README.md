@@ -21,4 +21,5 @@ visualization project of pathways through cornell CIS
 - Danny: try to build graph of dependent courses
 - set up Github repo
 
-
+#### Progress:
+- Danny: set up repo, created graph library for modeling dependent courses that supports dumping to graphviz DOT format, calculated some summary statistics on the graph
