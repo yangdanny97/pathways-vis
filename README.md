@@ -23,3 +23,6 @@ visualization project of pathways through cornell CIS
 
 #### Progress:
 - Danny: set up repo, created graph library for modeling dependent courses that supports dumping to graphviz DOT format, calculated some summary statistics on the graph
+- Eric: used Sam's work to build a heuristic to get required courses (top 10 of # of students in class / # of students
+  in major) and possible paths between them (75% of max path between 2 classes).
+  Made simple viz in D3 to show results
