@@ -26,3 +26,11 @@ visualization project of pathways through cornell CIS
 - Eric: used Sam's work to build a heuristic to get required courses (top 10 of # of students in class / # of students
   in major) and possible paths between them (75% of max path between 2 classes).
   Made simple viz in D3 to show results
+
+### Week ending on 10/5
+
+#### Goals: 
+- Danny: tune thresholds for including classes in graph, separate graphs for different majors, (stretch) investigate undirected edges and dumping graph to JSON for displaying with D3.
+
+#### Progress:
+- TBD
