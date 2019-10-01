@@ -34,13 +34,13 @@ class Student:
         # (course number, term number)
         self.term_numbers: Dict[str, int] = {}
 
-    def hasTaken(course: str) -> bool:
+    def hasTaken(self, course: str) -> bool:
         return course in self.courses
 
     def __str__(self):
         return str({"id": self.id, "major": self.major, "courses": [c.name for c in self.courses], "terms": self.terms, "term_numbers": self.term_numbers})
 
-    def getCourseSemester(course: str) -> int:
+    def getCourseSemester(self, course: str) -> int:
         return self.term_numbers[course]
 
     # return difference between semesters for course 1 and course 2
@@ -49,15 +49,15 @@ class Student:
     # it would output 2
     # if student took courses at the same time, output 0
     # if student took second course before first course then outputs negative
-    def compareCourses(course1: str, course2: str) -> int:
+    def compareCourses(self, course1: str, course2: str) -> int:
         s1 = self.getCourseSemester(course1)
         s2 = self.getCourseSemester(course2)
         return s2 - s1
 
-    def getCoursesForSemester(semester: int) -> Set[str]:
+    def getCoursesForSemester(self, semester: int) -> Set[str]:
         return set([self.term_numbers[k] for k in self.term_numbers if self.term_numbers[k] == semester])
 
-    def getCoursesBeforeSemester(semester: int) -> Set[str]:
+    def getCoursesBeforeSemester(self, semester: int) -> Set[str]:
         return set([k for k in self.term_numbers if self.term_numbers[k] < semester])
 
 
