@@ -75,7 +75,7 @@ class Graph:
     def export_json(self, name:str, threshold=0):
         edges = [e for e in self.edges.values() if e.weight >= threshold]
         nodes = set([e.src for e in edges]).intersection(set([e.dest for e in edges]))
-        fname = name+".graph"
+        fname = name+".json"
         data = {}
         data["nodes"] = nodes
         data["edges"] = []
@@ -87,4 +87,4 @@ class Graph:
             })
         with open(fname, "w") as f:
             json.dump(data, f)
-        print("done! exported as {}.dot".format(name))
+        print("done! exported as {}.json".format(name))
