@@ -1,4 +1,5 @@
 from typing import Dict, List, Tuple, Any, Callable, Set
+import json
 
 
 class Edge:
@@ -69,4 +70,21 @@ class Graph:
             for n in nodes:
                 f.write('{} [ label = "{}" ];\n'.format(n,n))
             f.write("}\n")
+        print("done! exported as {}.dot".format(name))
+
+    def export_json(self, name:str, threshold=0):
+        edges = [e for e in self.edges.values() if e.weight >= threshold]
+        nodes = set([e.src for e in edges]).intersection(set([e.dest for e in edges]))
+        fname = name+".graph"
+        data = {}
+        data["nodes"] = nodes
+        data["edges"] = []
+        for e in edges:
+            data["edges"].append({
+                "source": e.src,
+                "destination": e.dest,
+                "weight": e.weight
+            })
+        with open(fname, "w") as f:
+            json.dump(data, f)
         print("done! exported as {}.dot".format(name))

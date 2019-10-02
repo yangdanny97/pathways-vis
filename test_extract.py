@@ -77,7 +77,7 @@ class Course:
 
 
 class Data:
-    def __init__(self, path: str):
+    def __init__(self, path: str, majors = ["Information Science","Computer Science","Statistical Science"]):
         self.courses: Dict[str, Course] = {}  # course number lookup
         self.students: Dict[str, Student] = {}  # student id lookup
         self.rows = []
@@ -93,7 +93,7 @@ class Data:
                 print(x)
             lecs = self._getLecs(rows)
             for r in rows:
-                self._processRow(r, lecs)
+                self._processRow(r, lecs, majors)
         self._processTerms()
 
     def getStudents(self) -> List[Student]:
@@ -118,10 +118,12 @@ class Data:
                 lecs.add(course_num)
         return lecs
 
-    def _processRow(self, row: str, lecs: List[str]):
+    def _processRow(self, row: str, lecs: List[str], majors:List[str]):
         row = row[:-1].split(",")
         stu_id = row[0]
         major = row[1][1:-1]
+        if major not in majors:
+            return
         term: Term = maketerm(row[2][1:-1])
         course_num = row[3][1:-1]
         course_name = row[4][1:-1]
