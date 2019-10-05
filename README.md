@@ -44,6 +44,8 @@ visualization project of pathways through cornell CIS
   different majors, (stretch) investigate undirected edges and dumping graph to
   JSON for displaying with D3.
 - Sam: start working on ways to interpret data and make class recommendations
+- Eric: update requirement graph with classes take same semester, try to get
+  force graph to make a better vis that will look cleaner
 
 #### Progress:
 - TBD
