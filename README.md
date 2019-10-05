@@ -48,4 +48,14 @@ visualization project of pathways through cornell CIS
   force graph to make a better vis that will look cleaner
 
 #### Progress:
+- Danny: support for JSON dumping and separate graphs for different majors. built co-enrollment graph. designed and built UI prototype with dummy data.
+
+### Week ending on 10/12
+
+#### Goals: 
+- Danny: refine UI prototype, more investigation for undirected edges and thresholding, investigate graph representation size
+
+#### Progress:
 - TBD
+
+
