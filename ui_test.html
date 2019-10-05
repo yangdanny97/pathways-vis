@@ -1,0 +1,156 @@
+<html>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <style>
+    /* Add your CSS styles here! */
+    </style>
+    <body>
+        <p>Test UI</p>
+    <svg id="vis" width="1000px", height="2000px"></svg>
+    <script>
+        var vis = d3.select("#vis");
+        var grid = 100;
+        var data = [];
+        var data_recs = [];
+        var counter = 0;
+
+        function COURSE(name, row, col) {
+            return { type: "course", name: name, row: row, col: col};
+        }
+
+        function REC(suggestions, row, col) {
+            return { type: "rec", recs: suggestions, row: row, col: col};
+        }
+
+        for (var i = 0; i < 8; i++) {
+            var num_courses = Math.floor(Math.random() * 4) + 1;
+            for (var j = 0; j < num_courses; j++) {
+                data.push(COURSE(`CS ${counter} ${i} ${j}`, i, j));
+                counter++;
+            } 
+        }
+
+        for (var i = 0; i < 8; i++) {
+            var num = data.filter(d => d["row"] == i && d["type"] == "course").length;
+            for (var j = 0; j < 2; j++) {
+                var recs = [];
+                for (var k = 0; k < 3; k++) {
+                    recs.push(`CS ${counter}`);
+                    counter++;
+                }
+                data_recs.push(REC(recs, i, num + j));
+            }
+        }
+
+        console.log(data);
+        console.log(data_recs);
+
+        function recalculate(rec) {
+            var recs = [];
+            for (var k = 0; k < 3; k++) {
+                recs.push(`CS ${counter}`);
+                counter++;
+            }
+            rec.recs = recs;
+        }
+
+        function addCourse(cname, row) {
+            console.log(`ADD ${cname}`);
+            var rowsize = data.filter(x => x.row == row).length;
+            data.push(COURSE(cname, row, rowsize));
+            data_recs = data_recs
+                .map(x => { 
+                    //shift to right
+                    if (x.row == row) {
+                        x.col= x.col + 1;
+                    }
+                    // recalculate current and next semester suggestions
+                    if (x.row == row || x.row == row + 1) {
+                        recalculate(x);
+                    }
+                    return x;
+                });
+            displayCourses();
+        }
+
+        function deleteCourse(c) {
+            console.log(`DELETE ${c.name}`);
+            data = data
+                    .filter(x => x.name != c.name) // remove
+                    .map(x => { //shift to left
+                        if (x.row == c.row && x.col > c.col) {
+                            x.col = x.col - 1;
+                        }
+                        return x;
+                    });
+            data_recs = data_recs
+                .map(x => { 
+                    //shift to left
+                    if (x.row == c.row && x.col > c.col) {
+                        x.col= x.col - 1;
+                    }
+                    // recalculate current and next semester suggestions
+                    if (x.row == c.row || x.row == c.row + 1) {
+                        recalculate(x);
+                    }
+                    return x;
+                });
+            displayCourses();
+        }
+
+        function displayCourses() {
+            vis.selectAll(".course").remove();
+            vis.selectAll(".recs").remove();
+
+            var courses = vis.selectAll(".course").data(data);
+            var course = courses.enter().append("g")
+            .attr("class", "course")
+            .on("click", d => deleteCourse(d));
+
+            course.append("rect")
+            .attr("width", grid)
+            .attr("height", grid)
+            .attr("x", d => 50 + d.col* grid * 1.2)
+            .attr("y", d => 50 + (8 - d.row) * grid * 1.2)
+            .attr("stroke", "black")
+            .attr("stroke-width", 3)
+            .attr("fill", "gold");
+
+            course.append("text")
+            .attr('text-anchor', "middle")
+            .attr("font-size", "25px")
+            .text(d => d.name)
+            .attr("x", d => 50 + d.col * grid * 1.2 + grid * 0.5)
+            .attr("y", d => 50 + (8 - d.row) * grid * 1.2 + grid * 0.6)
+            .attr("fill", "white");
+
+            var recs = vis.selectAll(".recs").data(data_recs)
+            var rec = recs.enter().append("g")
+            .attr("class", "recs");
+
+            for (var idx = 0; idx < 3; idx++) {
+                var i = idx;
+                rec.append("rect")
+                .attr("width", grid)
+                .attr("height", grid/3)
+                .attr("x", d => 50 + d.col* grid * 1.2)
+                .attr("y", d => 50 + (8 - d.row) * grid * 1.2  + grid/3 * i)
+                .attr("stroke", "white")
+                .attr("stroke-width", 3)
+                .attr("fill", "gray")
+                .on("click", d => addCourse(d.recs[i], d.row));
+
+                rec.append("text")
+                .attr('text-anchor', "middle")
+                .attr("font-size", "15px")
+                .text(d => d.recs[i])
+                .attr("x", d => 50 + d.col * grid * 1.2 + grid * 0.5)
+                .attr("y", d => 50 + (8 - d.row) * grid * 1.2 + grid/3 * i + 15)
+                .attr("fill", "white")
+                .on("click", d => addCourse(d.recs[i], d.row));
+            }
+        }
+
+        displayCourses();
+    </script>
+    </body>
+</html>
