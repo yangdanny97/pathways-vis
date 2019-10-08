@@ -31,6 +31,10 @@
     background-color: #B31B1B;
 }
 
+#major {
+    font-family: Montserrat;
+}
+
 #title {
     flex-grow: 1;
     height: 100%;
