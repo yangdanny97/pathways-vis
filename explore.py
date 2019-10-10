@@ -177,7 +177,7 @@ text = widgets.Text()
 display(text)
 
 def show(course):
-    if not isinstance(course, Text):
+    if not isinstance(course, widgets.Text):
         course = course.value
 
     d = get_info(course)

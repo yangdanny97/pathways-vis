@@ -48,4 +48,22 @@ visualization project of pathways through cornell CIS
   force graph to make a better vis that will look cleaner
 
 #### Progress:
+- Danny: support for JSON dumping and separate graphs for different majors.
+  built co-enrollment graph. designed and built UI prototype with dummy data.
+- Eric: read the papers, used Danny's method of getting class to class to build
+  previous graphs and get classes next to each other, still need to improve viz
+- Sam: built site prototype, started work on recommendations
+
+### Week ending on 10/12
+
+#### Goals: 
+- Danny: refine UI prototype, more investigation for undirected edges and thresholding, investigate graph representation size
+- Eric: improve viz for required classes, combine required classes that are
+  semester to semester and same semester together to improve graph
+- Sam: build a preliminary recommendation prototype
+- Sam: incorporate some interactivity into site
+
+#### Progress:
 - TBD
+
+
