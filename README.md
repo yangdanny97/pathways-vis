@@ -60,10 +60,13 @@ visualization project of pathways through cornell CIS
 - Danny: refine UI prototype, more investigation for undirected edges and thresholding, investigate graph representation size
 - Eric: improve viz for required classes, combine required classes that are
   semester to semester and same semester together to improve graph
-- Sam: build a preliminary recommendation prototype
-- Sam: incorporate some interactivity into site
+- Sam: build a preliminary recommendation prototype, incorporate some interactivity into site
 
 #### Progress:
-- TBD
+- Danny: calculated graph JSON sizes, added animations to UI and began integrating real data
 
+### Week ending on 10/19
+
+#### Goals: 
+- Danny: integrate real data into interactive schedule UI, connect to Sam's website UI
 
