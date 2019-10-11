@@ -56,20 +56,22 @@
         function addCourse(cname, row) {
             console.log(`ADD ${cname}`);
             var rowsize = data.filter(x => x.row == row).length;
-            data.push(COURSE(cname, row, rowsize));
-            data_recs = data_recs
-                .map(x => { 
-                    //shift to right
-                    if (x.row == row) {
-                        x.col= x.col + 1;
-                    }
-                    // recalculate current and next semester suggestions
-                    if (x.row == row || x.row == row + 1) {
-                        recalculate(x);
-                    }
-                    return x;
-                });
-            displayCourses();
+            if (rowsize < 6) {
+                data.push(COURSE(cname, row, rowsize));
+                data_recs = data_recs
+                    .map(x => { 
+                        //shift to right
+                        if (x.row == row) {
+                            x.col= x.col + 1;
+                        }
+                        // recalculate current and next semester suggestions
+                        if (x.row == row || x.row == row + 1) {
+                            recalculate(x);
+                        }
+                        return x;
+                    });
+                displayCourses();
+            }
         }
 
         function deleteCourse(c) {
