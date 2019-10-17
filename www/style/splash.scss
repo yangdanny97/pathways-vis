@@ -1,0 +1,8 @@
+@import "node_modules/bootstrap/scss/bootstrap";
+@import url('https://fonts.googleapis.com/css?family=Montserrat|Nunito|Nunito+Sans|Raleway&display=swap');
+
+$montserrat: "Montserrat", sans-serif;
+
+h1 {
+    font-family: $montserrat;
+}
