@@ -5,6 +5,11 @@
     box-sizing: border-box;
 }
 
+a {
+    color: inherit;
+    text-decoration: inherit;
+}
+
 #container {
     display: flex;
     flex-direction: row;
