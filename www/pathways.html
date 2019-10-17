@@ -11,8 +11,13 @@
 <div id='container'>
     <div id='left'>
         <div id='head'>
-            <div id='title'><h1>Pathways</h1></div>
-            <div id='major'>Computer Science</div>
+            <div id='title'><a href='index.html'><h1>Pathways</h1></a></div>
+            <div id='major'></div>
+            <script>
+                var urlParams = new URLSearchParams(window.location.search);
+                major = urlParams.get('major');
+                document.getElementById('major').innerHTML += major;
+            </script>
         </div>
 
         <div id='bar'>
@@ -27,10 +32,10 @@
                 <div class='coursecred'>4 credits</div>
             </div>
             <p>
-                    Programming and problem solving using Python. Emphasizes
-                    principles of software development, style, and testing.
-                    Topics include procedures and functions, iteration,
-                    recusion, arrays and vectors, strings...
+                Programming and problem solving using Python. Emphasizes
+                principles of software development, style, and testing.
+                Topics include procedures and functions, iteration,
+                recusion, arrays and vectors, strings...
             </p>
         </div>
     </div>
