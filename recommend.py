@@ -165,3 +165,9 @@ show_results(df)
 # that helpful for a given student. One way to improve might be to "soften" our
 # target student pool - to include results from more students, but simply
 # prioritize students who have taken classes in the input set.
+
+#%%
+beta = translate(["CS4780", "INFO3300", "CS4740"])
+
+df = recommend_bystudent(beta)
+show_results(df)
