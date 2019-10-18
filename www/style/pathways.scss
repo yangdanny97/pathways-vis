@@ -27,6 +27,31 @@
     form input {
         margin: 10px;
     }
+
+}
+
+#left .card {
+    margin: 10px;
+    
+    .card-header {
+        display: flex;
+        flex-direction: row;
+
+        div.code {
+            width: 80px;
+            font-weight: bold;
+        }
+
+        div.name {
+            flex-grow: 1;
+            font-style: italic;
+        }
+
+        div.cred {
+            width: 80px;
+            text-align: right;
+        }
+    }
 }
 
 #head {
