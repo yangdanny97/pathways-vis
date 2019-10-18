@@ -2,14 +2,12 @@ var $ = require('jquery')
 
 import '../style/splash.scss';
 
-let input = $("#majorin")[0];
+var input = $(".form-control")[0];
 let major = input.value;
 
-function update() {
-    $('#golink')[0].href = 'pathways.html?major=' + input.value;
+function go() {
+    major = $('input')[0].value
+    window.location = 'pathways.html?major=' + major;
 }
 
-update();
-
-input.oninput = update;
-window.update = update;
+window.go = go;
