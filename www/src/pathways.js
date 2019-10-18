@@ -11,24 +11,28 @@ const major = urlParams.get('major');
 $('#major')[0].innerHTML = major;
 
 // Load classes
+var stack = []
 
-let truncate = function(text, limit) {
-    if (text.length > limit){
-        for (let i = limit; i > 0; i--){
-            if(text.charAt(i) === ' ' && (text.charAt(i-1) != ','||text.charAt(i-1) != '.'||text.charAt(i-1) != ';')) {
-                return text.substring(0, i) + '...';
-            }
-        }
-        return text.substring(0, limit) + '...';
+/* Package the API course data into a smaller, neater object */
+function grok(course) {
+    let trim = {
+        subject: course.subject,
+        catalogNbr: course.catalogNbr,
+        titleLong: course.titleLong,
+        titleShort: course.titleShort,
+        description: course.description,
+        credits: course.enrollGroups[0].unitsMinimum,
+        link: `https://classes.cornell.edu/browse/roster/FA19/class/${course.subject}/${course.catalogNbr}`
     }
-    else
-        return text;
-};
 
-function info(course, callback) {
+    return trim;
+}
+
+/* Get grokked course for a particular code */
+function info(code, callback) {
     let semester = "FA19";
-    let dept = course.slice(0,-4);
-    let num  = course.slice(-4);
+    let dept = code.slice(0,-4);
+    let num  = code.slice(-4);
 
     let url = `https://classes.cornell.edu/api/2.0/search/classes.json?roster=${semester}&subject=${dept}`
 
@@ -38,22 +42,36 @@ function info(course, callback) {
 
         for (let course of data.classes) {
             if (course.catalogNbr == num) { 
-                let trim = {
-                    subject: course.subject,
-                    catalogNbr: course.catalogNbr,
-                    titleLong: course.titleLong,
-                    titleShort: course.titleShort,
-                    description: course.description,
-                    credits: course.enrollGroups[0].unitsMinimum,
-                    link: `https://classes.cornell.edu/browse/roster/FA19/class/${course.subject}/${course.catalogNbr}`
-                }
-                    
-                callback(trim);
+                callback(grok(course));
             }
         }
     });
 }
 
+/* Get an array of grokked courses matching a particular search query */
+function search(query, callback) {
+    let fn = function(courses) {
+        stack = courses
+        window.stack = stack; 
+        render()
+        return 0;
+    }
+    callback = callback || fn;
+
+    let semester = "FA19";
+    let url = `https://classes.cornell.edu/api/2.0/search/classes.json?roster=${semester}&q=${query}&subject=${major}`;
+
+    request(url, function(error, response, body) {
+        window.body = body;
+        let data = JSON.parse(body).data;
+
+        let courses = data.classes.map(grok);
+
+        callback(courses);
+    });
+}
+
+/* Get an html card for a grokked course */
 function card(course) {
 
     let html = `<div class='card'>
@@ -67,21 +85,25 @@ function card(course) {
             <a class="btn btn-primary btn-sm" href="${course.link}" role="button" target="_blank">Details</a>
             <button class="btn btn-success btn-sm">Add</button>
         </div>
-    </div>`
+    </div>`;
 
-    window.html = html;
     return html
 }
 
-function push(card) {
-    $('#deck').append(card);
+/* Render an array of cards into the deck. If no array is provided, render the stack*/
+function render(cards) {
+    cards = cards || stack.map(card);
+
+    $('#deck').empty()
+    for (let card of cards) {
+        $('#deck').append(card);
+        console.log(card)
+    }
     for (let el of $(".card-text")) { $clamp(el, {clamp:3}); }
+
+    return 0;
 }
 
-var stack = ["CS1110"];
-
-info(stack[0], function(course) { push(card(course)); });
-
-var send = (course) => info(course, function(course) { push(card(course)); });
-
-window.send = send;
+window.search = search;
+window.render = render;
+window.stack = stack;

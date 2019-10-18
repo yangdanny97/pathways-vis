@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css?family=Montserrat|Nunito|Nunito+Sans|Raleway&display=swap');
 @import "node_modules/bootstrap/scss/bootstrap";
 
 * {
@@ -36,7 +37,6 @@
     }
 
     #deck {
-        border: 1px dotted black;
         flex-grow: 1;
         overflow-y: scroll;
     }
@@ -81,9 +81,13 @@
 }
 
 #left form {
+    padding: 10px;
+
     input {
-        margin: 10px;
+        flex-grow: 1;
+        margin-right: 10px;       
     }
+
 }
 
 #left #deck .card {
@@ -115,6 +119,10 @@
             width: 80px;
             text-align: right;
         }
+    }
+    
+    .card-text {
+        font-family: nunito;
     }
 }
 
