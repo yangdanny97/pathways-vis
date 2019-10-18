@@ -1,0 +1,64 @@
+@import "node_modules/bootstrap/scss/bootstrap";
+
+* {
+    margin: 0;
+    box-sizing: border-box;
+}
+
+#container {
+    display: flex;
+    flex-direction: row;
+
+    width: 100%;
+    height: 100vh;
+
+    margin: auto;
+
+    & > div {
+        height: 100%;
+        width: 100px;
+        flex-grow: 1;
+    }
+}
+
+#left {
+    background-color: #eee;
+
+}
+
+#head {
+    $header-height: 70px;
+
+    display: flex;
+    flex-direction: row;
+
+    height: $header-height;
+    width: 100%;
+
+    background-color: #B31B1B;
+
+    #title {
+        flex-grow: 1;
+        height: 100%;
+
+        a.h1, a.h1:hover {
+            display: inline-block;
+            padding-left: 20px;
+            line-height: $header-height;
+            color: white;
+            height: 100%;
+            
+            text-decoration: none;
+        }
+
+    }
+
+    #major {
+        height: 100%;
+        width: 200px;
+        text-align: center;
+        line-height: $header-height;
+
+        background-color: white;
+    }
+}

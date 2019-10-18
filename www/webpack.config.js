@@ -2,9 +2,13 @@ const path = require('path');
 
 module.exports = {
   mode: 'development',
-  entry: './src/splash.js',
+  //entry: './src/splash.js',
+  entry: {
+    splash: './src/splash.js',
+    pathways: './src/pathways.js',
+  },
   output: {
-    filename: 'splash.js',
+    filename: '[name].bundle.js',
     publicPath: 'dist'
   },
 
