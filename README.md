@@ -68,5 +68,7 @@ visualization project of pathways through cornell CIS
 ### Week ending on 10/19
 
 #### Goals: 
-- Danny: integrate real data into interactive schedule UI, connect to Sam's website UI
+- Danny: integrate real data into interactive schedule UI, connect to Sam's
+  website UI
+- Sam: Start building out site prototype with bootstrap and npm
 
