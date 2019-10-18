@@ -4,6 +4,7 @@
 <head>
     <meta charset='utf-8'>
     <title>Pathways</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/josephschmitt/Clamp.js/clamp.js"></script>
 </head>
 
 <body>
@@ -14,30 +15,14 @@
             <div id='major'></div>
         </div>
 
-        <form class='form-inline'>
+        <form class='form-inline' action="javascript:;" onsubmit="send(this.children[0].value)">
             <input class="form-control form-control-lg" type="search" placeholder="Class">
-
             <button class="btn btn-primary">Search</button>
         </form>
+
         <h2 id='status'>Core</h2>
 
-        <div class='card'>
-            <div class='card-header'>
-                <div class='code'>CS 1110</div>
-                <div class='name'>Introduction to Computing Using Python</div>
-                <div class='cred'>4 Credits</div>
-            </div>
-            <div class="card-body">
-                <p class="card-text">
-                    Programming and problem solving using Python. Emphasizes
-                    principles of software development, style, and testing.
-                    Topics include procedures and functions, iteration,
-                    recusion, arrays and vectors, strings...
-                </p>
-                <button class="btn btn-primary btn-sm">Add</button>
-            </div>
-        </div>
-
+        <div id='deck'></div>
     </div>
     <div id='right'>
 

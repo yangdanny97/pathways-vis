@@ -23,38 +23,27 @@
 
 #left {
     background-color: #eee;
+    display: flex;
+    flex-direction: column;
 
-    form input {
-        margin: 10px;
+    form {
+        height: 70px;
+    }
+
+    #status {
+        padding-left: 10px;
+        height: 40px;
+    }
+
+    #deck {
+        border: 1px dotted black;
+        flex-grow: 1;
+        overflow-y: scroll;
     }
 
 }
 
-#left .card {
-    margin: 10px;
-    
-    .card-header {
-        display: flex;
-        flex-direction: row;
-
-        div.code {
-            width: 80px;
-            font-weight: bold;
-        }
-
-        div.name {
-            flex-grow: 1;
-            font-style: italic;
-        }
-
-        div.cred {
-            width: 80px;
-            text-align: right;
-        }
-    }
-}
-
-#head {
+#left #head {
     $header-height: 70px;
 
     display: flex;
@@ -71,7 +60,7 @@
 
         a.h1, a.h1:hover {
             display: inline-block;
-            padding-left: 20px;
+            padding: 0 20px;
             line-height: $header-height;
             color: white;
             height: 100%;
@@ -90,3 +79,42 @@
         background-color: white;
     }
 }
+
+#left form {
+    input {
+        margin: 10px;
+    }
+}
+
+#left #deck .card {
+    margin: 10px;
+    
+    .card-header {
+        display: flex;
+        flex-direction: row;
+
+        div {
+            $height: 24px;
+            height: $height;
+            line-height: $height;
+        }
+
+        div.code {
+            width: 80px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        div.name {
+            flex-grow: 1;
+            font-style: italic;
+            overflow: hidden;
+        }
+
+        div.cred {
+            width: 80px;
+            text-align: right;
+        }
+    }
+}
+
