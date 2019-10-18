@@ -2,7 +2,7 @@ const path = require('path');
 
 module.exports = {
   mode: 'development',
-  //entry: './src/splash.js',
+
   entry: {
     splash: './src/splash.js',
     pathways: './src/pathways.js',
@@ -30,4 +30,10 @@ module.exports = {
       }
     ],
   },
+
+  node: {
+    fs: 'empty',
+    net: 'empty',
+    tls: 'empty'
+  }
 };
