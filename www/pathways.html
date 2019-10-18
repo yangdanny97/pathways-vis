@@ -4,20 +4,14 @@
 <head>
     <meta charset='utf-8'>
     <title>Pathways</title>
-    <link rel='stylesheet' type='text/css' href='style/style.css'>
 </head>
 
 <body>
 <div id='container'>
     <div id='left'>
         <div id='head'>
-            <div id='title'><a href='index.html'><h1>Pathways</h1></a></div>
+            <div id='title'><a class='h1' href='index.html'>Pathways</a></div>
             <div id='major'></div>
-            <script>
-                var urlParams = new URLSearchParams(window.location.search);
-                major = urlParams.get('major');
-                document.getElementById('major').innerHTML += major;
-            </script>
         </div>
 
         <div id='bar'>
@@ -42,6 +36,7 @@
     <div id='right'>
 
     </div>
+    <script src='dist/pathways.bundle.js'></script>
 </div>
 </body>
 
