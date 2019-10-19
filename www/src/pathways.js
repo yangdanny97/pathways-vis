@@ -1,5 +1,5 @@
 var $ = require('jquery');
-var request = require('request');
+var request = require('request-promise');
 
 import '../style/pathways.scss';
 
@@ -11,7 +11,55 @@ const major = urlParams.get('major');
 $('#major')[0].innerHTML = major;
 
 // Load classes
-var stack = []
+var stack = [];
+
+var popular = []
+var recs = [];
+var search_results = [];
+
+var pref = new Set()
+
+/* Add a class to the list of preferred classes */
+function add(code) {
+    pref.add(code);
+    window.pref = pref;
+}
+    
+/* Remove a class from the list of preferred classes */
+function remove(code) {
+    pref.delete(code);
+    window.pref = pref;
+}
+
+function push(courses, status) {
+    status = status || "Courses";
+    $("#status").html(status);
+
+    stack = courses;
+    window.stack = stack;
+    render();
+}
+
+/* Render an array of cards into the deck. If no array is provided, render the stack*/
+function render(courses, status) {
+    status = status || "Courses";
+    $("#status").html(status);
+
+    stack = courses;
+    window.stack = stack;
+
+    //console.log(stack);
+
+    let cards = stack.map(card);
+
+    $('#deck').empty()
+    for (let card of cards) {
+        $('#deck').append(card);
+    }
+    for (let el of $(".card-text")) { $clamp(el, {clamp:3}); }
+
+    return 0;
+}
 
 /* Package the API course data into a smaller, neater object */
 function grok(course) {
@@ -28,49 +76,6 @@ function grok(course) {
     return trim;
 }
 
-/* Get grokked course for a particular code */
-function info(code, callback) {
-    let semester = "FA19";
-    let dept = code.slice(0,-4);
-    let num  = code.slice(-4);
-
-    let url = `https://classes.cornell.edu/api/2.0/search/classes.json?roster=${semester}&subject=${dept}`
-
-    request(url, function(error, response, body) {
-        window.body = body;
-        let data = JSON.parse(body).data;
-
-        for (let course of data.classes) {
-            if (course.catalogNbr == num) { 
-                callback(grok(course));
-            }
-        }
-    });
-}
-
-/* Get an array of grokked courses matching a particular search query */
-function search(query, callback) {
-    let fn = function(courses) {
-        stack = courses
-        window.stack = stack; 
-        render()
-        return 0;
-    }
-    callback = callback || fn;
-
-    let semester = "FA19";
-    let url = `https://classes.cornell.edu/api/2.0/search/classes.json?roster=${semester}&q=${query}&subject=${major}`;
-
-    request(url, function(error, response, body) {
-        window.body = body;
-        let data = JSON.parse(body).data;
-
-        let courses = data.classes.map(grok);
-
-        callback(courses);
-    });
-}
-
 /* Get an html card for a grokked course */
 function card(course) {
 
@@ -83,27 +88,117 @@ function card(course) {
         <div class="card-body">
             <p class="card-text">${course.description}</p>
             <a class="btn btn-primary btn-sm" href="${course.link}" role="button" target="_blank">Details</a>
-            <button class="btn btn-success btn-sm">Add</button>
+            <button class="btn btn-success btn-sm" onclick="add('${course.subject}${course.catalogNbr}')">Add</button>
+            <button class="btn btn-danger btn-sm" onclick="remove('${course.subject}${course.catalogNbr}')">Remove</button>
         </div>
     </div>`;
 
     return html
 }
 
-/* Render an array of cards into the deck. If no array is provided, render the stack*/
-function render(cards) {
-    cards = cards || stack.map(card);
+/* Get grokked course for a particular code */
+async function info(code) {
+    let semester = "FA19";
+    let dept = code.slice(0,-4);
 
-    $('#deck').empty()
-    for (let card of cards) {
-        $('#deck').append(card);
-        console.log(card)
+    let options = {
+        uri: `https://classes.cornell.edu/api/2.0/search/classes.json?roster=${semester}&subject=${dept}`,
+        json: true
     }
-    for (let el of $(".card-text")) { $clamp(el, {clamp:3}); }
 
-    return 0;
+    let r = await request(options)
+    return r;
 }
 
-window.search = search;
-window.render = render;
+async function infoAll(codes) {
+    const tasks = codes.map(info);
+    const results = await Promise.all(tasks);
+
+    function getCourseFromBody(body, code) {
+        const num = code.slice(-4);
+
+        for (let course of body.data.classes) {
+            if (course.catalogNbr == num) {
+                return grok(course);
+            }
+        }
+    }
+
+    let courses = []
+    for (let i = 0; i < codes.length; i++) {
+        courses.push(getCourseFromBody(results[i], codes[i]));
+    }
+
+    return courses;
+}
+
+/* Get an array of popular courses based on the selected major */
+async function get_popular() {
+    let popular_codes = ["CS1110", "CS2110", "CS2800", "CS3110"]
+    popular.length = 0;
+    
+    //popular = await infoAll(popular_codes).then((v) => v);
+    infoAll(popular_codes).then((courses) => render(courses, "Popular"));
+
+    //render(popular, "Popular");
+
+    return popular;
+}
+
+/* Get an array of grokked courses matching a particular search query */
+function search(query) {
+    let value = $('input')[0].value;
+    query = query || value;
+
+    let semester = "FA19";
+    let url = `https://classes.cornell.edu/api/2.0/search/classes.json?roster=${semester}&q=${query}&subject=${major}`;
+
+    request(url, function(error, response, body) {
+        window.body = body;
+        let data = JSON.parse(body).data;
+
+        search_results = data.classes.map(grok);
+
+        render(search_results, "Search");
+    });
+}
+
+$(document).ready(function() {
+    $("#search").click(() => search());
+});
+
+/* Get an array of recommended courses based on the preferences list */
+function recommend(codes) {
+    codes = codes || pref;
+
+    recs.length = 0;
+
+    // Get recommended courses
+    let rec_codes = ["CS2800", "CS2110", "CS4820"];
+
+    for (let code of rec_codes) {
+        info(code, (course) => recs.push(course));
+    }
+    render(recs, "Recommendations")
+
+    return recs;
+}
+
 window.stack = stack;
+window.search_results = search_results;
+window.popular = popular;
+window.recs = recs;
+
+window.pref = pref;
+
+window.add = add;
+window.remove = remove;
+
+window.render = render;
+
+window.push = push;
+window.info = info;
+window.infoAll = infoAll;
+window.search = search;
+window.recommend = recommend;
+window.get_popular = get_popular;

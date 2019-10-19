@@ -18,8 +18,19 @@
         <form class='form-inline' action="javascript:;" 
         onsubmit="search(this.children[0].value)">
 
-            <input class="form-control form-control-lg" type="search" placeholder="Class">
-            <button class="btn btn-primary">Search</button>
+            <div class="input-group mb-3">
+                <input class="form-control form-control-lg" type="search" placeholder="Class">
+                <div class="input-group-append">
+                    <button class="btn btn-primary" type="button" id="search">Search</button>
+                </div>
+            </div>
+            
+            <!--
+            <div class="btn-group" role="group">
+                <button class="btn btn-primary">C</button>
+                <button class="btn btn-primary">R</button>
+            </div>
+            -->
         </form>
 
         <h2 id='status'>Core</h2>
