@@ -63,11 +63,13 @@ visualization project of pathways through cornell CIS
 - Sam: build a preliminary recommendation prototype, incorporate some interactivity into site
 
 #### Progress:
+- Eric: made required classes with co and next semester
 - Danny: calculated graph JSON sizes, added animations to UI and began integrating real data
 
 ### Week ending on 10/19
 
 #### Goals: 
+- Eric: not sure, try to make flask backend to integrate UI viz and frontend?
 - Danny: integrate real data into interactive schedule UI, connect to Sam's
   website UI
 - Sam: Start building out site prototype with bootstrap and npm
