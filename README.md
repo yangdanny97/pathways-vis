@@ -74,3 +74,15 @@ visualization project of pathways through cornell CIS
   website UI
 - Sam: Start building out site prototype with bootstrap and npm
 
+### Progress:
+- Danny: integrated CS course data with UI for demo, with really simple recommendation metric
+- Eric:
+- Sam:
+
+### Week ending on 10/26
+
+#### Goals:
+- All: build off of current prototypes for a minimum viable product, aiming for completion on approx 10/1
+- Eric: 
+- Danny: start working on GoLang server, figure out how to integrate that with UI; additionally, build out a static version which uses all 3 datasets
+- Sam: 
