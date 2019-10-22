@@ -12,8 +12,10 @@ visualization project of pathways through cornell CIS
 
 #### Progress:
 
-- All: held brainstorming meetings and presented several visualization ideas to prof kizilcec
-- Danny: built data module that supports easy loading/querying of enrollment data, enabling faster EDA
+- All: held brainstorming meetings and presented several visualization ideas to
+  prof kizilcec
+- Danny: built data module that supports easy loading/querying of enrollment
+  data, enabling faster EDA
 
 ### Week ending on 9/28
 
@@ -57,14 +59,17 @@ visualization project of pathways through cornell CIS
 ### Week ending on 10/12
 
 #### Goals: 
-- Danny: refine UI prototype, more investigation for undirected edges and thresholding, investigate graph representation size
+- Danny: refine UI prototype, more investigation for undirected edges and
+  thresholding, investigate graph representation size
 - Eric: improve viz for required classes, combine required classes that are
   semester to semester and same semester together to improve graph
-- Sam: build a preliminary recommendation prototype, incorporate some interactivity into site
+- Sam: build a preliminary recommendation prototype, incorporate some
+  interactivity into site
 
 #### Progress:
 - Eric: made required classes with co and next semester
-- Danny: calculated graph JSON sizes, added animations to UI and began integrating real data
+- Danny: calculated graph JSON sizes, added animations to UI and began
+  integrating real data
 
 ### Week ending on 10/19
 
@@ -75,14 +80,18 @@ visualization project of pathways through cornell CIS
 - Sam: Start building out site prototype with bootstrap and npm
 
 ### Progress:
-- Danny: integrated CS course data with UI for demo, with really simple recommendation metric
+- Danny: integrated CS course data with UI for demo, with really simple
+  recommendation metric
 - Eric:
-- Sam:
+- Sam: Built interactive site model using search API and bootstrap
 
 ### Week ending on 10/26
 
 #### Goals:
-- All: build off of current prototypes for a minimum viable product, aiming for completion on approx 10/1
+- All: build off of current prototypes for a minimum viable product, aiming for
+  completion on approx 11/1
 - Eric: 
-- Danny: start working on GoLang server, figure out how to integrate that with UI; additionally, build out a static version which uses all 3 datasets
-- Sam: 
+- Danny: start working on GoLang server, figure out how to integrate that with
+  UI; additionally, build out a static version which uses all 3 datasets
+- Sam: Improve and streamline UX around interaction modes, aim to improve major
+  selection experience
