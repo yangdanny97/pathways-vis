@@ -19,11 +19,12 @@
         onsubmit="search(this.children[0].value)">
 
             <div class="input-group mb-3">
-                <input class="form-control form-control-lg" type="search" placeholder="Class">
+                <input class="form-control" type="search" placeholder="Class">
                 <div class="input-group-append">
                     <button class="btn btn-primary" type="button" id="search">Search</button>
                 </div>
             </div>
+        </form>
             
             <!--
             <div class="btn-group" role="group">
@@ -31,8 +32,14 @@
                 <button class="btn btn-primary">R</button>
             </div>
             -->
-        </form>
-
+        <div class="btn-group btn-group-toggle" data-toggle="buttons">
+            <label class="btn btn-primary active">
+                <input type="radio" name="options" id="option1" autocomplete="off" checked> Popular
+            </label>
+            <label class="btn btn-primary">
+                <input type="radio" name="options" id="option2" autocomplete="off"> Recommend
+            </label>
+        </div>
         <h2 id='status'>Core</h2>
 
         <div id='deck'></div>
@@ -41,6 +48,7 @@
 
     </div>
     <script src='dist/pathways.bundle.js'></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
 </div>
 </body>
 

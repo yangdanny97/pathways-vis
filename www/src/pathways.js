@@ -1,5 +1,6 @@
 var $ = require('jquery');
 var request = require('request-promise');
+import 'bootstrap';
 
 import '../style/pathways.scss';
 
