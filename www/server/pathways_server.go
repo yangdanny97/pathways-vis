@@ -2,17 +2,17 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"html/template"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"sort"
 )
 
 type Edge struct {
-	Source string
-	Dest   string
-	Weight int
+	Source      string
+	Destination string
+	Weight      int
 }
 
 type Graph struct {
@@ -61,13 +61,16 @@ func filter(vs []string, f func(string) bool) []string {
 }
 
 func renderStaticTemplate(w http.ResponseWriter, tmpl string) {
+	fmt.Println(tmpl)
 	t, err := template.ParseFiles(tmpl + ".html")
 	if err != nil {
+		fmt.Println("template load error")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	err = t.Execute(w, nil)
 	if err != nil {
+		fmt.Println("template execute error")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
@@ -77,10 +80,10 @@ func visHandler(w http.ResponseWriter, r *http.Request) {
 	renderStaticTemplate(w, "vis")
 }
 
-// endpoint handler for splash page (HTML response)
-func splashHandler(w http.ResponseWriter, r *http.Request) {
-	renderStaticTemplate(w, "splash")
-}
+// // endpoint handler for splash page (HTML response)
+// func splashHandler(w http.ResponseWriter, r *http.Request) {
+// 	renderStaticTemplate(w, "splash")
+// }
 
 // generate up to 3 recommendations based on a course graph, a list of courses,
 // an excluded courses map
@@ -89,12 +92,12 @@ func genRec(graph *Graph, semCourses []string, excl *map[string]bool) *RecTile {
 	candidates := []string{}
 	// iterate thru edges and calculate scores
 	for _, e := range graph.Edges {
-		_, ok := points[e.Dest]
-		if !ok {
-			candidates = append(candidates, e.Dest)
-		}
 		if contains(semCourses, e.Source) {
-			points[e.Dest] = points[e.Dest] + e.Weight
+			_, ok := points[e.Destination]
+			if !ok {
+				candidates = append(candidates, e.Destination)
+			}
+			points[e.Destination] = points[e.Destination] + e.Weight
 		}
 	}
 	// sort candidates by points
@@ -104,7 +107,7 @@ func genRec(graph *Graph, semCourses []string, excl *map[string]bool) *RecTile {
 	// filter out excluded candidates
 	candidates = filter(candidates, func(x string) bool {
 		_, ok := (*excl)[x]
-		return ok
+		return !ok
 	})
 	top := []string{}
 	// get top 3 candidates
@@ -125,12 +128,22 @@ func recHandler(w http.ResponseWriter, r *http.Request) {
 	req := RecRequest{}
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
+		fmt.Println("request decode error")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 	coGraph, err := loadGraph(req.Major + "_co")
+	if err != nil {
+		fmt.Println("graph load error")
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 	postGraph, err := loadGraph(req.Major + "_post")
+	if err != nil {
+		fmt.Println("graph load error")
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 
 	courses := req.Courses
+	cnames := []string{}
 	excl := make(map[string]bool)
 	semMap := make(map[int][]string)
 	semKeys := []int{}
@@ -144,6 +157,14 @@ func recHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		semMap[c.Row] = append(semMap[c.Row], c.Name)
 		excl[c.Name] = true
+		cnames = append(cnames, c.Name)
+	}
+	for i := 0; i < 8; i++ {
+		_, ok := semMap[i]
+		if !ok {
+			semKeys = append(semKeys, i)
+			semMap[i] = cnames
+		}
 	}
 	sort.Ints(semKeys)
 
@@ -174,6 +195,7 @@ func recHandler(w http.ResponseWriter, r *http.Request) {
 	response := RecResponse{Recs: recs}
 	responseJSON, err := json.Marshal(response)
 	if err != nil {
+		fmt.Println("response marshal error")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 	w.Header().Set("Content-Type", "application/json")
@@ -194,8 +216,10 @@ func loadGraph(name string) (*Graph, error) {
 }
 
 func main() {
-	http.HandleFunc("/", splashHandler)
+	fs := http.FileServer(http.Dir("static"))
+	http.Handle("/static/", http.StripPrefix("/static/", fs))
+	// http.HandleFunc("/", splashHandler)
 	http.HandleFunc("/vis/", visHandler)
 	http.HandleFunc("/rec/", recHandler)
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	fmt.Println(http.ListenAndServe(":8000", nil))
 }
