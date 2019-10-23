@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html/template"
 	"io/ioutil"
+	"math/rand"
 	"net/http"
 	"sort"
 )
@@ -110,13 +111,16 @@ func genRec(graph *Graph, semCourses []string, excl *map[string]bool) *RecTile {
 		return !ok
 	})
 	top := []string{}
-	// get top 3 candidates
+	// get top 3 candidates, if none exist then random course
 	for i := 0; i < 3; i++ {
 		if i >= len(candidates) {
-			break
+			randomCourse := graph.Nodes[rand.Intn(len(graph.Nodes))]
+			top = append(top, randomCourse)
+			(*excl)[randomCourse] = true
+		} else {
+			top = append(top, candidates[i])
+			(*excl)[candidates[i]] = true
 		}
-		top = append(top, candidates[i])
-		(*excl)[candidates[i]] = true
 	}
 	return &RecTile{Recs: top}
 }
@@ -163,9 +167,10 @@ func recHandler(w http.ResponseWriter, r *http.Request) {
 		_, ok := semMap[i]
 		if !ok {
 			semKeys = append(semKeys, i)
-			semMap[i] = cnames
+			semMap[i] = []string{}
 		}
 	}
+	// generate semester recs from lowest to highest sem
 	sort.Ints(semKeys)
 
 	// calculate points and generate recs
@@ -174,7 +179,7 @@ func recHandler(w http.ResponseWriter, r *http.Request) {
 		// generate post-enrollment recs for next semester
 		if i < len(semKeys)-1 {
 			postRec := genRec(postGraph, semMap[k], &excl)
-			postRec.Col = len(semMap[k])
+			postRec.Col = len(semMap[k+1])
 			postRec.Row = k + 1
 			recs = append(recs, *postRec)
 		}
