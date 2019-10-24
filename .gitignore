@@ -24,7 +24,7 @@ instance/
 env/
 
 /www/node_modules/
-/www/dist/
+/www/static/dist/
 
 # >:(
 .DS_Store
