@@ -211,3 +211,4 @@ window.infoAll = infoAll;
 window.search = search;
 window.recommend = recommend;
 window.get_popular = get_popular;
+window.search = search;
