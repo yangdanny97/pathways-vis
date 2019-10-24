@@ -25,6 +25,8 @@ env/
 
 /www/node_modules/
 /www/static/dist/
+/www/pathways_server
+*.exe
 
 # >:(
 .DS_Store
