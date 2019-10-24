@@ -1,5 +1,3 @@
-var $ = require('jquery')
-
 import '../style/splash.scss';
 
 var input = $(".form-control")[0];

@@ -6,11 +6,21 @@ var major = "cs"
 
 // course and recommendation factory methods
 function COURSE(name, row, col) {
-    return { Type: "course", Name: name, Row: row, Col: col };
+    return {
+        Type: "course",
+        Name: name,
+        Row: row,
+        Col: col
+    };
 }
 
 function REC(suggestions, row, col) {
-    return { Type: "rec", Recs: suggestions, Row: row, Col: col };
+    return {
+        Type: "rec",
+        Recs: suggestions,
+        Row: row,
+        Col: col
+    };
 }
 
 function init() {
@@ -31,8 +41,14 @@ function init() {
 
 function updateRecs() {
     // TODO update the URL
-    var reqbody = {Major:major, Courses:data};
-    var req = new Request('http://localhost:8000/rec/', {method: 'POST', body: JSON.stringify(reqbody)});
+    var reqbody = {
+        Major: major,
+        Courses: data
+    };
+    var req = new Request('/rec/', {
+        method: 'POST',
+        body: JSON.stringify(reqbody)
+    });
     fetch(req)
         .then(resp => resp.json())
         .then(d => {
@@ -51,14 +67,15 @@ function addCourse(cname, row) {
 }
 
 function deleteCourse(c) {
-    var row = c.Row, col = c.Col;
+    var row = c.Row,
+        col = c.Col;
     console.log(`DELETE ${c.Name}`);
     data = data.filter(x => x.Name !== c.Name); // remove
     data.map(x => { //shift to left
-            if (x.Row == row && x.Col > col) {
-                x.Col = x.Col - 1;
-            }
-        });
+        if (x.Row == row && x.Col > col) {
+            x.Col = x.Col - 1;
+        }
+    });
     updateRecs();
 }
 
@@ -68,7 +85,7 @@ function getX(d) {
 }
 
 function getY(d) {
-    return 25 + (7 - d.Row) * grid * 1.2;
+    return 25 + d.Row * grid * 1.2;
 }
 
 function displayCourses() {

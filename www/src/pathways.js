@@ -1,5 +1,3 @@
-var $ = require('jquery');
-var request = require('request-promise');
 import 'bootstrap';
 
 import '../style/pathways.scss';
@@ -25,7 +23,7 @@ function add(code) {
     pref.add(code);
     window.pref = pref;
 }
-    
+
 /* Remove a class from the list of preferred classes */
 function remove(code) {
     pref.delete(code);
@@ -57,7 +55,11 @@ function render(courses, status) {
     for (let card of cards) {
         $('#deck').append(card);
     }
-    for (let el of $(".card-text")) { $clamp(el, {clamp:3}); }
+    for (let el of $(".card-text")) {
+        $clamp(el, {
+            clamp: 3
+        });
+    }
 
     return 0;
 }
@@ -100,15 +102,15 @@ function card(course) {
 /* Get grokked course for a particular code */
 async function info(code) {
     let semester = "FA19";
-    let dept = code.slice(0,-4);
+    let dept = code.slice(0, -4);
 
     let options = {
         uri: `https://classes.cornell.edu/api/2.0/search/classes.json?roster=${semester}&subject=${dept}`,
         json: true
     }
 
-    let r = await request(options)
-    return r;
+    let r = new Request(options.uri);
+    return await fetch(r);
 }
 
 async function infoAll(codes) {
@@ -137,7 +139,7 @@ async function infoAll(codes) {
 async function get_popular() {
     let popular_codes = ["CS1110", "CS2110", "CS2800", "CS3110"]
     popular.length = 0;
-    
+
     //popular = await infoAll(popular_codes).then((v) => v);
     infoAll(popular_codes).then((courses) => render(courses, "Popular"));
 
@@ -154,17 +156,23 @@ function search(query) {
     let semester = "FA19";
     let url = `https://classes.cornell.edu/api/2.0/search/classes.json?roster=${semester}&q=${query}&subject=${major}`;
 
-    request(url, function(error, response, body) {
-        window.body = body;
-        let data = JSON.parse(body).data;
-
-        search_results = data.classes.map(grok);
-
-        render(search_results, "Search");
-    });
+    let r = new Request(url);
+    fetch(r)
+        .then(resp => {
+            if (!resp.ok) {
+                alert("something went wrong!");
+            }
+            return resp.json();
+        })
+        .then(body => {
+            window.body = body;
+            let data = body.data;
+            search_results = data.classes.map(grok);
+            render(search_results, "Search");
+        });
 }
 
-$(document).ready(function() {
+$(document).ready(function () {
     $("#search").click(() => search());
 });
 
