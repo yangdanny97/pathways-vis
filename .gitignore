@@ -22,3 +22,11 @@ env/
 
 /www/node_modules/
 /www/dist/
+
+# >:(
+.DS_Store
+*.DS_Store
+*/.DS_Store
+
+.vscode
+__pycache__
