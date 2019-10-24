@@ -1,6 +1,6 @@
 var $ = require('jquery')
 
-import '../style/splash.scss';
+import './splash.scss';
 
 var input = $(".form-control")[0];
 let major = input.value;

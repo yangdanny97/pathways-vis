@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <title>Pathways</title>
+</head>
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<script>
+    var allowed_majors = ["CS"]
+    function go() {
+        major = document.getElementById("major_input").value
+        window.location = 'vis.html?major=' + major;
+    }
+</script>
+
+<body>
+    <div id='bg'>
+        <div class='jumbotron'>
+            <h1>Pathways</h1>
+            <form action='javascript:;' onsubmit='go()' id='major'>
+                <input class="form-control form-control-lg" type="search" placeholder="Major" id="major_input">
+
+                <button type="submit" class="btn btn-primary">
+                    Find your pathway
+                </button>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

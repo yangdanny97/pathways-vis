@@ -81,10 +81,10 @@ func visHandler(w http.ResponseWriter, r *http.Request) {
 	renderStaticTemplate(w, "vis")
 }
 
-// // endpoint handler for splash page (HTML response)
-// func splashHandler(w http.ResponseWriter, r *http.Request) {
-// 	renderStaticTemplate(w, "splash")
-// }
+// endpoint handler for splash page (HTML response)
+func splashHandler(w http.ResponseWriter, r *http.Request) {
+	renderStaticTemplate(w, "index")
+}
 
 // generate up to 3 recommendations based on a course graph, a list of courses,
 // an excluded courses map
