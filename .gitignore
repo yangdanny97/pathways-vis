@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+/data/
+/exploratory/data/
+
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
@@ -21,7 +24,9 @@ instance/
 env/
 
 /www/node_modules/
-/www/dist/
+/www/static/dist/
+/www/pathways_server
+*.exe
 
 # >:(
 .DS_Store
