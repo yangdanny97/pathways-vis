@@ -2,7 +2,7 @@ var $ = require('jquery');
 var request = require('request-promise');
 import 'bootstrap';
 
-import '../style/pathways.scss';
+import './pathways.scss';
 
 // Get major from url query string
 let urlParams = new URLSearchParams(window.location.search);
