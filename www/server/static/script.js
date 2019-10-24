@@ -52,10 +52,9 @@ function addCourse(cname, row) {
 
 function deleteCourse(c) {
     var row = c.Row, col = c.Col;
-    console.log(`DELETE ${c.name}`);
-    data = data
-        .filter(x => x.name != c.name) // remove
-        .map(x => { //shift to left
+    console.log(`DELETE ${c.Name}`);
+    data = data.filter(x => x.Name !== c.Name); // remove
+    data.map(x => { //shift to left
             if (x.Row == row && x.Col > col) {
                 x.Col = x.Col - 1;
             }
@@ -73,11 +72,10 @@ function getY(d) {
 }
 
 function displayCourses() {
+    console.log(data);
     console.log(data_recs);
     var courses = vis.selectAll(".course").data(data, d => d.Name);
     var recs = vis.selectAll(".recs").data(data_recs);
-    console.log(courses);
-    console.log(recs);
     courses.exit().remove();
     recs.exit().remove();
 
