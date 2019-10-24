@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+/data/
+/exploratory/data/
+
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
