@@ -125,6 +125,11 @@ func genRec(graph *Graph, semCourses []string, excl *map[string]bool) *RecTile {
 	return &RecTile{Recs: top}
 }
 
+// endpoint hadnler for requests for core classes (JSON response)
+func coreClassesHandler(w http.ResponseWriter, r *http.Request) {
+	
+}
+
 // endpoint handler for request for new recs (JSON response)
 // request format: RecRequest
 // response format: RecResponse

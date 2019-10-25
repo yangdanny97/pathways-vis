@@ -1,0 +1,15 @@
+digraph course_graph {
+STSCI2200 -> STSCI3200 [ label = "59" ];
+STSCI3200 -> STSCI3100 [ label = "48" ];
+STSCI3200 -> STSCI4030 [ label = "27" ];
+STSCI3100 -> STSCI4090 [ label = "26" ];
+STSCI3100 -> STSCI4110 [ label = "20" ];
+STSCI3100 -> STSCI4030 [ label = "17" ];
+STSCI3200 -> STSCI4090 [ label = "16" ];
+STSCI3200 -> STSCI4270 [ label = "14" ];
+STSCI4090 -> STSCI4270 [ label = "12" ];
+STSCI3200 -> STSCI3080 [ label = "11" ];
+STSCI3200 [ label = "STSCI3200" ];
+STSCI4090 [ label = "STSCI4090" ];
+STSCI3100 [ label = "STSCI3100" ];
+}
