@@ -1,10 +1,12 @@
+var d3 = require("d3-selection");
+
 import '../style/splash.scss';
 
-var input = $(".form-control")[0];
+var input = d3.select(".form-control").node();
 let major = input.value;
 
 function go() {
-    major = $('input')[0].value
+    major = input.value
     window.location = 'vis/?major=' + major;
 }
 
