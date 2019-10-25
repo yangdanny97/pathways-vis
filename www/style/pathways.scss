@@ -6,10 +6,6 @@
     box-sizing: border-box;
 }
 
-.btn {
-    padding:10px;
-}
-
 #container {
     display: flex;
     flex-direction: row;
@@ -34,6 +30,7 @@
 
     form {
         height: 70px;
+        margin: 10px;
     }
 
     #status {
@@ -44,6 +41,10 @@
     #deck {
         flex-grow: 1;
         overflow-y: scroll;
+    }
+
+    .btn-group {
+        margin: 10px;
     }
 
 }
