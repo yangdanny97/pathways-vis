@@ -1,3 +1,5 @@
+var d3 = require('d3');
+
 import 'bootstrap';
 
 import '../style/pathways.scss';
@@ -12,7 +14,12 @@ let urlParams = new URLSearchParams(window.location.search);
 const major = urlParams.get('major');
 
 // Put major in title bar
-$('#major')[0].innerHTML = major;
+d3.select('#major').node().innerHTML = major;
+
+// HTML element anchors
+var mode = d3.select('#status').node();
+var deck = d3.select('#deck').node();
+var searchbar = d3.select('input').node();
 
 // Load classes
 var stack = [];
@@ -40,7 +47,7 @@ function remove(code) {
 
 function push(courses, status) {
     status = status || "Courses";
-    $("#status").html(status);
+    mode.html(status);
 
     stack = courses;
     window.stack = stack;
@@ -50,7 +57,7 @@ function push(courses, status) {
 /* Render an array of cards into the deck. If no array is provided, render the stack*/
 function render(courses, status) {
     status = status || "Courses";
-    $("#status").html(status);
+    mode.html(status);
 
     stack = courses;
     window.stack = stack;
@@ -59,11 +66,11 @@ function render(courses, status) {
 
     let cards = stack.map(card);
 
-    $('#deck').empty()
+    deck.empty()
     for (let card of cards) {
-        $('#deck').append(card);
+        deck.append(card);
     }
-    for (let el of $(".card-text")) {
+    for (let el of d3.selectAll(".card-text").nodes()) {
         $clamp(el, {
             clamp: 3
         });
@@ -158,7 +165,7 @@ async function get_popular() {
 
 /* Get an array of grokked courses matching a particular search query */
 var search = function(query) {
-    let value = $('input')[0].value;
+    let value = searchbar.value;
     query = query || value;
 
     let semester = "FA19";
@@ -375,10 +382,13 @@ function displayCourses() {
     }
 }
 
-$(document).ready(function () {
-    $("#search").click(() => search());
+/*
+d3.select(document).node().ready(function () {
+    d3.select("#search").node().click(() => search());
     init();
 });
+*/
+init();
 
 window.stack = stack;
 window.search_results = search_results;
@@ -396,6 +406,6 @@ window.push = push;
 window.info = info;
 window.infoAll = infoAll;
 window.search = search;
-window.recommend = recommend;
+//window.recommend = recommend;
 window.get_popular = get_popular;
 window.search = search;
