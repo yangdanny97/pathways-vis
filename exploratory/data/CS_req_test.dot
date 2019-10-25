@@ -1,0 +1,16 @@
+digraph course_graph {
+CS2800 -> CS3110 [ label = "958" ];
+CS4700 -> CS4701 [ label = "929" ];
+CS3110 -> CS4820 [ label = "821" ];
+CS2800 -> CS3410 [ label = "784" ];
+CS1110 -> CS2110 [ label = "749" ];
+CS2110 -> CS2800 [ label = "660" ];
+CS2800 -> CS2110 [ label = "647" ];
+CS3110 -> CS3410 [ label = "615" ];
+CS1110 -> CS2800 [ label = "606" ];
+CS4820 -> CS4410 [ label = "601" ];
+CS4820 [ label = "CS4820" ];
+CS2110 [ label = "CS2110" ];
+CS2800 [ label = "CS2800" ];
+CS3110 [ label = "CS3110" ];
+}

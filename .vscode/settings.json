@@ -1,5 +1,5 @@
 {
-    "python.pythonPath": "env\\Scripts\\python.exe",
+    "python.pythonPath": "/Users/ericsun/anaconda3/bin/python",
 
     "npm.includeDirectories": ["www"],
     "npm.useRootDirectory": false,

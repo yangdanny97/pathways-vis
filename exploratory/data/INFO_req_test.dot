@@ -1,0 +1,15 @@
+digraph course_graph {
+INFO2040 -> INFO1300 [ label = "350" ];
+INFO1300 -> INFO2300 [ label = "344" ];
+INFO2040 -> INFO2450 [ label = "276" ];
+INFO1300 -> INFO2450 [ label = "265" ];
+INFO2040 -> INFO2300 [ label = "230" ];
+INFO2450 -> INFO2300 [ label = "175" ];
+INFO1200 -> INFO4240 [ label = "154" ];
+INFO2450 -> INFO4240 [ label = "133" ];
+INFO2040 -> INFO2950 [ label = "130" ];
+INFO2040 -> INFO1200 [ label = "129" ];
+INFO1200 [ label = "INFO1200" ];
+INFO2450 [ label = "INFO2450" ];
+INFO1300 [ label = "INFO1300" ];
+}
