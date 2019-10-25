@@ -74,7 +74,7 @@ visualization project of pathways through cornell CIS
 ### Week ending on 10/19
 
 #### Goals: 
-- Eric: not sure, try to make flask backend to integrate UI viz and frontend?
+- Eric: help with backend, develop core_courses endpoint
 - Danny: integrate real data into interactive schedule UI, connect to Sam's
   website UI
 - Sam: Start building out site prototype with bootstrap and npm
@@ -82,7 +82,7 @@ visualization project of pathways through cornell CIS
 ### Progress:
 - Danny: integrated CS course data with UI for demo, with really simple
   recommendation metric
-- Eric:
+- Eric: building json of required courses
 - Sam: Built interactive site model using search API and bootstrap
 
 ### Week ending on 10/26
@@ -90,7 +90,7 @@ visualization project of pathways through cornell CIS
 #### Goals:
 - All: build off of current prototypes for a minimum viable product, aiming for
   completion on approx 11/1
-- Eric: 
+- Eric: build major courses in golang
 - Danny: start working on GoLang server, figure out how to integrate that with
   UI; additionally, build out a static version which uses all 3 datasets
 - Sam: Improve and streamline UX around interaction modes, aim to improve major
