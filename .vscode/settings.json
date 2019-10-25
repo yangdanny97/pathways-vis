@@ -3,5 +3,7 @@
 
     "npm.includeDirectories": ["www"],
     "npm.useRootDirectory": false,
-    "npm.enableScriptExplorer": true
+    "npm.enableScriptExplorer": true,
+
+    "files.insertFinalNewline": true
 }
