@@ -47,7 +47,7 @@ function remove(code) {
 
 function push(courses, status) {
     status = status || "Courses";
-    mode.html(status);
+    mode.innerHTML = status;
 
     stack = courses;
     window.stack = stack;
@@ -57,7 +57,7 @@ function push(courses, status) {
 /* Render an array of cards into the deck. If no array is provided, render the stack*/
 function render(courses, status) {
     status = status || "Courses";
-    mode.html(status);
+    mode.innerHTML = status;
 
     stack = courses;
     window.stack = stack;
@@ -66,9 +66,9 @@ function render(courses, status) {
 
     let cards = stack.map(card);
 
-    deck.empty()
+    deck.innerHTML = ""
     for (let card of cards) {
-        deck.append(card);
+        deck.innerHTML += card;
     }
     for (let el of d3.selectAll(".card-text").nodes()) {
         $clamp(el, {
