@@ -61,7 +61,7 @@ class Graph:
 
     def export_graph(self, name:str, threshold=0):
         edges = [e for e in self.edges.values() if e.weight >= threshold]
-        nodes = set([e.src for e in edges]).intersection(set([e.dest for e in edges]))
+        nodes = set([e.src for e in edges]).union(set([e.dest for e in edges]))
         fname = name+".dot"
         with open(fname, "w") as f:
             f.write("digraph course_graph {\n")
@@ -74,7 +74,7 @@ class Graph:
 
     def export_json(self, name:str, threshold=0):
         edges = [e for e in self.edges.values() if e.weight >= threshold]
-        nodes = list(set([e.src for e in edges]).intersection(set([e.dest for e in edges])))
+        nodes = list(set([e.src for e in edges]).union(set([e.dest for e in edges])))
         fname = name+".json"
         data = {}
         data["nodes"] = nodes
