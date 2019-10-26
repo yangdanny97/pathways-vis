@@ -95,3 +95,19 @@ visualization project of pathways through cornell CIS
   UI; additionally, build out a static version which uses all 3 datasets
 - Sam: Improve and streamline UX around interaction modes, aim to improve major
   selection experience
+
+#### Progress:
+- Demoed @ Kizilcec lab meeting, got feedback on priorities for next week
+- Integrated frontend with server, integrated codebase for search/landing page with interactive tiles
+
+### Week ending 11/1
+
+#### Goals:
+1. UI on the RHS: add timeline indicator and clear design for what is a selection vs. recommendation
+2. implement adding/removing of courses to appear on RHS
+3. ensure some degree of serendipity for finding out of major courses in uncommon departments, i..e. don’t overemphasize common courses
+4. netid login
+5. user interaction logging using netid as the identifier
+
+#### Progress:
+- TBD
