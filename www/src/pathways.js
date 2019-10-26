@@ -226,17 +226,21 @@ function REC(suggestions, row, col) {
 function init() {
     // TODO load core courses graphs instead of defaulting to CS
     // for now, hardcode initial CS courses
-    data.push(COURSE("CS1110", 0, 0));
-    data.push(COURSE("MATH1920", 0, 1));
-    data.push(COURSE("PHYS2213", 0, 2));
-    data.push(COURSE("CS2110", 1, 0));
-    data.push(COURSE("CS2800", 1, 1));
-    data.push(COURSE("CS3110", 2, 0));
-    data.push(COURSE("CS3410", 3, 0));
-    data.push(COURSE("CS4820", 4, 0));
-    data.push(COURSE("CS4410", 5, 0));
-
-    updateRecs();
+    var reqbody = {
+        Major: major,
+        Courses: data
+    };
+    var req = new Request('/core_courses/', {
+        method: 'POST',
+        body: JSON.stringify(reqbody)
+    });
+    fetch(req)
+        .then(resp => resp.json())
+        .then(d => {
+            data = d.Courses;
+            console.log(d.Courses);
+            updateRecs();
+        });
 }
 
 function updateRecs() {

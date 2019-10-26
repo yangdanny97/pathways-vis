@@ -7,7 +7,9 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"net/http"
+	"regexp"
 	"sort"
+	"strconv"
 )
 
 type Edge struct {
@@ -25,6 +27,10 @@ type Course struct {
 	Name string
 	Row  int
 	Col  int
+}
+
+type CourseResponse struct {
+	Courses []Course
 }
 
 type RecTile struct {
@@ -59,6 +65,27 @@ func filter(vs []string, f func(string) bool) []string {
 		}
 	}
 	return vsf
+}
+
+func min(x, y int) int {
+	if x < y {
+		return x
+	}
+	return y
+}
+
+func max(x, y int) int {
+	if x < y {
+		return y
+	}
+	return x
+}
+
+func remove(a []string, i int) []string {
+	a[i] = a[len(a)-1]
+	a[len(a)-1] = ""
+	a = a[:len(a)-1]
+	return a
 }
 
 func renderStaticTemplate(w http.ResponseWriter, tmpl string) {
@@ -127,7 +154,108 @@ func genRec(graph *Graph, semCourses []string, excl *map[string]bool) *RecTile {
 
 // endpoint hadnler for requests for core classes (JSON response)
 func coreClassesHandler(w http.ResponseWriter, r *http.Request) {
-	
+	req := RecRequest{}
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		fmt.Println("request decode error")
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	reqGraph, err := loadGraph(req.Major + "_req")
+	if err != nil {
+		fmt.Println("graph load error")
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	//need to keep track of parent of node, nodes w/ no parents,
+	// or just make a structure -> map level to nodes at that level
+	var courses []Course
+	edges := make(map[string][]string)
+	numEdges := make(map[string]int)
+	levels := make(map[int][]string)
+	re := regexp.MustCompile("[0-9]")
+
+	for _, n := range reqGraph.Nodes {
+		numEdges[n] = 0
+	}
+	//iterate through all edges and find # count into each one
+	for _, e := range reqGraph.Edges {
+		sources, ok := edges[e.Source]
+		if ok {
+			edges[e.Source] = append(sources, e.Destination)
+		} else {
+			edges[e.Source] = []string{e.Destination}
+		}
+
+		eCount, ok := numEdges[e.Destination]
+		numEdges[e.Destination] = eCount + 1
+	}
+
+	//get first level
+	for n, e := range numEdges {
+		courseNum, _ := strconv.Atoi(re.FindString(n))
+		courseNum = courseNum - 1
+		level := courseNum
+		if e == 0 {
+			nodes, ok := levels[level]
+			if ok {
+				levels[level] = append(nodes, n)
+			} else {
+				levels[level] = []string{n}
+			}
+		}
+	}
+
+	//next levels
+	classSet := make(map[string]bool)
+	rowColCount := []int{0, 0, 0, 0, 0, 0, 0, 0}
+	level := 0
+	for level < 8 {
+		nodes, _ := levels[level]
+		fmt.Println(levels)
+		_, ok := levels[level+1]
+		if !ok {
+			levels[level+1] = []string{}
+		}
+		for _, node := range nodes {
+			//add current courses
+			_, newClass := classSet[node]
+			if !newClass {
+				courses = append(courses, Course{Name: node, Row: level, Col: rowColCount[level]})
+				rowColCount[level] = rowColCount[level] + 1
+				classSet[node] = true
+			}
+
+			//fill in next level
+			for _, nextNode := range edges[node] {
+				_, newClass := classSet[nextNode]
+				if !newClass {
+					levels[level+1] = append(levels[level+1], nextNode)
+					classSet[node] = true
+				}
+			}
+		}
+		level = level + 1
+	}
+
+	// //iterate through nodes and set row/col
+	// rowColCount := []int{0, 0, 0, 0, 0, 0, 0, 0}
+	// for _, n := range reqGraph.Nodes {
+	// 	courseNum, _ := strconv.Atoi(re.FindString(n))
+	// 	courseNum = courseNum - 1
+	// 	row := min(max(courseNum, numEdges[n]), 7)
+	// 	col := rowColCount[row]
+	// 	courses = append(courses, Course{Name: n, Row: row, Col: rowColCount[row]})
+	// 	rowColCount[row] = col + 1
+	// }
+
+	response := CourseResponse{Courses: courses}
+	responseJSON, err := json.Marshal(response)
+	if err != nil {
+		fmt.Println("response marshal error")
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(responseJSON)
 }
 
 // endpoint handler for request for new recs (JSON response)
@@ -231,5 +359,6 @@ func main() {
 	http.HandleFunc("/", splashHandler)
 	http.HandleFunc("/vis/", visHandler)
 	http.HandleFunc("/rec/", recHandler)
+	http.HandleFunc("/core_courses/", coreClassesHandler)
 	fmt.Println(http.ListenAndServe(":8000", nil))
 }

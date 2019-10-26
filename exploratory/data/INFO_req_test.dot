@@ -9,7 +9,11 @@ INFO1200 -> INFO4240 [ label = "154" ];
 INFO2450 -> INFO4240 [ label = "133" ];
 INFO2040 -> INFO2950 [ label = "130" ];
 INFO2040 -> INFO1200 [ label = "129" ];
-INFO1200 [ label = "INFO1200" ];
 INFO2450 [ label = "INFO2450" ];
+INFO4240 [ label = "INFO4240" ];
+INFO2300 [ label = "INFO2300" ];
 INFO1300 [ label = "INFO1300" ];
+INFO2040 [ label = "INFO2040" ];
+INFO1200 [ label = "INFO1200" ];
+INFO2950 [ label = "INFO2950" ];
 }
