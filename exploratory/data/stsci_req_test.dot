@@ -9,7 +9,12 @@ STSCI3200 -> STSCI4090 [ label = "16" ];
 STSCI3200 -> STSCI4270 [ label = "14" ];
 STSCI4090 -> STSCI4270 [ label = "12" ];
 STSCI3200 -> STSCI3080 [ label = "11" ];
+STSCI4110 [ label = "STSCI4110" ];
 STSCI3200 [ label = "STSCI3200" ];
 STSCI4090 [ label = "STSCI4090" ];
 STSCI3100 [ label = "STSCI3100" ];
+STSCI4270 [ label = "STSCI4270" ];
+STSCI3080 [ label = "STSCI3080" ];
+STSCI4030 [ label = "STSCI4030" ];
+STSCI2200 [ label = "STSCI2200" ];
 }
