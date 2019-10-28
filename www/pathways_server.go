@@ -320,12 +320,18 @@ func recHandler(w http.ResponseWriter, r *http.Request) {
 	// generate semester recs from lowest to highest sem
 	// TODO: should this be reversed to give more varied courses from lowest sem?
 	sort.Ints(semKeys)
+	// reversal code below
+
+	// for i := len(semKeys)/2 - 1; i >= 0; i-- {
+	// 	opp := len(semKeys) - 1 - i
+	// 	semKeys[i], semKeys[opp] = semKeys[opp], semKeys[i]
+	// }
 
 	// calculate points and generate recs
-	for i, k := range semKeys {
+	for _, k := range semKeys {
 		// for all semesters but the last
 		// generate post-enrollment recs for next semester
-		if i < len(semKeys)-1 {
+		if k < len(semKeys)-1 {
 			postRec := genRec(postGraph, semMap[k], &excl)
 			postRec.Col = len(semMap[k+1])
 			postRec.Row = k + 1
@@ -338,7 +344,7 @@ func recHandler(w http.ResponseWriter, r *http.Request) {
 		recs = append(recs, *coRec)
 		// first semester has no post-enrollment rec
 		// so generate a second co-enrollment rec
-		if i == 0 {
+		if k == 0 {
 			coRec = genRec(coGraph, semMap[k], &excl)
 			coRec.Col = len(semMap[k])
 			coRec.Row = k
