@@ -152,7 +152,7 @@ func genRec(graph *Graph, semCourses []string, excl *map[string]bool) *RecTile {
 	return &RecTile{Recs: top}
 }
 
-// endpoint hadnler for requests for core classes (JSON response)
+// endpoint handler for requests for core classes (JSON response)
 func coreClassesHandler(w http.ResponseWriter, r *http.Request) {
 	req := RecRequest{}
 	err := json.NewDecoder(r.Body).Decode(&req)
@@ -165,8 +165,7 @@ func coreClassesHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("graph load error")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
-	//need to keep track of parent of node, nodes w/ no parents,
-	// or just make a structure -> map level to nodes at that level
+
 	var courses []Course
 	edges := make(map[string][]string)
 	numEdges := make(map[string]int)
@@ -176,6 +175,7 @@ func coreClassesHandler(w http.ResponseWriter, r *http.Request) {
 	for _, n := range reqGraph.Nodes {
 		numEdges[n] = 0
 	}
+
 	//iterate through all edges and find # count into each one
 	for _, e := range reqGraph.Edges {
 		sources, ok := edges[e.Source]
@@ -204,7 +204,7 @@ func coreClassesHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	//next levels
+	//next levels and add courses
 	classSet := make(map[string]bool)
 	rowColCount := []int{0, 0, 0, 0, 0, 0, 0, 0}
 	level := 0
@@ -235,17 +235,6 @@ func coreClassesHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		level = level + 1
 	}
-
-	// //iterate through nodes and set row/col
-	// rowColCount := []int{0, 0, 0, 0, 0, 0, 0, 0}
-	// for _, n := range reqGraph.Nodes {
-	// 	courseNum, _ := strconv.Atoi(re.FindString(n))
-	// 	courseNum = courseNum - 1
-	// 	row := min(max(courseNum, numEdges[n]), 7)
-	// 	col := rowColCount[row]
-	// 	courses = append(courses, Course{Name: n, Row: row, Col: rowColCount[row]})
-	// 	rowColCount[row] = col + 1
-	// }
 
 	response := CourseResponse{Courses: courses}
 	responseJSON, err := json.Marshal(response)
