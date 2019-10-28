@@ -13,9 +13,6 @@ $cornell_red: #B31B1B;
 }
 
 #container {
-    // display: flex;
-    // flex-direction: row;
-
     width: 100%;
     height: 100vh;
 
@@ -32,82 +29,17 @@ $cornell_red: #B31B1B;
     background-color: #eee;
     display: flex;
     flex-direction: column;
-    // flex-grow:1;
-
-    form {
-        height: 70px;
-        margin: 10px;
-    }
+    padding: 0;
 
     #status {
-        padding-left: 10px;
-        height: 40px;
+        margin-left: 10px;
+        margin-top: 10px;
     }
 
     #deck {
         flex-grow: 1;
         overflow-y: scroll;
     }
-
-    .btn-group {
-        margin: 10px;
-    }
-
-}
-
-#right {
-    // flex-grow:2;
-}
-
-#left #head {
-    $header-height: 70px;
-
-    display: flex;
-    flex-direction: row;
-
-    height: $header-height;
-    width: 100%;
-
-    background-color: $cornell_red;
-
-    #title {
-        flex-grow: 1;
-        height: 100%;
-
-        a.h1, a.h1:hover {
-            display: inline-block;
-            padding: 0 20px;
-            line-height: $header-height;
-            color: white;
-            height: 100%;
-            
-            text-decoration: none;
-        }
-
-    }
-
-    #major {
-        height: 100%;
-        width: 200px;
-        text-align: center;
-        line-height: $header-height;
-
-        background-color: white;
-    }
-}
-
-#left form {
-    padding: 10px;
-
-    div.input-group {
-        flex-grow: 1;
-    }
-
-}
-
-#right .card {
-    padding: 10px;
-    margin: 10px;
 }
 
 #left #deck .card {
@@ -124,19 +56,20 @@ $cornell_red: #B31B1B;
         }
 
         div.code {
-            width: 80px;
             font-weight: bold;
             font-size: 14px;
         }
 
         div.name {
+            margin-left: 5px;
             flex-grow: 1;
             font-style: italic;
             overflow: hidden;
+            white-space: nowrap;
         }
 
         div.cred {
-            width: 80px;
+            flex: 0 0 20px;
             text-align: right;
         }
     }
@@ -144,5 +77,10 @@ $cornell_red: #B31B1B;
     .card-text {
         font-family: nunito;
     }
+}
+
+#right .card {
+    padding: 10px;
+    margin: 10px;
 }
 
