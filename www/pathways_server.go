@@ -185,6 +185,7 @@ func coreClassesHandler(w http.ResponseWriter, r *http.Request) {
 	numEdges := make(map[string]int)
 	levels := make(map[int][]string)
 	re := regexp.MustCompile("[0-9]")
+	reFull := regexp.MustCompile("[0-9]+")
 
 	for _, n := range reqGraph.Nodes {
 		numEdges[n] = 0
@@ -239,10 +240,20 @@ func coreClassesHandler(w http.ResponseWriter, r *http.Request) {
 			}
 
 			//fill in next level
-			for _, nextNode := range edges[node] {
+			nextNodes := edges[node]
+			sort.SliceStable(nextNodes, func(i, j int) bool {
+				courseNum1, _ := strconv.Atoi(reFull.FindString(nextNodes[i]))
+				courseNum2, _ := strconv.Atoi(reFull.FindString(nextNodes[j]))
+				return courseNum1 < courseNum2
+			})
+			for _, nextNode := range nextNodes {
 				_, newClass := classSet[nextNode]
-				if !newClass {
+				if !newClass && len(levels[level+1]) < 2 {
 					levels[level+1] = append(levels[level+1], nextNode)
+					classSet[node] = true
+				} else if !newClass && len(levels[level+1]) >= 2 {
+					nextLevel := min(7, level+2)
+					levels[nextLevel] = append(levels[nextLevel], nextNode)
 					classSet[node] = true
 				}
 			}
