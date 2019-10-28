@@ -10,12 +10,14 @@
 <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/josephschmitt/Clamp.js/clamp.js"></script>
 <body>
+    <nav class='navbar navbar-dark'>
+        <a class='navbar-brand' href='/'>Pathways</a>
+        
+        <span class='navbar-text' id='major'></span>
+    </nav>
+
     <div id='container' class="row">
         <div id='left' class="col-md-4">
-            <div id='head'>
-                <div id='title'><a class='h1' href='/'>Pathways</a></div>
-                <div id='major'></div>
-            </div>
             <form class='form-inline' action="javascript:;" onsubmit="window.search()">
                 <div class="input-group mb-3">
                     <input class="form-control" type="search" placeholder="Class">
