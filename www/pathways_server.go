@@ -33,6 +33,10 @@ type CourseResponse struct {
 	Courses []Course
 }
 
+type AddResponse struct {
+	Row int
+}
+
 type RecTile struct {
 	Recs []string
 	Row  int
@@ -43,12 +47,22 @@ type RecResponse struct {
 	Recs []RecTile
 }
 
-type RecRequest struct {
+type PathwaysRequest struct {
 	Major   string
 	Courses []Course
+	Course  string
 }
 
 func contains(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
+}
+
+func containsint(s []int, e int) bool {
 	for _, a := range s {
 		if a == e {
 			return true
@@ -89,7 +103,7 @@ func remove(a []string, i int) []string {
 }
 
 func renderStaticTemplate(w http.ResponseWriter, tmpl string) {
-	fmt.Println(tmpl)
+	// fmt.Println(tmpl)
 	t, err := template.ParseFiles("static/" + tmpl + ".html")
 	if err != nil {
 		fmt.Println("template load error")
@@ -154,15 +168,15 @@ func genRec(graph *Graph, semCourses []string, excl *map[string]bool) *RecTile {
 
 // endpoint handler for requests for core classes (JSON response)
 func coreClassesHandler(w http.ResponseWriter, r *http.Request) {
-	req := RecRequest{}
+	req := PathwaysRequest{}
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		fmt.Println("request decode error")
+		// fmt.Println("request decode error")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 	reqGraph, err := loadGraph(req.Major + "_req")
 	if err != nil {
-		fmt.Println("graph load error")
+		// fmt.Println("graph load error")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
@@ -210,7 +224,7 @@ func coreClassesHandler(w http.ResponseWriter, r *http.Request) {
 	level := 0
 	for level < 8 {
 		nodes, _ := levels[level]
-		fmt.Println(levels)
+		// fmt.Println(levels)
 		_, ok := levels[level+1]
 		if !ok {
 			levels[level+1] = []string{}
@@ -248,10 +262,10 @@ func coreClassesHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // endpoint handler for request for new recs (JSON response)
-// request format: RecRequest
+// request format: PathwaysRequest
 // response format: RecResponse
 func recHandler(w http.ResponseWriter, r *http.Request) {
-	req := RecRequest{}
+	req := PathwaysRequest{}
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		fmt.Println("request decode error")
@@ -293,13 +307,20 @@ func recHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	// generate semester recs from lowest to highest sem
+	// TODO: should this be reversed to give more varied courses from lowest sem?
 	sort.Ints(semKeys)
+	// reversal code below
+
+	// for i := len(semKeys)/2 - 1; i >= 0; i-- {
+	// 	opp := len(semKeys) - 1 - i
+	// 	semKeys[i], semKeys[opp] = semKeys[opp], semKeys[i]
+	// }
 
 	// calculate points and generate recs
-	for i, k := range semKeys {
+	for _, k := range semKeys {
 		// for all semesters but the last
 		// generate post-enrollment recs for next semester
-		if i < len(semKeys)-1 {
+		if k < len(semKeys)-1 {
 			postRec := genRec(postGraph, semMap[k], &excl)
 			postRec.Col = len(semMap[k+1])
 			postRec.Row = k + 1
@@ -312,7 +333,7 @@ func recHandler(w http.ResponseWriter, r *http.Request) {
 		recs = append(recs, *coRec)
 		// first semester has no post-enrollment rec
 		// so generate a second co-enrollment rec
-		if i == 0 {
+		if k == 0 {
 			coRec = genRec(coGraph, semMap[k], &excl)
 			coRec.Col = len(semMap[k])
 			coRec.Row = k
@@ -320,6 +341,85 @@ func recHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	response := RecResponse{Recs: recs}
+	responseJSON, err := json.Marshal(response)
+	if err != nil {
+		fmt.Println("response marshal error")
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(responseJSON)
+}
+
+func addHandler(w http.ResponseWriter, r *http.Request) {
+	req := PathwaysRequest{}
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		fmt.Println("request decode error")
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	coGraph, err := loadGraph(req.Major + "_co")
+	if err != nil {
+		fmt.Println("graph load error")
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	postGraph, err := loadGraph(req.Major + "_post")
+	if err != nil {
+		fmt.Println("graph load error")
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	addCourse := req.Course
+	courses := req.Courses
+	cnames := []string{}
+	semMap := make(map[int][]string)
+	semKeys := []int{}
+	semPoints := make(map[int]int)
+
+	// build semester -> courses mapping, build excluded courses set
+	for _, c := range courses {
+		_, ok := semMap[c.Row]
+		if !ok {
+			semKeys = append(semKeys, c.Row)
+		}
+		semMap[c.Row] = append(semMap[c.Row], c.Name)
+		cnames = append(cnames, c.Name)
+	}
+	for i := 0; i < 8; i++ {
+		_, ok := semMap[i]
+		if !ok {
+			semKeys = append(semKeys, i)
+			semMap[i] = []string{}
+		}
+	}
+
+	// calculate points and generate recs
+	for _, e := range coGraph.Edges {
+		for _, k := range semKeys {
+			if contains(semMap[k], e.Source) && e.Destination == addCourse {
+				semPoints[k] = semPoints[k] + e.Weight/len(semMap[k])
+			}
+		}
+	}
+	for _, e := range postGraph.Edges {
+		for _, k := range semKeys {
+			if contains(semMap[k], e.Source) && e.Destination == addCourse && containsint(semKeys, k+1) {
+				semPoints[k+1] = semPoints[k+1] + e.Weight/len(semMap[k])
+			}
+		}
+	}
+
+	// get semester of maximum points
+	addSem := 0
+	maxWt := 0
+	for k, v := range semPoints {
+		if v > maxWt {
+			maxWt = v
+			addSem = k
+		}
+	}
+
+	response := AddResponse{Row: addSem}
 	responseJSON, err := json.Marshal(response)
 	if err != nil {
 		fmt.Println("response marshal error")
@@ -348,6 +448,7 @@ func main() {
 	http.HandleFunc("/", splashHandler)
 	http.HandleFunc("/vis/", visHandler)
 	http.HandleFunc("/rec/", recHandler)
+	http.HandleFunc("/smart_add/", addHandler)
 	http.HandleFunc("/core_courses/", coreClassesHandler)
 	fmt.Println(http.ListenAndServe(":8000", nil))
 }

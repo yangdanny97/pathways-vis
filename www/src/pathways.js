@@ -33,15 +33,33 @@ var pref = new Set()
 /* Add a class to the list of preferred classes */
 function add(code) {
     pref.add(code);
-    // TODO this is where the search -> grid course adding would go
-    // missing the smart semester selection
-    // addCourse(code, ___)
+
+    var reqbody = {
+        Major: major.toLowerCase(),
+        Course: code,
+        Courses: data,
+    };
+
+    var req = new Request('/smart_add/', {
+        method: 'POST',
+        body: JSON.stringify(reqbody)
+    });
+
+    fetch(req)
+        .then(resp => resp.json())
+        .then(d => {
+            addCourse(code, d.Row);
+        });
     window.pref = pref;
 }
 
 /* Remove a class from the list of preferred classes */
 function remove(code) {
     pref.delete(code);
+    var c = data.find(x => x.Name === code);
+    if (c) {
+        deleteCourse(code);
+    }
     window.pref = pref;
 }
 
@@ -106,7 +124,7 @@ function card(course) {
         <div class="card-body">
             <p class="card-text">${course.description}</p>
             <a class="btn btn-primary btn-sm" href="${course.link}" role="button" target="_blank">Details</a>
-            <button class="btn btn-success btn-sm" onclick="add('${course.subject}${course.catalogNbr}')">Add</button>
+            <button class="btn btn-success btn-sm" onclick="add('${course.subject}${course.catalogNbr}')">Select</button>
             <button class="btn btn-danger btn-sm" onclick="remove('${course.subject}${course.catalogNbr}')">Remove</button>
         </div>
     </div>`;
@@ -224,10 +242,9 @@ function REC(suggestions, row, col) {
 }
 
 function init() {
-    // TODO load core courses graphs instead of defaulting to CS
-    // for now, hardcode initial CS courses
+    console.log(major);
     var reqbody = {
-        Major: major,
+        Major: major.toLowerCase(),
         Courses: data
     };
     var req = new Request('/core_courses/', {
@@ -245,7 +262,7 @@ function init() {
 
 function updateRecs() {
     var reqbody = {
-        Major: major,
+        Major: major.toLowerCase(),
         Courses: data
     };
     var req = new Request('/rec/', {
@@ -260,15 +277,23 @@ function updateRecs() {
         });
 }
 
+// cname is string, row is int
 function addCourse(cname, row) {
     // console.log(`ADD ${cname}`);
+    if (data.find(x => x.Name === cname)) {
+        alert("course is already selected")
+        return
+    }
     var rowsize = data.filter(x => x.Row == row).length;
     if (rowsize < 6) {
         data.push(COURSE(cname, row, rowsize));
         updateRecs();
+    } else {
+        alert("cannot add more than 6 courses per group")
     }
 }
 
+//c is a Course object
 function deleteCourse(c) {
     var row = c.Row,
         col = c.Col;
