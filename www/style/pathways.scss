@@ -1,9 +1,15 @@
 @import url('https://fonts.googleapis.com/css?family=Montserrat|Nunito|Nunito+Sans|Raleway&display=swap');
 @import "node_modules/bootstrap/scss/bootstrap";
 
+$cornell_red: #B31B1B;
+
 * {
     margin: 0;
     box-sizing: border-box;
+}
+
+.navbar {
+    background-color: $cornell_red;
 }
 
 #container {
@@ -62,7 +68,7 @@
     height: $header-height;
     width: 100%;
 
-    background-color: #B31B1B;
+    background-color: $cornell_red;
 
     #title {
         flex-grow: 1;
