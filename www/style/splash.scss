@@ -21,9 +21,9 @@ $montserrat: "Montserrat", sans-serif;
         width: 400px;
         background-color: rgba(233, 236, 239, 0.5);
 
-        button {
-            margin: 5px 0;
-        }
+        select { -webkit-appearance: none; }
+
+        button { margin: 5px 0; }
     }
 }
 

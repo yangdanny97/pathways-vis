@@ -5,33 +5,33 @@
 </head>
 
 <html>
-<script src="https://d3js.org/d3.v5.min.js"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
-<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/josephschmitt/Clamp.js/clamp.js"></script>
 <body>
+    <nav class='navbar navbar-expand-sm navbar-dark'>
+        <a class='navbar-brand' href='/'>Pathways</a>
+        <span class='navbar-text' id='major'></span>
+        
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+            <div class="navbar-nav">
+                <a class="nav-item nav-link" href='#' id="popular">Popular</a>
+                
+                <a class="nav-item nav-link" href="#">Suggested</a>
+            </div>
+        </div>
+
+        <form class='form-inline' action="javascript:;" onsubmit="window.search()">
+            <input class="form-control mr-sm-1" type="search" placeholder="Class">
+            <button class="btn btn-outline-light" type="submit" id="search">Search</button>
+        </form>
+
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+    </nav>
+
     <div id='container' class="row">
         <div id='left' class="col-md-4">
-            <div id='head'>
-                <div id='title'><a class='h1' href='/'>Pathways</a></div>
-                <div id='major'></div>
-            </div>
-            <form class='form-inline' action="javascript:;" onsubmit="window.search()">
-                <div class="input-group mb-3">
-                    <input class="form-control" type="search" placeholder="Class">
-                    <div class="input-group-append">
-                        <button class="btn btn-primary" type="submit" id="search">Search</button>
-                    </div>
-                </div>
-            </form>
-            <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                <label class="btn btn-primary active">
-                    <input type="radio" name="options" id="option1" autocomplete="off" checked> Popular
-                </label>
-                <label class="btn btn-primary">
-                    <input type="radio" name="options" id="option2" autocomplete="off"> Recommend
-                </label>
-            </div>
             <h2 id='status'>Core</h2>
 
             <div id='deck'></div>

@@ -67,7 +67,7 @@ function push(courses, status) {
     render();
 }
 
-/* Render an array of cards into the deck. If no array is provided, render the stack*/
+/* Render an array of grokked courses into the deck. If no array is provided, render the stack */
 function render(courses, status) {
     status = status || "Courses";
     mode.innerHTML = status;
@@ -84,9 +84,7 @@ function render(courses, status) {
         deck.innerHTML += card;
     }
     for (let el of d3.selectAll(".card-text").nodes()) {
-        $clamp(el, {
-            clamp: 3
-        });
+        $clamp(el, { clamp: 3 });
     }
 
     return 0;
@@ -127,51 +125,57 @@ function card(course) {
     return html
 }
 
+
 /* Get grokked course for a particular code */
 async function info(code) {
-    let semester = "FA19";
+    let semesters = ["FA19", "SP20"];
     let dept = code.slice(0, -4);
 
-    let options = {
-        uri: `https://classes.cornell.edu/api/2.0/search/classes.json?roster=${semester}&subject=${dept}`,
-        json: true
-    }
+    for (let semester of semesters) {
+        let uri = `https://classes.cornell.edu/api/2.0/search/classes.json?roster=${semester}&subject=${dept}`;
 
-    let r = new Request(options.uri);
-    return await fetch(r);
-}
+        function getCourseFromBody(body, code) {
+            const num = code.slice(-4);
 
-async function infoAll(codes) {
-    const tasks = codes.map(info);
-    const results = await Promise.all(tasks);
-
-    function getCourseFromBody(body, code) {
-        const num = code.slice(-4);
-
-        for (let course of body.data.classes) {
-            if (course.catalogNbr == num) {
-                return grok(course);
+            for (let course of body.data.classes) {
+                if (course.catalogNbr == num) {
+                    return grok(course);
+                }
             }
         }
-    }
 
-    let courses = []
-    for (let i = 0; i < codes.length; i++) {
-        courses.push(getCourseFromBody(results[i], codes[i]));
-    }
+        const response = await fetch(uri);
+        const p = await response.json();
 
-    return courses;
+        let g = getCourseFromBody(p, code);
+        if (g != undefined) return g;
+    }
+}
+
+/* Get an array of grokked courses from an array of course codes */
+async function infoAll(codes) {
+    return Promise.all(codes.map(info));
 }
 
 /* Get an array of popular courses based on the selected major */
 async function get_popular() {
-    let popular_codes = ["CS1110", "CS2110", "CS2800", "CS3110"]
-    popular.length = 0;
 
-    //popular = await infoAll(popular_codes).then((v) => v);
-    infoAll(popular_codes).then((courses) => render(courses, "Popular"));
+    var reqbody = {
+        Major: major.toLowerCase(),
+        Courses: data
+    };
 
-    //render(popular, "Popular");
+    var req = new Request('/core_courses/', {
+        method: 'POST',
+        body: JSON.stringify(reqbody)
+    });
+
+    popular = await fetch(req)
+        .then(resp => resp.json())
+        .then(d => d.Courses.map(c => c.Name))
+        .then(infoAll);
+
+    window.popular = popular;
 
     return popular;
 }
@@ -410,13 +414,13 @@ function displayCourses() {
     }
 }
 
-/*
-d3.select(document).node().ready(function () {
-    d3.select("#search").node().click(() => search());
-    init();
-});
-*/
 init();
+
+get_popular().then(c => render(c,"Suggested"));
+
+d3.select("#popular").on("click", () => {
+    get_popular().then(c => render(c, 'Popular'))
+});
 
 window.stack = stack;
 window.search_results = search_results;
@@ -437,3 +441,4 @@ window.search = search;
 //window.recommend = recommend;
 window.get_popular = get_popular;
 window.search = search;
+window.d3 = d3;

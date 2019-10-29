@@ -183,17 +183,18 @@ func coreClassesHandler(w http.ResponseWriter, r *http.Request) {
 		// fmt.Println("graph load error")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
-	//need to keep track of parent of node, nodes w/ no parents,
-	// or just make a structure -> map level to nodes at that level
+
 	var courses []Course
 	edges := make(map[string][]string)
 	numEdges := make(map[string]int)
 	levels := make(map[int][]string)
 	re := regexp.MustCompile("[0-9]")
+	reFull := regexp.MustCompile("[0-9]+")
 
 	for _, n := range reqGraph.Nodes {
 		numEdges[n] = 0
 	}
+
 	//iterate through all edges and find # count into each one
 	for _, e := range reqGraph.Edges {
 		sources, ok := edges[e.Source]
@@ -222,7 +223,7 @@ func coreClassesHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	//next levels
+	//next levels and add courses
 	classSet := make(map[string]bool)
 	rowColCount := []int{0, 0, 0, 0, 0, 0, 0, 0}
 	level := 0
@@ -243,10 +244,20 @@ func coreClassesHandler(w http.ResponseWriter, r *http.Request) {
 			}
 
 			//fill in next level
-			for _, nextNode := range edges[node] {
+			nextNodes := edges[node]
+			sort.SliceStable(nextNodes, func(i, j int) bool {
+				courseNum1, _ := strconv.Atoi(reFull.FindString(nextNodes[i]))
+				courseNum2, _ := strconv.Atoi(reFull.FindString(nextNodes[j]))
+				return courseNum1 < courseNum2
+			})
+			for _, nextNode := range nextNodes {
 				_, newClass := classSet[nextNode]
-				if !newClass {
+				if !newClass && len(levels[level+1]) < 2 {
 					levels[level+1] = append(levels[level+1], nextNode)
+					classSet[node] = true
+				} else if !newClass && len(levels[level+1]) >= 2 {
+					nextLevel := min(7, level+2)
+					levels[nextLevel] = append(levels[nextLevel], nextNode)
 					classSet[node] = true
 				}
 			}
