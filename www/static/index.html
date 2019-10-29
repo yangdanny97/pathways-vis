@@ -10,8 +10,12 @@
     <div id='bg'>
         <div class='jumbotron'>
             <h1>Pathways</h1>
-            <form action='javascript:;' onsubmit='go()' id='major'>
-                <input class="form-control form-control-lg" type="search" placeholder="Major">
+            <form action='/vis' method='get'>
+                <select class="custom-select" id="major" name='major'>
+                    <option value="CS">Computer Science</option>
+                    <option value="IS">Information Science</option>
+                    <option value="STSCI">Statistics</option>
+                </select>
 
                 <button type="submit" class="btn btn-primary">
                     Find your pathway
