@@ -72,7 +72,7 @@ function push(courses, status) {
     render();
 }
 
-/* Render an array of cards into the deck. If no array is provided, render the stack*/
+/* Render an array of grokked courses into the deck. If no array is provided, render the stack */
 function render(courses, status) {
     status = status || "Courses";
     mode.innerHTML = status;
@@ -89,9 +89,7 @@ function render(courses, status) {
         deck.innerHTML += card;
     }
     for (let el of d3.selectAll(".card-text").nodes()) {
-        $clamp(el, {
-            clamp: 3
-        });
+        $clamp(el, { clamp: 3 });
     }
 
     return 0;
@@ -132,23 +130,13 @@ function card(course) {
     return html
 }
 
+
 /* Get grokked course for a particular code */
 async function info(code) {
     let semester = "FA19";
     let dept = code.slice(0, -4);
 
-    let options = {
-        uri: `https://classes.cornell.edu/api/2.0/search/classes.json?roster=${semester}&subject=${dept}`,
-        json: true
-    }
-
-    let r = new Request(options.uri);
-    return await fetch(r);
-}
-
-async function infoAll(codes) {
-    const tasks = codes.map(info);
-    const results = await Promise.all(tasks);
+    let uri = `https://classes.cornell.edu/api/2.0/search/classes.json?roster=${semester}&subject=${dept}`;
 
     function getCourseFromBody(body, code) {
         const num = code.slice(-4);
@@ -160,12 +148,15 @@ async function infoAll(codes) {
         }
     }
 
-    let courses = []
-    for (let i = 0; i < codes.length; i++) {
-        courses.push(getCourseFromBody(results[i], codes[i]));
-    }
+    const response = await fetch(uri);
+    const p = await response.json();
 
-    return courses;
+    return getCourseFromBody(p, code);
+}
+
+/* Get an array of grokked courses from an array of course codes */
+async function infoAll(codes) {
+    return Promise.all(codes.map(info));
 }
 
 /* Get an array of popular courses based on the selected major */
