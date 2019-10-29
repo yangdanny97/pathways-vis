@@ -32,8 +32,6 @@ var pref = new Set()
 
 /* Add a class to the list of preferred classes */
 function add(code) {
-    pref.add(code);
-
     var reqbody = {
         Major: major.toLowerCase(),
         Course: code,
@@ -50,17 +48,14 @@ function add(code) {
         .then(d => {
             addCourse(code, d.Row);
         });
-    window.pref = pref;
 }
 
 /* Remove a class from the list of preferred classes */
 function remove(code) {
-    pref.delete(code);
     var c = data.find(x => x.Name === code);
     if (c) {
         deleteCourse(code);
     }
-    window.pref = pref;
 }
 
 function push(courses, status) {
@@ -279,6 +274,8 @@ function updateRecs() {
 
 // cname is string, row is int
 function addCourse(cname, row) {
+    pref.add(cname);
+    window.pref = pref;
     // console.log(`ADD ${cname}`);
     if (data.find(x => x.Name === cname)) {
         alert("course is already selected")
@@ -304,6 +301,8 @@ function deleteCourse(c) {
             x.Col = x.Col - 1;
         }
     });
+    pref.delete(c.Name);
+    window.pref = pref;
     updateRecs();
 }
 
