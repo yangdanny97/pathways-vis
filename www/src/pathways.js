@@ -133,12 +133,13 @@ function card(course) {
 
 /* Get grokked course for a particular code */
 async function info(code) {
-    let semester = "FA19";
+    let semesters = ["FA19", "SP20"];
     let dept = code.slice(0, -4);
 
-    let uri = `https://classes.cornell.edu/api/2.0/search/classes.json?roster=${semester}&subject=${dept}`;
+    for (let semester of semesters) {
+        let uri = `https://classes.cornell.edu/api/2.0/search/classes.json?roster=${semester}&subject=${dept}`;
 
-    function getCourseFromBody(body, code) {
+        function getCourseFromBody(body, code) {
         const num = code.slice(-4);
 
         for (let course of body.data.classes) {
@@ -148,10 +149,12 @@ async function info(code) {
         }
     }
 
-    const response = await fetch(uri);
-    const p = await response.json();
+        const response = await fetch(uri);
+        const p = await response.json();
 
-    return getCourseFromBody(p, code);
+        let g = getCourseFromBody(p, code);
+        if (g != undefined) return g;
+    }
 }
 
 /* Get an array of grokked courses from an array of course codes */
