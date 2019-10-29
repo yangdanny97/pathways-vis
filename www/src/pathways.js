@@ -415,15 +415,13 @@ function displayCourses() {
     }
 }
 
-/*
-d3.select(document).node().ready(function () {
-    d3.select("#search").node().click(() => search());
-    init();
-});
-*/
 init();
 
 get_popular().then(c => render(c,"Suggested"));
+
+d3.select("#popular").on("click", () => {
+    get_popular().then(c => render(c, 'Popular'))
+});
 
 window.stack = stack;
 window.search_results = search_results;
@@ -444,3 +442,4 @@ window.search = search;
 //window.recommend = recommend;
 window.get_popular = get_popular;
 window.search = search;
+window.d3 = d3;
