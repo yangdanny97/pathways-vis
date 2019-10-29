@@ -33,6 +33,10 @@ type CourseResponse struct {
 	Courses []Course
 }
 
+type CourseCodes struct {
+	Codes []string
+}
+
 type AddResponse struct {
 	Row int
 }
@@ -127,9 +131,9 @@ func splashHandler(w http.ResponseWriter, r *http.Request) {
 	renderStaticTemplate(w, "index")
 }
 
-// generate up to 3 recommendations based on a course graph, a list of courses,
+// generate up to n recommendations based on a course graph, a list of courses,
 // an excluded courses map
-func genRec(graph *Graph, semCourses []string, excl *map[string]bool) *RecTile {
+func genRec(graph *Graph, semCourses []string, excl *map[string]bool, n int) *RecTile {
 	points := make(map[string]int)
 	candidates := []string{}
 	// iterate thru edges and calculate scores
@@ -152,8 +156,8 @@ func genRec(graph *Graph, semCourses []string, excl *map[string]bool) *RecTile {
 		return !ok
 	})
 	top := []string{}
-	// get top 3 candidates, if none exist then random course
-	for i := 0; i < 3; i++ {
+	// get top n candidates, if none exist then random course
+	for i := 0; i < n; i++ {
 		if i >= len(candidates) {
 			randomCourse := graph.Nodes[rand.Intn(len(graph.Nodes))]
 			top = append(top, randomCourse)
@@ -250,18 +254,49 @@ func coreClassesHandler(w http.ResponseWriter, r *http.Request) {
 		level = level + 1
 	}
 
-	// //iterate through nodes and set row/col
-	// rowColCount := []int{0, 0, 0, 0, 0, 0, 0, 0}
-	// for _, n := range reqGraph.Nodes {
-	// 	courseNum, _ := strconv.Atoi(re.FindString(n))
-	// 	courseNum = courseNum - 1
-	// 	row := min(max(courseNum, numEdges[n]), 7)
-	// 	col := rowColCount[row]
-	// 	courses = append(courses, Course{Name: n, Row: row, Col: rowColCount[row]})
-	// 	rowColCount[row] = col + 1
-	// }
-
 	response := CourseResponse{Courses: courses}
+	responseJSON, err := json.Marshal(response)
+	if err != nil {
+		fmt.Println("response marshal error")
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(responseJSON)
+}
+
+// treats list of courses as unordered, generates 10 recs for everything
+func unorderedRecHandler(w http.ResponseWriter, r *http.Request) {
+	req := PathwaysRequest{}
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		fmt.Println("request decode error")
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	coGraph, err := loadGraph(req.Major + "_co")
+	if err != nil {
+		fmt.Println("graph load error")
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	postGraph, err := loadGraph(req.Major + "_post")
+	if err != nil {
+		fmt.Println("graph load error")
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	courses := req.Courses
+	cnames := []string{}
+	excl := make(map[string]bool)
+	for _, c := range courses {
+		excl[c.Name] = true
+		cnames = append(cnames, c.Name)
+	}
+
+	recPost := genRec(postGraph, cnames, &excl, 5)
+	recCo := genRec(coGraph, cnames, &excl, 5)
+	recs := append(recPost.Recs, recCo.Recs...)
+
+	response := CourseCodes{Codes: recs}
 	responseJSON, err := json.Marshal(response)
 	if err != nil {
 		fmt.Println("response marshal error")
@@ -332,20 +367,20 @@ func recHandler(w http.ResponseWriter, r *http.Request) {
 		// for all semesters but the last
 		// generate post-enrollment recs for next semester
 		if k < len(semKeys)-1 {
-			postRec := genRec(postGraph, semMap[k], &excl)
+			postRec := genRec(postGraph, semMap[k], &excl, 3)
 			postRec.Col = len(semMap[k+1])
 			postRec.Row = k + 1
 			recs = append(recs, *postRec)
 		}
 		// generate co-enrollment recs
-		coRec := genRec(coGraph, semMap[k], &excl)
+		coRec := genRec(coGraph, semMap[k], &excl, 3)
 		coRec.Col = len(semMap[k]) + 1
 		coRec.Row = k
 		recs = append(recs, *coRec)
 		// first semester has no post-enrollment rec
 		// so generate a second co-enrollment rec
 		if k == 0 {
-			coRec = genRec(coGraph, semMap[k], &excl)
+			coRec = genRec(coGraph, semMap[k], &excl, 3)
 			coRec.Col = len(semMap[k])
 			coRec.Row = k
 			recs = append(recs, *coRec)
@@ -459,6 +494,7 @@ func main() {
 	http.HandleFunc("/", splashHandler)
 	http.HandleFunc("/vis/", visHandler)
 	http.HandleFunc("/rec/", recHandler)
+	http.HandleFunc("/unordered_rec/", unorderedRecHandler)
 	http.HandleFunc("/smart_add/", addHandler)
 	http.HandleFunc("/core_courses/", coreClassesHandler)
 	fmt.Println(http.ListenAndServe(":8000", nil))
