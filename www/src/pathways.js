@@ -52,9 +52,10 @@ function add(code) {
 
 /* Remove a class from the list of preferred classes */
 function remove(code) {
+    console.log(code);
     var c = data.find(x => x.Name === code);
     if (c) {
-        deleteCourse(code);
+        deleteCourse(c);
     }
 }
 
@@ -99,7 +100,7 @@ function grok(course) {
         titleShort: course.titleShort,
         description: course.description,
         credits: course.enrollGroups[0].unitsMinimum,
-        link: `https://classes.cornell.edu/browse/roster/FA19/class/${course.subject}/${course.catalogNbr}`
+        link: `https://classes.cornell.edu/browse/roster/SP20/class/${course.subject}/${course.catalogNbr}`
     }
 
     return trim;
@@ -128,7 +129,7 @@ function card(course) {
 
 /* Get grokked course for a particular code */
 async function info(code) {
-    let semesters = ["FA19", "SP20"];
+    let semesters = ["SP20", "SP20"];
     let dept = code.slice(0, -4);
 
     for (let semester of semesters) {
@@ -185,7 +186,7 @@ var search = function(query) {
     let value = searchbar.value;
     query = query || value;
 
-    let semester = "FA19";
+    let semester = "SP20";
     let url = `https://classes.cornell.edu/api/2.0/search/classes.json?roster=${semester}&q=${query}&subject=${major}`;
 
     let r = new Request(url);

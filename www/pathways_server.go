@@ -408,6 +408,14 @@ func recHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(responseJSON)
 }
 
+//return semester with fewer courses
+func findSmallerSem(semMap *map[int][]string, a int, b int) int {
+	if len((*semMap)[a]) > len((*semMap)[b]) {
+		return b
+	}
+	return a
+}
+
 func addHandler(w http.ResponseWriter, r *http.Request) {
 	req := PathwaysRequest{}
 	err := json.NewDecoder(r.Body).Decode(&req)
@@ -473,6 +481,22 @@ func addHandler(w http.ResponseWriter, r *http.Request) {
 		if v > maxWt {
 			maxWt = v
 			addSem = k
+		}
+	}
+
+	// if course is unrelated to current schedule,
+	// place according to course number
+	digits := regexp.MustCompile("[0-9]+")
+	if maxWt == 0 {
+		courseNum, _ := strconv.Atoi(digits.FindString(addCourse))
+		if courseNum > 4000 {
+			addSem = findSmallerSem(&semMap, 6, 7)
+		} else if courseNum > 3000 {
+			addSem = findSmallerSem(&semMap, 4, 5)
+		} else if courseNum > 2000 {
+			addSem = findSmallerSem(&semMap, 2, 3)
+		} else {
+			addSem = findSmallerSem(&semMap, 0, 1)
 		}
 	}
 
