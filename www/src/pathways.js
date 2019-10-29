@@ -140,14 +140,14 @@ async function info(code) {
         let uri = `https://classes.cornell.edu/api/2.0/search/classes.json?roster=${semester}&subject=${dept}`;
 
         function getCourseFromBody(body, code) {
-        const num = code.slice(-4);
+            const num = code.slice(-4);
 
-        for (let course of body.data.classes) {
-            if (course.catalogNbr == num) {
-                return grok(course);
+            for (let course of body.data.classes) {
+                if (course.catalogNbr == num) {
+                    return grok(course);
+                }
             }
         }
-    }
 
         const response = await fetch(uri);
         const p = await response.json();
@@ -164,13 +164,23 @@ async function infoAll(codes) {
 
 /* Get an array of popular courses based on the selected major */
 async function get_popular() {
-    let popular_codes = ["CS1110", "CS2110", "CS2800", "CS3110"]
-    popular.length = 0;
 
-    //popular = await infoAll(popular_codes).then((v) => v);
-    infoAll(popular_codes).then((courses) => render(courses, "Popular"));
+    var reqbody = {
+        Major: major.toLowerCase(),
+        Courses: data
+    };
 
-    //render(popular, "Popular");
+    var req = new Request('/core_courses/', {
+        method: 'POST',
+        body: JSON.stringify(reqbody)
+    });
+
+    popular = await fetch(req)
+        .then(resp => resp.json())
+        .then(d => d.Courses.map(c => c.Name))
+        .then(infoAll);
+
+    window.popular = popular;
 
     return popular;
 }
@@ -412,6 +422,8 @@ d3.select(document).node().ready(function () {
 });
 */
 init();
+
+get_popular().then(c => render(c,"Suggested"));
 
 window.stack = stack;
 window.search_results = search_results;
