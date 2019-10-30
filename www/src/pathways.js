@@ -129,7 +129,7 @@ function card(course) {
 
 /* Get grokked course for a particular code */
 async function info(code) {
-    let semesters = ["SP20", "SP20"];
+    let semesters = ["FA19", "SP20"];
     let dept = code.slice(0, -4);
 
     for (let semester of semesters) {
