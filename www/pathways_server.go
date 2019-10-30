@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"html/template"
 	"io/ioutil"
-	"log"
 	"math/rand"
 	"net/http"
 	"regexp"
@@ -539,16 +538,17 @@ func logHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	msg := "log: " + req.NetID + "|" + req.Message
-	fmt.Println(msg)
 	ctx := context.Background()
 	projectID := "pathways-logging"
 
-	// create logging client
+	// create logging client (for now, non-fatal error if it fails)
 	client, err := logging.NewClient(ctx, projectID)
 	if err != nil {
-		log.Fatalf("Failed to create client: %v", err)
+		fmt.Println("Failed to create client: ", err)
+		return
 	}
 	defer client.Close()
+	fmt.Println(msg)
 
 	// log the message
 	logName := "pathways-log"
