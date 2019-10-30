@@ -436,7 +436,7 @@ function displayCourses() {
 
 init();
 
-get_popular().then(c => render(c, "Suggested"));
+get_popular().then(c => render(c, "Popular"));
 
 d3.select("#popular").on("click", () => {
     get_popular().then(c => render(c, 'Popular'))
