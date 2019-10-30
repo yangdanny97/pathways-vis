@@ -59,6 +59,21 @@ function remove(code) {
     }
 }
 
+//logging to google Stackdriver
+function log(message) {
+    var reqbody = {
+        NetID: "dzy4",
+        Message: message,
+    };
+
+    var req = new Request('/log/', {
+        method: 'POST',
+        body: JSON.stringify(reqbody)
+    });
+
+    fetch(req);
+}
+
 function push(courses, status) {
     status = status || "Courses";
     mode.innerHTML = status;
@@ -281,6 +296,7 @@ function updateRecs() {
 
 // cname is string, row is int
 function addCourse(cname, row) {
+    log(`add|${major}|${cname}`);
     pref.add(cname);
     window.pref = pref;
     // console.log(`ADD ${cname}`);
@@ -299,6 +315,7 @@ function addCourse(cname, row) {
 
 //c is a Course object
 function deleteCourse(c) {
+    log(`delete|${major}|${c.Name}`);
     var row = c.Row,
         col = c.Col;
     // console.log(`DELETE ${c.Name}`);

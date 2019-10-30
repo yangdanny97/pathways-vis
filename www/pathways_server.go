@@ -1,15 +1,19 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"html/template"
 	"io/ioutil"
+	"log"
 	"math/rand"
 	"net/http"
 	"regexp"
 	"sort"
 	"strconv"
+
+	"cloud.google.com/go/logging"
 )
 
 type Edge struct {
@@ -55,6 +59,11 @@ type PathwaysRequest struct {
 	Major   string
 	Courses []Course
 	Course  string
+}
+
+type LogRequest struct {
+	NetID   string
+	Message string
 }
 
 func contains(s []string, e string) bool {
@@ -523,6 +532,37 @@ func loadGraph(name string) (*Graph, error) {
 	return &graph, nil
 }
 
+func logHandler(w http.ResponseWriter, r *http.Request) {
+	req := LogRequest{}
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		return
+	}
+	msg := "log: " + req.NetID + "|" + req.Message
+	fmt.Println(msg)
+	ctx := context.Background()
+	projectID := "pathways-logging"
+
+	// create logging client
+	client, err := logging.NewClient(ctx, projectID)
+	if err != nil {
+		log.Fatalf("Failed to create client: %v", err)
+	}
+	defer client.Close()
+
+	// log the message
+	logName := "pathways-log"
+	logger := client.Logger(logName).StandardLogger(logging.Info)
+	logger.Println(msg)
+
+	// empty response (placeholder)
+	response := RecResponse{}
+	responseJSON, _ := json.Marshal(response)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(responseJSON)
+}
+
 func main() {
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
@@ -532,5 +572,6 @@ func main() {
 	http.HandleFunc("/unordered_rec/", unorderedRecHandler)
 	http.HandleFunc("/smart_add/", addHandler)
 	http.HandleFunc("/core_courses/", coreClassesHandler)
+	http.HandleFunc("/log/", logHandler)
 	fmt.Println(http.ListenAndServe(":8000", nil))
 }
