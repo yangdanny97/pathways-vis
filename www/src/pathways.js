@@ -85,7 +85,9 @@ function render(courses, status) {
         deck.innerHTML += card;
     }
     for (let el of d3.selectAll(".card-text").nodes()) {
-        $clamp(el, { clamp: 3 });
+        $clamp(el, {
+            clamp: 3
+        });
     }
 
     return 0;
@@ -182,7 +184,7 @@ async function get_popular() {
 }
 
 /* Get an array of grokked courses matching a particular search query */
-var search = function(query) {
+var search = function (query) {
     let value = searchbar.value;
     query = query || value;
 
@@ -417,7 +419,7 @@ function displayCourses() {
 
 init();
 
-get_popular().then(c => render(c,"Suggested"));
+get_popular().then(c => render(c, "Suggested"));
 
 d3.select("#popular").on("click", () => {
     get_popular().then(c => render(c, 'Popular'))
