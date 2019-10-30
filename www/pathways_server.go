@@ -482,6 +482,14 @@ func addHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	for _, e := range postGraph.Edges {
+		for _, k := range semKeys {
+			if contains(semMap[k], e.Destination) && e.Source == addCourse && containsint(semKeys, k-1) {
+				semPoints[k-1] = semPoints[k-1] + e.Weight/len(semMap[k])
+			}
+		}
+	}
+
 	// get semester of maximum points
 	addSem := 0
 	maxWt := 0
