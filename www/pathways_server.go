@@ -61,7 +61,6 @@ type PathwaysRequest struct {
 }
 
 type LogRequest struct {
-	NetID   string
 	Message string
 }
 
@@ -540,14 +539,12 @@ func loadGraph(name string) (*Graph, error) {
 }
 
 func logHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(r.Header.Get("NetID")[0])
-	fmt.Println(r.Header.Get("NetID"))
 	req := LogRequest{}
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		return
 	}
-	msg := "log: " + req.NetID + "|" + req.Message
+	msg := "log: " + r.Header.Get("NetID") + "|" + req.Message
 	ctx := context.Background()
 	projectID := "pathways-logging"
 
