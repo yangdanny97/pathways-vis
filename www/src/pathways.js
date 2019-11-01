@@ -62,7 +62,6 @@ function remove(code) {
 //logging to google Stackdriver
 function log(message) {
     var reqbody = {
-        NetID: "dzy4",
         Message: message,
     };
 
