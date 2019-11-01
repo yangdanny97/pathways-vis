@@ -13,6 +13,7 @@ import (
 	"strconv"
 
 	"cloud.google.com/go/logging"
+	"google.golang.org/api/option"
 )
 
 type Edge struct {
@@ -61,7 +62,6 @@ type PathwaysRequest struct {
 }
 
 type LogRequest struct {
-	NetID   string
 	Message string
 }
 
@@ -545,12 +545,16 @@ func logHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
-	msg := "log: " + req.NetID + "|" + req.Message
+	netid := r.Header.Get("NetID")
+	if netid == "" {
+		netid = "test"
+	}
+	msg := "log: " + netid + "|" + req.Message
 	ctx := context.Background()
 	projectID := "pathways-logging"
 
 	// create logging client (for now, non-fatal error if it fails)
-	client, err := logging.NewClient(ctx, projectID)
+	client, err := logging.NewClient(ctx, projectID, option.WithCredentialsFile("pathways-logging.json"))
 	if err != nil {
 		fmt.Println("Failed to create client: ", err)
 		return
