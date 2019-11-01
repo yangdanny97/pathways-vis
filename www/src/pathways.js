@@ -259,6 +259,7 @@ function REC(suggestions, row, col) {
 
 function init() {
     console.log(major);
+    displaySemesters();
     var reqbody = {
         Major: major.toLowerCase(),
         Courses: data
@@ -338,6 +339,85 @@ function getY(d) {
     return 25 + d.Row * grid * 1.2;
 }
 
+//displays the semester next to each row
+function displaySemesters() {
+    let semesters = [];
+    let currDate = new Date();
+    let currYear = currDate.getFullYear();
+    if (currDate.getMonth() < 5) {
+        currYear = currYear - 1;
+    }
+
+    let fallSpring = ["F","S"];
+    for (let i = 0; i < 8; i++){
+        if (i % 2 == 1) {
+            currYear = currYear + 1
+        }
+        semesters.push({
+            "Year":fallSpring[i%2] + currYear.toString(),
+            "Col":0,
+            "Row":i});
+    }
+
+    let visSem = vis.selectAll(".semester").data(semesters, d => d.Year);
+    visSem.attr("transform", d => `translate(${getX(d) - 15} ${getY(d)})`);
+    let sem = visSem.enter().append("g")
+        .attr("class","semester")
+        .attr("transform", d => `translate(${getX(d) - 10} ${getY(d)})`);
+    sem.append("text")
+        .attr('text-anchor', "middle")
+        .attr("font-size", "15px")
+        .text(d => d.Year)
+        .attr("x", 0)
+        .attr("y", grid * 0.5)
+        .attr("fill", "black")
+        .style("writing-mode", "vertical-rl")
+        .style("text-orientation","upright");
+}
+
+//displays menu next to course when clicked
+function makeContextMenu(d, type) {
+    let options = [];
+    let courseCode = "";
+    if (type == "REC"){
+        courseCode = d;
+        options = ["More Info"];
+    } else if (type == "COURSE"){
+        courseCode = d.Name;
+        options = ["Remove", "More Info"];
+    }
+
+    d3.selectAll(".context-menu")
+        .data([1])
+        .enter()
+        .append("div")
+        .attr("class","context-menu");
+    d3.select("body").on("click.context-menu", function (){
+        d3.select(".context-menu").style("display","none");
+    })
+    d3.selectAll(".context-menu")
+        .html("")
+        .append("ul")
+        .selectAll("li")
+            .data(options)
+            .enter()
+            .append("li")
+        .on("click", function(command) {
+            if (command == "Remove"){
+                deleteCourse(d);
+            } else if (command == "More Info"){
+                info(courseCode).then(v => window.open(v.link));
+            }
+            d3.select('.context-menu').style('display', 'none');
+        })
+        .text(d => d);
+    d3.select('.context-menu')
+        .style('left', (d3.event.pageX - 2) + 'px')
+        .style('top', (d3.event.pageY - 2) + 'px')
+        .style('display', 'block');
+    d3.event.preventDefault();
+}
+
 function displayCourses() {
     // console.log(data);
     // console.log(data_recs);
@@ -364,6 +444,7 @@ function displayCourses() {
             .attr("stroke", "white")
             .attr("stroke-width", 3)
             .attr("fill", "gray")
+            .on("contextmenu", d => makeContextMenu(d.Recs[i], "REC"))
             .on("click", d => addCourse(d.Recs[i], d.Row));
 
         recs.append("text")
@@ -373,6 +454,7 @@ function displayCourses() {
             .attr("x", grid * 0.5)
             .attr("y", d => d.Recs.length > i ? grid / 3 * i + 20 : -1000)
             .attr("fill", "white")
+            .on("contextmenu", d => makeContextMenu(d.Recs[i], "REC"))
             .on("click", d => addCourse(d.Recs[i], d.Row));
     }
 
@@ -380,6 +462,7 @@ function displayCourses() {
     var course = courses.enter().append("g")
         .attr("class", "course")
         .on("click", d => deleteCourse(d))
+        .on("contextmenu", d => makeContextMenu(d, "COURSE"))
         .attr("transform", d => `translate(${getX(d)} ${getY(d)})`)
         .style("opacity", 0);
 
@@ -420,6 +503,7 @@ function displayCourses() {
             .attr("stroke", "white")
             .attr("stroke-width", 3)
             .attr("fill", "gray")
+            .on("contextmenu", d => makeContextMenu(d.Recs[i], "REC"))
             .on("click", d => addCourse(d.Recs[i], d.Row));
 
         rec.append("text")
@@ -429,6 +513,7 @@ function displayCourses() {
             .attr("x", grid * 0.5)
             .attr("y", d => d.Recs.length > i ? grid / 3 * i + 20 : -1000)
             .attr("fill", "white")
+            .on("contextmenu", d => makeContextMenu(d.Recs[i], "REC"))
             .on("click", d => addCourse(d.Recs[i], d.Row));
     }
 }
