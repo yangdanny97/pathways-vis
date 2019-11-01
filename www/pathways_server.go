@@ -544,7 +544,11 @@ func logHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
-	msg := "log: " + r.Header.Get("NetID") + "|" + req.Message
+	netid := r.Header.Get("NetID")
+	if netid == "" {
+		netid = "test"
+	}
+	msg := "log: " + netid + "|" + req.Message
 	ctx := context.Background()
 	projectID := "pathways-logging"
 
