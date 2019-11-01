@@ -136,6 +136,7 @@ func visHandler(w http.ResponseWriter, r *http.Request) {
 
 // endpoint handler for splash page (HTML response)
 func splashHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println(r.Header)
 	renderStaticTemplate(w, "index")
 }
 
