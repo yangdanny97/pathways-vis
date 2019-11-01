@@ -444,6 +444,7 @@ function displayCourses() {
             .attr("stroke", "white")
             .attr("stroke-width", 3)
             .attr("fill", "gray")
+            .on("contextmenu", d => makeContextMenu(d.Recs[i], "REC"))
             .on("click", d => addCourse(d.Recs[i], d.Row));
 
         recs.append("text")
@@ -453,6 +454,7 @@ function displayCourses() {
             .attr("x", grid * 0.5)
             .attr("y", d => d.Recs.length > i ? grid / 3 * i + 20 : -1000)
             .attr("fill", "white")
+            .on("contextmenu", d => makeContextMenu(d.Recs[i], "REC"))
             .on("click", d => addCourse(d.Recs[i], d.Row));
     }
 
