@@ -136,7 +136,6 @@ func visHandler(w http.ResponseWriter, r *http.Request) {
 
 // endpoint handler for splash page (HTML response)
 func splashHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(r.Header)
 	renderStaticTemplate(w, "index")
 }
 
@@ -541,6 +540,8 @@ func loadGraph(name string) (*Graph, error) {
 }
 
 func logHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println(r.Header.Get("NetID")[0])
+	fmt.Println(r.Header.Get("NetID"))
 	req := LogRequest{}
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
