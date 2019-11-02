@@ -376,12 +376,12 @@ function displaySemesters() {
 }
 
 //displays menu next to course when clicked
-function makeContextMenu(d, type) {
+function makeContextMenu(d, type, row=0) {
     let options = [];
     let courseCode = "";
     if (type == "REC"){
         courseCode = d;
-        options = ["More Info"];
+        options = ["Add","More Info"];
     } else if (type == "COURSE"){
         courseCode = d.Name;
         options = ["Remove", "More Info"];
@@ -407,6 +407,8 @@ function makeContextMenu(d, type) {
                 deleteCourse(d);
             } else if (command == "More Info"){
                 info(courseCode).then(v => window.open(v.link));
+            } else if (command == "Add"){
+                addCourse(courseCode, row);
             }
             d3.select('.context-menu').style('display', 'none');
         })
@@ -444,7 +446,7 @@ function displayCourses() {
             .attr("stroke", "white")
             .attr("stroke-width", 3)
             .attr("fill", "gray")
-            .on("contextmenu", d => makeContextMenu(d.Recs[i], "REC"))
+            .on("contextmenu", d => makeContextMenu(d.Recs[i], "REC", d.Row))
             .on("click", d => addCourse(d.Recs[i], d.Row));
 
         recs.append("text")
@@ -454,7 +456,7 @@ function displayCourses() {
             .attr("x", grid * 0.5)
             .attr("y", d => d.Recs.length > i ? grid / 3 * i + 20 : -1000)
             .attr("fill", "white")
-            .on("contextmenu", d => makeContextMenu(d.Recs[i], "REC"))
+            .on("contextmenu", d => makeContextMenu(d.Recs[i], "REC", d.Row))
             .on("click", d => addCourse(d.Recs[i], d.Row));
     }
 
@@ -503,7 +505,7 @@ function displayCourses() {
             .attr("stroke", "white")
             .attr("stroke-width", 3)
             .attr("fill", "gray")
-            .on("contextmenu", d => makeContextMenu(d.Recs[i], "REC"))
+            .on("contextmenu", d => makeContextMenu(d.Recs[i], "REC", d.Row))
             .on("click", d => addCourse(d.Recs[i], d.Row));
 
         rec.append("text")
@@ -513,7 +515,7 @@ function displayCourses() {
             .attr("x", grid * 0.5)
             .attr("y", d => d.Recs.length > i ? grid / 3 * i + 20 : -1000)
             .attr("fill", "white")
-            .on("contextmenu", d => makeContextMenu(d.Recs[i], "REC"))
+            .on("contextmenu", d => makeContextMenu(d.Recs[i], "REC", d.Row))
             .on("click", d => addCourse(d.Recs[i], d.Row));
     }
 }
