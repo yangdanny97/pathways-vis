@@ -56,7 +56,7 @@ $cornell_red: #B31B1B;
         }
 
         div.code {
-            min-width: 70px;
+            min-width: 80px;
             font-weight: bold;
             font-size: 14px;
         }
@@ -67,6 +67,8 @@ $cornell_red: #B31B1B;
             font-style: italic;
             overflow: hidden;
             white-space: nowrap;
+
+            a { color: black; }
         }
 
         div.cred {

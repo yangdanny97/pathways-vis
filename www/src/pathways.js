@@ -128,7 +128,7 @@ function card(course) {
     let html = `<div class='card'>
         <div class='card-header'>
             <div class='code'>${course.subject} ${course.catalogNbr}</div>
-            <div class='name'>${course.titleShort}</div>
+            <div class='name'><a href="${course.link}">${course.titleShort}</a></div>
             <div class='cred'>${course.credits}</div>
         </div>
         <div class="card-body">
