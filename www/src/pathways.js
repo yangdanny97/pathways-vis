@@ -222,22 +222,31 @@ var search = function (query) {
         });
 }
 
-// /* Get an array of recommended courses based on the preferences list */
-// function recommend(codes) {
-//     codes = codes || pref;
+/* Get an array of recommended courses based on the preferences list */
+async function recommend(codes) {
+    codes = codes || pref;
 
-//     recs.length = 0;
+    var reqbody = {
+        Major: major.toLowerCase(),
+        Courses: data
+    };
 
-//     // Get recommended courses
-//     let rec_codes = ["CS2800", "CS2110", "CS4820"];
+    var req = new Request('/unordered_rec/', {
+        method: 'POST',
+        body: JSON.stringify(reqbody)
+    });
 
-//     for (let code of rec_codes) {
-//         info(code, (course) => recs.push(course));
-//     }
-//     render(recs, "Recommendations")
+    recs.length = 0; // Empty the list of recommendations
 
-//     return recs;
-// }
+    recs = await fetch(req)
+        .then(resp => resp.json())
+        .then(json => json.Codes)
+        .then(infoAll);
+
+    window.recs = recs;
+    
+    return recs;
+}
 
 // course and recommendation factory methods
 function COURSE(name, row, col) {
@@ -279,6 +288,7 @@ function init() {
 }
 
 function updateRecs() {
+    console.log(data);
     var reqbody = {
         Major: major.toLowerCase(),
         Courses: data
@@ -529,6 +539,12 @@ d3.select("#popular").on("click", () => {
     get_popular().then(c => render(c, 'Popular'))
 });
 
+d3.select("#recommended").on("click", () => {
+    recommend().then(c => render(c, 'Recommended'))
+});
+
+window.d3 = d3;
+
 window.stack = stack;
 window.search_results = search_results;
 window.popular = popular;
@@ -545,7 +561,8 @@ window.push = push;
 window.info = info;
 window.infoAll = infoAll;
 window.search = search;
-//window.recommend = recommend;
+window.recommend = recommend;
 window.get_popular = get_popular;
 window.search = search;
-window.d3 = d3;
+
+window.data=data;
