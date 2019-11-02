@@ -100,7 +100,7 @@ visualization project of pathways through cornell CIS
 - Demoed @ Kizilcec lab meeting, got feedback on priorities for next week
 - Integrated frontend with server, integrated codebase for search/landing page with interactive tiles
 
-### Week ending 11/1
+### Week ending 11/2
 
 #### Goals:
 1. UI on the RHS: add timeline indicator and clear design for what is a selection vs. recommendation
@@ -108,6 +108,21 @@ visualization project of pathways through cornell CIS
 3. ensure some degree of serendipity for finding out of major courses in uncommon departments, i..e. don’t overemphasize common courses
 4. netid login
 5. user interaction logging using netid as the identifier
+
+#### Progress:
+1. Several UI improvements are made
+2. Done
+3. No progress
+4. Server is deployed on pathway.cis.cornell.edu with NetID login enabled
+5. NetID + add/delete/search is logged to Google Stackdriver
+
+### Week ending 11/9
+
+#### Goals:
+- improving the interface, reducing errors and unexpected behaviors
+- add hashing for logging netIDs
+- refine algorithm to promote less common courses
+- investigate new/improved vis
 
 #### Progress:
 - TBD
