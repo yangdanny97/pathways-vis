@@ -111,6 +111,8 @@ visualization project of pathways through cornell CIS
 
 #### Progress:
 1. Several UI improvements are made
+- Eric: updated algo for core courses, tried adding semester text and added
+  right click context menu
 2. Done
 3. No progress
 4. Server is deployed on pathway.cis.cornell.edu with NetID login enabled
