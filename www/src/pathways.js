@@ -269,7 +269,7 @@ function REC(suggestions, row, col) {
 
 function init() {
     console.log(major);
-    displaySemesters();
+    // displaySemesters();
     var reqbody = {
         Major: major.toLowerCase(),
         Courses: data
@@ -351,40 +351,40 @@ function getY(d) {
 }
 
 //displays the semester next to each row
-function displaySemesters() {
-    let semesters = [];
-    let currDate = new Date();
-    let currYear = currDate.getFullYear();
-    if (currDate.getMonth() < 5) {
-        currYear = currYear - 1;
-    }
+// function displaySemesters() {
+//     let semesters = [];
+//     let currDate = new Date();
+//     let currYear = currDate.getFullYear();
+//     if (currDate.getMonth() < 5) {
+//         currYear = currYear - 1;
+//     }
 
-    let fallSpring = ["F","S"];
-    for (let i = 0; i < 8; i++){
-        if (i % 2 == 1) {
-            currYear = currYear + 1
-        }
-        semesters.push({
-            "Year":fallSpring[i%2] + currYear.toString(),
-            "Col":0,
-            "Row":i});
-    }
+//     let fallSpring = ["F","S"];
+//     for (let i = 0; i < 8; i++){
+//         if (i % 2 == 1) {
+//             currYear = currYear + 1
+//         }
+//         semesters.push({
+//             "Year":fallSpring[i%2] + currYear.toString(),
+//             "Col":0,
+//             "Row":i});
+//     }
 
-    let visSem = vis.selectAll(".semester").data(semesters, d => d.Year);
-    visSem.attr("transform", d => `translate(${getX(d) - 15} ${getY(d)})`);
-    let sem = visSem.enter().append("g")
-        .attr("class","semester")
-        .attr("transform", d => `translate(${getX(d) - 10} ${getY(d)})`);
-    sem.append("text")
-        .attr('text-anchor', "middle")
-        .attr("font-size", "15px")
-        .text(d => d.Year)
-        .attr("x", 0)
-        .attr("y", grid * 0.5)
-        .attr("fill", "black")
-        .style("writing-mode", "vertical-rl")
-        .style("text-orientation","upright");
-}
+//     let visSem = vis.selectAll(".semester").data(semesters, d => d.Year);
+//     visSem.attr("transform", d => `translate(${getX(d) - 15} ${getY(d)})`);
+//     let sem = visSem.enter().append("g")
+//         .attr("class","semester")
+//         .attr("transform", d => `translate(${getX(d) - 10} ${getY(d)})`);
+//     sem.append("text")
+//         .attr('text-anchor', "middle")
+//         .attr("font-size", "15px")
+//         .text(d => d.Year)
+//         .attr("x", 0)
+//         .attr("y", grid * 0.5)
+//         .attr("fill", "black")
+//         .style("writing-mode", "vertical-rl")
+//         .style("text-orientation","upright");
+// }
 
 //displays menu next to course when clicked
 function makeContextMenu(d, type, row=0) {
