@@ -103,20 +103,26 @@ visualization project of pathways through cornell CIS
 ### Week ending 11/2
 
 #### Goals:
-1. UI on the RHS: add timeline indicator and clear design for what is a selection vs. recommendation
+1. UI on the RHS: add timeline indicator and clear design for what is a
+   selection vs. recommendation
 2. implement adding/removing of courses to appear on RHS
-3. ensure some degree of serendipity for finding out of major courses in uncommon departments, i..e. don’t overemphasize common courses
+3. ensure some degree of serendipity for finding out of major courses in
+   uncommon departments, i.. don’t overemphasize common courses
 4. netid login
 5. user interaction logging using netid as the identifier
 
 #### Progress:
 1. Several UI improvements are made
-- Eric: updated algo for core courses, tried adding semester text and added
-  right click context menu
+   - Eric: updated algo for core courses, tried adding semester text and added
+     right click context menu
+   - Sam: Navbar added
+   - Sam: Implemented major selection dropdown
 2. Done
 3. No progress
 4. Server is deployed on pathway.cis.cornell.edu with NetID login enabled
 5. NetID + add/delete/search is logged to Google Stackdriver
+
+- Sam: Implemented server endpoints for popular and recommended classes
 
 ### Week ending 11/9
 
@@ -125,6 +131,7 @@ visualization project of pathways through cornell CIS
 - add hashing for logging netIDs
 - refine algorithm to promote less common courses
 - investigate new/improved vis
+- improve search behavior
 
 #### Progress:
 - TBD
