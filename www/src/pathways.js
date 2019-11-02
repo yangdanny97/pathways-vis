@@ -199,6 +199,7 @@ async function get_popular() {
 
 /* Get an array of grokked courses matching a particular search query */
 var search = function (query) {
+    log(`search|${major}|${query}`);
     let value = searchbar.value;
     query = query || value;
 
