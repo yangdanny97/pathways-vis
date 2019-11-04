@@ -222,7 +222,7 @@ func coreClassesHandler(w http.ResponseWriter, r *http.Request) {
 	for n, e := range numEdges {
 		courseNum, _ := strconv.Atoi(re.FindString(n))
 		courseNum = courseNum - 1
-		level := courseNum
+		level := 0
 		if e == 0 {
 			nodes, ok := levels[level]
 			if ok {
@@ -373,8 +373,7 @@ func recHandler(w http.ResponseWriter, r *http.Request) {
 			semMap[i] = []string{}
 		}
 	}
-	// generate semester recs from lowest to highest sem
-	// TODO: should this be reversed to give more varied courses from lowest sem?
+
 	sort.Ints(semKeys)
 	// reversal code below
 
@@ -383,25 +382,27 @@ func recHandler(w http.ResponseWriter, r *http.Request) {
 	// 	semKeys[i], semKeys[opp] = semKeys[opp], semKeys[i]
 	// }
 
+	nRecs := 1
+
 	// calculate points and generate recs
 	for _, k := range semKeys {
 		// for all semesters but the last
 		// generate post-enrollment recs for next semester
 		if k < len(semKeys)-1 {
-			postRec := genRec(postGraph, semMap[k], &excl, 3)
+			postRec := genRec(postGraph, semMap[k], &excl, nRecs)
 			postRec.Col = len(semMap[k+1])
 			postRec.Row = k + 1
 			recs = append(recs, *postRec)
 		}
 		// generate co-enrollment recs
-		coRec := genRec(coGraph, semMap[k], &excl, 3)
-		coRec.Col = len(semMap[k]) + 1
+		coRec := genRec(coGraph, semMap[k], &excl, nRecs)
+		coRec.Col = len(semMap[k]) + nRecs
 		coRec.Row = k
 		recs = append(recs, *coRec)
 		// first semester has no post-enrollment rec
 		// so generate a second co-enrollment rec
 		if k == 0 {
-			coRec = genRec(coGraph, semMap[k], &excl, 3)
+			coRec = genRec(coGraph, semMap[k], &excl, nRecs)
 			coRec.Col = len(semMap[k])
 			coRec.Row = k
 			recs = append(recs, *coRec)
