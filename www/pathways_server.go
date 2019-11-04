@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"crypto/sha1"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -547,7 +549,13 @@ func logHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	netid := r.Header.Get("NetID")
 	if netid == "" {
+		// testing locally
 		netid = "test"
+	} else {
+		// in production, hash the NetID
+		h := sha1.New()
+		h.Write([]byte(netid))
+		netid = hex.Dump(h.Sum(nil))
 	}
 	msg := "log: " + netid + "|" + req.Message
 	ctx := context.Background()
