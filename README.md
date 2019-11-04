@@ -117,21 +117,21 @@ visualization project of pathways through cornell CIS
      right click context menu
    - Sam: Navbar added
    - Sam: Implemented major selection dropdown
-2. Done
+2. Done - Danny
 3. No progress
-4. Server is deployed on pathway.cis.cornell.edu with NetID login enabled
-5. NetID + add/delete/search is logged to Google Stackdriver
+4. Server is deployed on pathway.cis.cornell.edu with NetID login enabled - Danny
+5. NetID + add/delete/search is logged to Google Stackdriver - Danny
 
-- Sam: Implemented server endpoints for popular and recommended classes
+- Sam: Integrated server endpoints for popular and recommended classes
 
 ### Week ending 11/9
 
 #### Goals:
 - improving the interface, reducing errors and unexpected behaviors
-- add hashing for logging netIDs
+- add hashing for logging netIDs (Quick fix)
 - refine algorithm to promote less common courses
 - investigate new/improved vis
 - improve search behavior
 
 #### Progress:
-- TBD
+- hashing for NetIDs - Danny
