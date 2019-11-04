@@ -9,12 +9,7 @@ $montserrat: "Montserrat", sans-serif;
     display: flex;
     align-items: center;
 
-    background-image: url(static/cornell.jpg);
-
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
-
+    background: url(static/cornell.jpg) no-repeat center/cover;
 
     .jumbotron {
         margin: auto 10%;
@@ -26,4 +21,3 @@ $montserrat: "Montserrat", sans-serif;
         button { margin: 5px 0; }
     }
 }
-
