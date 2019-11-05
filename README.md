@@ -133,5 +133,17 @@ visualization project of pathways through cornell CIS
 - investigate new/improved vis
 - improve search behavior
 
+#### Meeting With Professor 11/4/19
+- Improve splash viz 
+  - put pathways logo at top and make it an actual logo
+  - change drop down to text entry for when we get more majors
+  - potentially scrape all HREF from the cornell fields of study website
+  - Add "pathway is a research project, click here to learn more about it" aka about page
+- Improve Viz page
+  - Figure out intuitive design for viz that's independent of left side
+    - Figure out how to represent time (arrow)
+  - When clicking on viz nodes, add exploratory card to the left side
+
 #### Progress:
 - hashing for NetIDs - Danny
+
