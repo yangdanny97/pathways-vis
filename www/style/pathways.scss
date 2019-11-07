@@ -10,19 +10,16 @@ $cornell_red: #B31B1B;
 
 .navbar {
     background-color: $cornell_red;
+    height: 10vh;
 }
 
 #container {
     width: 100%;
-    height: 100vh;
+    height: 90vh;
 
     margin: auto;
 
-    & > div {
-        height: 100%;
-        width: 100px;
-        flex-grow: 1;
-    }
+    & > div { height: 100%; }
 }
 
 #left {
@@ -82,17 +79,12 @@ $cornell_red: #B31B1B;
     }
 }
 
-#right .card {
-    padding: 10px;
-    margin: 10px;
-}
-
 #right {
     overflow:scroll;
-}
+    
+    .card { margin-top: 15px; }
 
-#right rect,text {
-    cursor: pointer;
+    rect,text { cursor: pointer; }
 }
 
 .context-menu {
