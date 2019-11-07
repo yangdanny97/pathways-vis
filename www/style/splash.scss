@@ -20,4 +20,29 @@ $montserrat: "Montserrat", sans-serif;
 
         button { margin: 5px 0; }
     }
+
+    .content {
+        margin-left: 100px;
+        position: absolute;
+        top: 20%;
+
+        display: flex;
+        flex-direction: row;
+
+        h1 { 
+            display: inline;
+            color: white;
+            margin-right: 20px;
+        }
+
+        .form-inline {
+            display: inline-flex;
+        }
+
+        select { 
+            width: 300px;
+            -webkit-appearance: none; 
+        }
+
+    }
 }

@@ -132,6 +132,26 @@ visualization project of pathways through cornell CIS
 - refine algorithm to promote less common courses
 - investigate new/improved vis
 - improve search behavior
+- Sam:
+  - add popovers for class info
+  - make class links open in new tab
+  - Add about page
+  - Make the splash page look more like Bing
+  - Add explanatory text to splash page
+
+#### Meeting With Professor 11/4/19
+- Improve splash viz 
+  - put pathways logo at top and make it an actual logo
+  - change drop down to text entry for when we get more majors
+  - Add explanatory text
+  - potentially scrape all HREF from the cornell fields of study website
+  - Add "pathway is a research project, click here to learn more about it" aka about page
+- Improve Viz page
+  - Figure out intuitive design for viz that's independent of left side
+    - Figure out how to represent time (arrow)
+  - When clicking on viz nodes, add exploratory card to the left side
+  - Add popovers for class info
 
 #### Progress:
 - hashing for NetIDs - Danny
+

@@ -8,18 +8,22 @@
 
 <body>
     <div id='bg'>
-        <div class='jumbotron'>
+        <div class='content'>
             <h1>Pathway</h1>
-            <form action='/vis' method='get'>
-                <select class="custom-select" id="major" name='major'>
-                    <option value="CS">Computer Science</option>
-                    <option value="INFO">Information Science</option>
-                    <option value="STSCI">Statistics</option>
-                </select>
+            <form class="form-inline" action='/vis' method='get'>
+                <div class="input-group input-group-lg">
+                    <select class="custom-select" id="major" name='major'>
+                        <option value="CS">Computer Science</option>
+                        <option value="INFO">Information Science</option>
+                        <option value="STSCI">Statistics</option>
+                    </select>
 
-                <button type="submit" class="btn btn-primary">
-                    Find your pathway
-                </button>
+                    <div class="input-group-append mb-sm-1">
+                        <button type="submit" class="btn btn-outline-light">
+                            Find your pathway
+                        </button>
+                    </div>
+                </div>
             </form>
         </div>
     </div>
