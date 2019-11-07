@@ -54,7 +54,8 @@ type RecTile struct {
 }
 
 type RecResponse struct {
-	Recs []RecTile
+	Recs  []RecTile
+	Edges []Edge
 }
 
 type PathwaysRequest struct {
@@ -328,6 +329,42 @@ func unorderedRecHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(responseJSON)
 }
 
+// list of post-enrollment edges between courses
+func edgeGenerator(graph *Graph, semMap map[int][]string) []Edge {
+	cMap := make(map[string]int) //map from course -> semester
+	preEdge := make(map[string]Edge)
+	postEdge := make(map[string]Edge)
+
+	for n, v := range semMap {
+		for _, c := range v {
+			cMap[c] = n
+		}
+	}
+
+	for _, e := range graph.Edges {
+		srcSem, ok := cMap[e.Source]
+		dstSem, ok2 := cMap[e.Destination]
+		if ok && ok2 && (srcSem-dstSem == -1) {
+			pre, ok := preEdge[e.Source]
+			if !ok || pre.Weight < e.Weight {
+				preEdge[e.Source] = e
+			}
+			post, ok := postEdge[e.Destination]
+			if !ok || post.Weight < e.Weight {
+				postEdge[e.Destination] = e
+			}
+		}
+	}
+	edges := []Edge{}
+	for _, e := range preEdge {
+		edges = append(edges, e)
+	}
+	for _, e := range postEdge {
+		edges = append(edges, e)
+	}
+	return edges
+}
+
 // endpoint handler for request for new recs (JSON response)
 // request format: PathwaysRequest
 // response format: RecResponse
@@ -375,30 +412,17 @@ func recHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sort.Ints(semKeys)
-	// reversal code below
-
-	// for i := len(semKeys)/2 - 1; i >= 0; i-- {
-	// 	opp := len(semKeys) - 1 - i
-	// 	semKeys[i], semKeys[opp] = semKeys[opp], semKeys[i]
-	// }
-
+	// number of recs to generate per rec-tile
 	nRecs := 1
 
 	// calculate points and generate recs
 	for _, k := range semKeys {
-		// for all semesters but the last
-		// generate post-enrollment recs for next semester
-		if k < len(semKeys)-1 {
-			postRec := genRec(postGraph, semMap[k], &excl, nRecs)
-			postRec.Col = len(semMap[k+1])
-			postRec.Row = k + 1
-			recs = append(recs, *postRec)
-		}
 		// generate co-enrollment recs
 		coRec := genRec(coGraph, semMap[k], &excl, nRecs)
 		coRec.Col = len(semMap[k]) + nRecs
 		coRec.Row = k
 		recs = append(recs, *coRec)
+
 		// first semester has no post-enrollment rec
 		// so generate a second co-enrollment rec
 		if k == 0 {
@@ -407,8 +431,17 @@ func recHandler(w http.ResponseWriter, r *http.Request) {
 			coRec.Row = k
 			recs = append(recs, *coRec)
 		}
+		// for all semesters but the last
+		// generate post-enrollment recs for next semester
+		if k < len(semKeys)-1 {
+			postRec := genRec(postGraph, semMap[k], &excl, nRecs)
+			postRec.Col = len(semMap[k+1])
+			postRec.Row = k + 1
+			recs = append(recs, *postRec)
+		}
 	}
-	response := RecResponse{Recs: recs}
+	visEdges := edgeGenerator(postGraph, semMap)
+	response := RecResponse{Recs: recs, Edges: visEdges}
 	responseJSON, err := json.Marshal(response)
 	if err != nil {
 		fmt.Println("response marshal error")
@@ -477,16 +510,12 @@ func addHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
+
 	for _, e := range postGraph.Edges {
 		for _, k := range semKeys {
 			if contains(semMap[k], e.Source) && e.Destination == addCourse && containsint(semKeys, k+1) {
 				semPoints[k+1] = semPoints[k+1] + e.Weight/len(semMap[k])
 			}
-		}
-	}
-
-	for _, e := range postGraph.Edges {
-		for _, k := range semKeys {
 			if contains(semMap[k], e.Destination) && e.Source == addCourse && containsint(semKeys, k-1) {
 				semPoints[k-1] = semPoints[k-1] + e.Weight/len(semMap[k])
 			}
