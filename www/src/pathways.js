@@ -301,6 +301,7 @@ function updateRecs() {
     fetch(req)
         .then(resp => resp.json())
         .then(d => {
+            console.log(d.Edges);
             data_recs = d.Recs;
             displayCourses();
         });
