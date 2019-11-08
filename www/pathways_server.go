@@ -142,6 +142,11 @@ func splashHandler(w http.ResponseWriter, r *http.Request) {
 	renderStaticTemplate(w, "index")
 }
 
+func majorHandler(w http.ResponseWriter, r *http.Request) {
+	fp := path.Join("data", "majors.json")
+	http.ServeFile(w, r, fp)
+}
+
 // generate up to n recommendations based on a course graph, a list of courses,
 // an excluded courses map
 func genRec(graph *Graph, semCourses []string, excl *map[string]bool, n int) *RecTile {
@@ -623,5 +628,6 @@ func main() {
 	http.HandleFunc("/smart_add/", addHandler)
 	http.HandleFunc("/core_courses/", coreClassesHandler)
 	http.HandleFunc("/log/", logHandler)
+	http.HandleFunc("/majors/", majorHandler)
 	fmt.Println(http.ListenAndServe(":8000", nil))
 }
