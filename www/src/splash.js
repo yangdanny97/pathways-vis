@@ -1,20 +1,49 @@
 var d3 = require("d3-selection");
-var Typeahead = require("typeahead")
+var typeahead = require("typeahead.js");
+var $ = require("jquery");
 
 import '../style/splash.scss';
-import '../node_modules/typeahead/style.css';
 
 var major_input = d3.select("#major").node();
 
+var substringMatcher = function(strs) {
+    return function findMatches(q, cb) {
+        var matches, substrRegex;
+    
+        // an array that will be populated with substring matches
+        matches = [];
+    
+        // regex used to determine if a string contains the substring `q`
+        substrRegex = new RegExp(q, 'i');
+    
+        // iterate through the pool of strings and for any string that
+        // contains the substring `q`, add it to the `matches` array
+        $.each(strs, function(i, str) {
+            if (substrRegex.test(str)) {
+            matches.push(str);
+            }
+        });
+    
+        cb(matches);
+    };
+};
+
 var req = new Request("/majors/", { method: 'POST', });
+var names;
 var majors = fetch(req)
     .then(resp => resp.json())
     .then(function(json) {
-        var names = json.map(obj => obj.Major);
-        console.log(names);
+        names = json.map(obj => `${obj.Major} (${obj.Code})`);
 
-        var ta = Typeahead(major_input, { source: names });
-        return majors
+        $("input").typeahead({
+            minLength: 1,
+            highlight: true
+        },
+        {
+            name: "dataset",
+            source: substringMatcher(names)
+        });
+        return json;
     });
 
 

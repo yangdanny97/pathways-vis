@@ -3,6 +3,8 @@
 
 $montserrat: "Montserrat", sans-serif;
 
+$input-height: 48px;
+
 #bg {
     height: 100vh;
     
@@ -10,39 +12,50 @@ $montserrat: "Montserrat", sans-serif;
     align-items: center;
 
     background: url(static/cornell.jpg) no-repeat center/cover;
+}
 
-    .jumbotron {
-        margin: auto 10%;
-        width: 400px;
-        background-color: rgba(233, 236, 239, 0.5);
+.content {
+    margin-left: 100px;
+    position: absolute;
+    top: 20%;
 
-        select { -webkit-appearance: none; }
+    display: flex;
+    flex-direction: row;
 
-        button { margin: 5px 0; }
+    h1 { 
+        display: inline;
+        color: white;
+        margin-right: 20px;
     }
 
-    .content {
-        margin-left: 100px;
-        position: absolute;
-        top: 20%;
+    .form-inline {
+        display: inline-flex;
 
-        display: flex;
-        flex-direction: row;
-
-        h1 { 
-            display: inline;
-            color: white;
-            margin-right: 20px;
+        input {
+            height: $input-height;
         }
-
-        .form-inline {
-            display: inline-flex;
-        }
-
-        select { 
-            width: 300px;
-            -webkit-appearance: none; 
-        }
-
     }
+
+}
+
+.tt-input {
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+}
+
+.tt-menu {
+    @extend .list-group;
+    box-shadow: 0 5px 10px rgba(0,0,0,.2);
+    width: 500px;
+    top: $input-height + 10px;
+}
+
+.tt-suggestion {
+    @extend .list-group-item;
+}
+.tt-selectable {
+    @extend .list-group-item-action;
+}
+
+.tt-input, .tt-hint {
+    @extend .form-control-lg;
 }
