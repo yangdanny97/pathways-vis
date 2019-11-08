@@ -4,6 +4,7 @@
 
 <head>
     <title>Pathway</title>
+    <link rel="stylesheet" type="text/css" href="../style/typeahead.css">
 </head>
 
 <body>
@@ -12,11 +13,8 @@
             <h1>Pathway</h1>
             <form class="form-inline" action='/vis' method='get'>
                 <div class="input-group input-group-lg">
-                    <select class="custom-select" id="major" name='major'>
-                        <option value="CS">Computer Science</option>
-                        <option value="INFO">Information Science</option>
-                        <option value="STSCI">Statistics</option>
-                    </select>
+                    <input id="major" name="major" type="text" class="form-control" placeholder="Major">
+
 
                     <div class="input-group-append mb-sm-1">
                         <button type="submit" class="btn btn-outline-light">
