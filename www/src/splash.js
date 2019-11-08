@@ -46,5 +46,19 @@ var majors = fetch(req)
         return json;
     });
 
+function validate() {
+    let re = /^.* \(([A-Z]*)\)$/;
+    let text = major_input.value;
+    let matches = text.match(re);
+    if (matches == null) return false;
+    if (matches.length == 2) {
+        window.location = "vis/?major=" + matches[1];
+    }
+    return false;
+}
+
+$("form").attr("onsubmit", "validate()");
+
+window.validate = validate;
 
 
