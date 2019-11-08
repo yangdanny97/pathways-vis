@@ -14,6 +14,15 @@ var recs_per_tile = 1;
 let urlParams = new URLSearchParams(window.location.search);
 const major = urlParams.get('major');
 
+async function setMajor() {
+    var req = new Request("/majors/", { method: 'POST', });
+    return fetch(req)
+        .then(resp => resp.json())
+        .then(json => json.filter(obj => obj.Code == major)[0]);
+}
+
+setMajor().then(obj => d3.select("#major").node().innerHTML = obj.Major);
+
 // Put major in title bar
 d3.select('#major').node().innerHTML = major;
 

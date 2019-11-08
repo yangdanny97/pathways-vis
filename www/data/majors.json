@@ -1,0 +1,318 @@
+[
+  {
+    "Major": "Africana Studies",
+    "Code": "ASRC"
+  },
+  {
+    "Major": "Agricultural Sciences",
+    "Code": "AGSCI"
+  },
+  {
+    "Major": "American Studies",
+    "Code": "AMST"
+  },
+  {
+    "Major": "Animal Science",
+    "Code": "ANSC"
+  },
+  {
+    "Major": "Anthropology",
+    "Code": "ANTHR"
+  },
+  {
+    "Major": "Applied Economics and Management",
+    "Code": "AEM"
+  },
+  {
+    "Major": "Archaeology",
+    "Code": "ARKEO"
+  },
+  {
+    "Major": "Architecture",
+    "Code": "ARCH"
+  },
+  {
+    "Major": "Asian Studies",
+    "Code": "ASIAN"
+  },
+  {
+    "Major": "Astronomy",
+    "Code": "ASTRO"
+  },
+  {
+    "Major": "Atmospheric Science",
+    "Code": "ATMO"
+  },
+  {
+    "Major": "Biological Engineering",
+    "Code": "BIOE"
+  },
+  {
+    "Major": "Biological Sciences",
+    "Code": "BIO"
+  },
+  {
+    "Major": "Biology and Society",
+    "Code": "BSOC"
+  },
+  {
+    "Major": "Biomedical Engineering",
+    "Code": "BME"
+  },
+  {
+    "Major": "Biometry and Statistics",
+    "Code": "BTRY"
+  },
+  {
+    "Major": "Chemical Engineering",
+    "Code": "CHEME"
+  },
+  {
+    "Major": "Chemistry and Chemical Biology",
+    "Code": "CHEM"
+  },
+  {
+    "Major": "China and Asia-Pacific Studies",
+    "Code": "CAPS"
+  },
+  {
+    "Major": "Civil Engineering",
+    "Code": "CIVIL"
+  },
+  {
+    "Major": "Classics",
+    "Code": "CLASS"
+  },
+  {
+    "Major": "College Scholar Program",
+    "Code": "COLLS"
+  },
+  {
+    "Major": "Communication",
+    "Code": "COMM"
+  },
+  {
+    "Major": "Comparative Literature",
+    "Code": "COML"
+  },
+  {
+    "Major": "Computer Science",
+    "Code": "CS"
+  },
+  {
+    "Major": "Design and Environmental Analysis",
+    "Code": "DEA"
+  },
+  {
+    "Major": "Development Sociology",
+    "Code": "DSOC"
+  },
+  {
+    "Major": "Earth and Atmospheric Sciences",
+    "Code": "EAS"
+  },
+  {
+    "Major": "Economics",
+    "Code": "ECON"
+  },
+  {
+    "Major": "Electrical and Computer Engineering",
+    "Code": "ECE"
+  },
+  {
+    "Major": "Engineering Physics",
+    "Code": "PHYSE"
+  },
+  {
+    "Major": "English",
+    "Code": "ENG"
+  },
+  {
+    "Major": "Entomology",
+    "Code": "ENTOM"
+  },
+  {
+    "Major": "Environmental and Sustainability Sciences",
+    "Code": "ESS"
+  },
+  {
+    "Major": "Environmental Engineering",
+    "Code": "EE"
+  },
+  {
+    "Major": "Feminist, Gender, & Sexuality Studies",
+    "Code": "FGSS"
+  },
+  {
+    "Major": "Fiber Science and Apparel Design",
+    "Code": "FSAD"
+  },
+  {
+    "Major": "Fine Arts",
+    "Code": "FARTS"
+  },
+  {
+    "Major": "Food Science",
+    "Code": "FDSC"
+  },
+  {
+    "Major": "French",
+    "Code": "FREN"
+  },
+  {
+    "Major": "German Studies",
+    "Code": "GMAN"
+  },
+  {
+    "Major": "Global & Public Health Sciences",
+    "Code": "GPHS"
+  },
+  {
+    "Major": "Government",
+    "Code": "GOVT"
+  },
+  {
+    "Major": "History",
+    "Code": "HIST"
+  },
+  {
+    "Major": "History of Architecture",
+    "Code": "HARCH"
+  },
+  {
+    "Major": "History of Art",
+    "Code": "HART"
+  },
+  {
+    "Major": "Hotel Administration",
+    "Code": "HADM"
+  },
+  {
+    "Major": "Human Biology, Health and Society",
+    "Code": "HBHS"
+  },
+  {
+    "Major": "Human Development",
+    "Code": "HD"
+  },
+  {
+    "Major": "Independent Major-Arts and Sciences",
+    "Code": "IMAS"
+  },
+  {
+    "Major": "Independent Major-Engineering",
+    "Code": "IMENG"
+  },
+  {
+    "Major": "Industrial and Labor Relations",
+    "Code": "ILR"
+  },
+  {
+    "Major": "Information Science",
+    "Code": "INFO"
+  },
+  {
+    "Major": "Information Science, Systems, and Technology",
+    "Code": "ISST"
+  },
+  {
+    "Major": "Interdisciplinary Studies",
+    "Code": "STUD"
+  },
+  {
+    "Major": "International Agriculture and Rural Development",
+    "Code": "IARD"
+  },
+  {
+    "Major": "Italian",
+    "Code": "ITAL"
+  },
+  {
+    "Major": "Landscape Architecture",
+    "Code": "LARCH"
+  },
+  {
+    "Major": "Linguistics",
+    "Code": "LING"
+  },
+  {
+    "Major": "Materials Science and Engineering",
+    "Code": "MSE"
+  },
+  {
+    "Major": "Mathematics",
+    "Code": "MATH"
+  },
+  {
+    "Major": "Mechanical Engineering",
+    "Code": "MECHE"
+  },
+  {
+    "Major": "Music",
+    "Code": "MUSIC"
+  },
+  {
+    "Major": "Near Eastern Studies",
+    "Code": "NES"
+  },
+  {
+    "Major": "Nutritional Sciences",
+    "Code": "NS"
+  },
+  {
+    "Major": "Operations Research and Engineering",
+    "Code": "ORIE"
+  },
+  {
+    "Major": "Performing and Media Arts",
+    "Code": "PMA"
+  },
+  {
+    "Major": "Philosophy",
+    "Code": "PHIL"
+  },
+  {
+    "Major": "Physics",
+    "Code": "PHYS"
+  },
+  {
+    "Major": "Plant Sciences",
+    "Code": "PLSCI"
+  },
+  {
+    "Major": "Policy Analysis and Management",
+    "Code": "PAM"
+  },
+  {
+    "Major": "Psychology",
+    "Code": "PSYCH"
+  },
+  {
+    "Major": "Religious Studies",
+    "Code": "RELST"
+  },
+  {
+    "Major": "Science and Technology Studies",
+    "Code": "STS"
+  },
+  {
+    "Major": "Sociology",
+    "Code": "SOC"
+  },
+  {
+    "Major": "Spanish",
+    "Code": "SPAN"
+  },
+  {
+    "Major": "Statistical Science",
+    "Code": "STSCI"
+  },
+  {
+    "Major": "Urban and Regional Studies",
+    "Code": "URS"
+  },
+  {
+    "Major": "Viticulture and Enology",
+    "Code": "VIEN"
+  }
+]
