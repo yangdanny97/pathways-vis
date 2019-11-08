@@ -11,6 +11,11 @@ $cornell_red: #B31B1B;
 .navbar {
     background-color: $cornell_red;
     height: 10vh;
+
+    #major {
+        color: white;
+        font-size: 16px;
+    }
 }
 
 #container {
