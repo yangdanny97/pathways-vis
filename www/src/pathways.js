@@ -8,6 +8,7 @@ var vis = d3.select("#vis");
 var grid = 120;
 var data = [];
 var data_recs = [];
+var data_edges = [];
 var recs_per_tile = 1;
 
 // Get major from url query string
@@ -300,6 +301,7 @@ function updateRecs() {
     fetch(req)
         .then(resp => resp.json())
         .then(d => {
+            data_edges = d.Edges;
             data_recs = d.Recs;
             displayCourses();
         });
@@ -432,7 +434,9 @@ function makeContextMenu(d, type, row = 0) {
 }
 
 function displayCourses() {
+    //collecting all courses and recommendations together
     let allNodes = [];
+    let allEdges = [];
     for (let node of data) {
         allNodes.push({
             "Type": "Course",
@@ -451,28 +455,75 @@ function displayCourses() {
             });
         }
     }
+    for (let edge of data_edges){
+        allEdges.push({"source":edge["Source"],"target":edge["Destination"]})
+    }
+    console.log(data, data_recs);
     console.log(allNodes);
+    console.log(allEdges);
 
     let simulation = d3.forceSimulation();
 
-    vis.selectAll(".node").remove();
     let nodes = vis.selectAll(".node").data(allNodes);
-    nodes.selectAll("circle").exit().remove();
+    nodes.exit().remove();
+    nodes.selectAll("circle").remove();
+    nodes.selectAll("text").remove();
 
-    simulation.nodes(nodes)
+    //arrowhead
+    vis.append('defs').append('marker')
+        .attr("id", "arrowhead")
+        .attr("viewBox", "0 -5 10 10")
+        .attr("refX", 13)
+        .attr("refY", 0)
+        .attr("markerWidth", 9)
+        .attr("markerHeight", 9)
+        .attr("orient", "auto")
+        .append("path")
+        .attr("d", "M0,-5 L10,0 L0,5")
+        .attr('fill', "black")
+        .style('stroke', 'none');
+
+    let edges = vis.selectAll(".link").data(allEdges);
+    edges.exit().remove();
+    edges.selectAll("path").remove();
+    let edge = edges.enter().append("path").merge(edges)
+        .attr("class","link")
+        .attr("stroke","black")
+        .attr("marker-end", "url(#arrowhead)")
+        .attr("fill","none");
+
+    simulation.nodes(allNodes)
+        .force("link", d3.forceLink()
+            .links(allEdges).id(d => d.Name))
         .force("charge", d3.forceManyBody());
 
     //update nodes
-    nodes.transition()
-        .attr("transform", d => `translate(${getX(d)} ${getY(d)})`)
-        .duration(500);
+    nodes.attr("transform", d => `translate(${getX(d)} ${getY(d)})`);
 
-    let node = nodes.enter().append("g")
+    let node = nodes.enter().append("g").merge(nodes)
         .attr("class", "node");
+
+    simulation.on("tick", function () {
+        node
+            // .transition()
+            .attr("transform", d => `translate(${getX(d)} ${getY(d)})`)
+            // .duration(500);
+        
+        edge.attr("d", d => 'M ' + getX(d.source) + ' ' + getY(d.source) 
+            + ' L ' + getX(d.target) + ' ' + getY(d.target))
+        // edge.attr("x1", d => getX(d.source))
+        //     .attr("y1", d => getY(d.source))
+        //     .attr("x2", d => getX(d.target))
+        //     .attr("y2", d => getY(d.target));
+    });
+    
+    for (var i = 0, n = Math.ceil(Math.log(simulation.alphaMin()) / Math.log(1 - simulation.alphaDecay())); i < n; ++i) {
+        simulation.tick();
+    }
 
     node.append("circle")
         .attr("r", grid / 2)
-        .attr("fill", d => d.Type == "Course" ? "red" : "none")
+        .attr("fill", d => d.Type == "Course" ? "red" : "white")
         .attr("stroke", d => d.Type == "Course" ? "black" : "gray")
         .attr("stroke-dasharray", d => d.Type == "Course" ? "none" : "8 4")
         .on("click", d => d.Type == "Course" ? deleteCourse(d) : addCourse(d.Name, d.Row))
@@ -494,109 +545,6 @@ function displayCourses() {
             d.Type == "Course" ?
             makeContextMenu(d, "COURSE") :
             makeContextMenu(d.Name, "REC", d.Row));
-
-    simulation.on("tick", function () {
-        node.attr("transform", d => `translate(${getX(d)} ${getY(d)})`);
-    });
-
-    for (var i = 0, n = Math.ceil(Math.log(simulation.alphaMin()) / Math.log(1 - simulation.alphaDecay())); i < n; ++i) {
-        simulation.tick();
-    }
-
-    // var courses = vis.selectAll(".course").data(data, d => d.Name);
-    // var recs = vis.selectAll(".recs").data(data_recs);
-    // courses.exit().remove();
-    // recs.exit().remove();
-
-    // //update position
-    // courses.transition()
-    //     .attr("transform", d => `translate(${getX(d)} ${getY(d)})`)
-    //     .duration(500);
-    // recs.transition()
-    //     .attr("transform", d => `translate(${getX(d)} ${getY(d)})`)
-    //     .duration(500);
-    // recs.selectAll("circle").remove();
-    // recs.selectAll("text").remove();
-    // for (var idx = 0; idx < recs_per_tile; idx++) {
-    //     const i = idx;
-    //     recs.append("circle")
-    //         .attr("r", grid / 2)
-    //         .attr("cx", i * grid * 1.1)
-    //         .attr("stroke", "gray")
-    //         .attr("stroke-dasharray", "8 4")
-    //         .attr("stroke-width", 3)
-    //         .attr("fill", "none")
-    //         .on("contextmenu", d => makeContextMenu(d.Recs[i], "REC", d.Row))
-    //         .on("click", d => addCourse(d.Recs[i], d.Row));
-
-    //     recs.append("text")
-    //         .attr('text-anchor', "middle")
-    //         .attr("font-size", "18px")
-    //         .text(d => d.Recs[i])
-    //         .attr("x", i * grid * 1.1)
-    //         .attr("y", 9)
-    //         .attr("fill", "gray")
-    //         .on("contextmenu", d => makeContextMenu(d.Recs[i], "REC", d.Row))
-    //         .on("click", d => addCourse(d.Recs[i], d.Row));
-    // }
-
-    // // add course
-    // var course = courses.enter().append("g")
-    //     .attr("class", "course")
-    //     .on("click", d => deleteCourse(d))
-    //     .on("contextmenu", d => makeContextMenu(d, "COURSE"))
-    //     .attr("transform", d => `translate(${getX(d)} ${getY(d)})`)
-    //     .style("opacity", 0);
-
-    // course.transition()
-    //     .style("opacity", 1)
-    //     .duration(500);
-
-    // course.append("circle")
-    //     .attr("r", grid / 2)
-    //     .attr("stroke", "black")
-    //     .attr("stroke-width", 3)
-    //     .attr("fill", "crimson");
-
-    // course.append("text")
-    //     .attr('text-anchor', "middle")
-    //     .attr("font-size", "18px")
-    //     .text(d => d.Name)
-    //     .attr("x", 0)
-    //     .attr("y", 9)
-    //     .attr("fill", "white");
-
-    // //add recs
-    // var rec = recs.enter().append("g")
-    //     .attr("class", "recs")
-    //     .attr("transform", d => `translate(0 ${getY(d)})`);
-
-    // rec.transition()
-    //     .attr("transform", d => `translate(${getX(d)} ${getY(d)})`)
-    //     .duration(500);
-
-    // for (var idx = 0; idx < recs_per_tile; idx++) {
-    //     const i = idx;
-    //     rec.append("circle")
-    //         .attr("r", grid / 2)
-    //         .attr("cx", i * grid * 1.1)
-    //         .attr("stroke", "gray")
-    //         .attr("stroke-dasharray", "8 4")
-    //         .attr("stroke-width", 3)
-    //         .attr("fill", "none")
-    //         .on("contextmenu", d => makeContextMenu(d.Recs[i], "REC", d.Row))
-    //         .on("click", d => addCourse(d.Recs[i], d.Row));
-
-    //     rec.append("text")
-    //         .attr('text-anchor', "middle")
-    //         .attr("font-size", "18px")
-    //         .text(d => d.Recs[i])
-    //         .attr("x", i * grid * 1.1)
-    //         .attr("y", 9)
-    //         .attr("fill", "gray")
-    //         .on("contextmenu", d => makeContextMenu(d.Recs[i], "REC", d.Row))
-    //         .on("click", d => addCourse(d.Recs[i], d.Row));
-    // }
 }
 
 init();
