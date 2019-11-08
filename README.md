@@ -140,18 +140,26 @@ visualization project of pathways through cornell CIS
   - Add explanatory text to splash page
 
 #### Meeting With Professor 11/4/19
-- Improve splash viz 
+- Improve splash page 
   - put pathways logo at top and make it an actual logo
   - change drop down to text entry for when we get more majors
   - Add explanatory text
   - potentially scrape all HREF from the cornell fields of study website
   - Add "pathway is a research project, click here to learn more about it" aka about page
-- Improve Viz page
+- Improve vis page
   - Figure out intuitive design for viz that's independent of left side
-    - Figure out how to represent time (arrow)
+  - Figure out how to represent time (arrow)
   - When clicking on viz nodes, add exploratory card to the left side
   - Add popovers for class info
 
 #### Progress:
 - hashing for NetIDs - Danny
+- modify server endpoint to return directed edges - Danny
 
+### TODO
+Adding a section for the backlog
+- Optimize frontend compilation performance, reduce dependencies
+- Optimize webpack CSS loading (right now CSS loads after JS, which loads after the body, resulting in no styling for 1/2 sec after page load)
+- Brainstorm and implement intuitive user flow for L-R pane interaction
+- Log using local DB instead of StackDriver
+- Reach out to CourseCrafter for API access (maybe)
