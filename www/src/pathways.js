@@ -283,7 +283,6 @@ function init() {
         .then(resp => resp.json())
         .then(d => {
             data = d.Courses;
-            console.log(d.Courses);
             updateRecs();
         });
 }
@@ -433,102 +432,171 @@ function makeContextMenu(d, type, row = 0) {
 }
 
 function displayCourses() {
-    // console.log(data);
-    // console.log(data_recs);
-    var courses = vis.selectAll(".course").data(data, d => d.Name);
-    var recs = vis.selectAll(".recs").data(data_recs);
-    courses.exit().remove();
-    recs.exit().remove();
-
-    //update position
-    courses.transition()
-        .attr("transform", d => `translate(${getX(d)} ${getY(d)})`)
-        .duration(500);
-    recs.transition()
-        .attr("transform", d => `translate(${getX(d)} ${getY(d)})`)
-        .duration(500);
-    recs.selectAll("circle").remove();
-    recs.selectAll("text").remove();
-    for (var idx = 0; idx < recs_per_tile; idx++) {
-        const i = idx;
-        recs.append("circle")
-            .attr("r", grid / 2)
-            .attr("cx", i * grid * 1.1)
-            .attr("stroke", "gray")
-            .attr("stroke-dasharray", "8 4")
-            .attr("stroke-width", 3)
-            .attr("fill", "none")
-            .on("contextmenu", d => makeContextMenu(d.Recs[i], "REC", d.Row))
-            .on("click", d => addCourse(d.Recs[i], d.Row));
-
-        recs.append("text")
-            .attr('text-anchor', "middle")
-            .attr("font-size", "18px")
-            .text(d => d.Recs[i])
-            .attr("x", i * grid * 1.1)
-            .attr("y", 9)
-            .attr("fill", "gray")
-            .on("contextmenu", d => makeContextMenu(d.Recs[i], "REC", d.Row))
-            .on("click", d => addCourse(d.Recs[i], d.Row));
+    let allNodes = [];
+    for (let node of data) {
+        allNodes.push({
+            "Type": "Course",
+            "Name": node["Name"],
+            "Row": node["Row"],
+            "Col": node["Col"]
+        })
     }
+    for (let row of data_recs) {
+        for (let rec of row["Recs"]) {
+            allNodes.push({
+                "Type": "Rec",
+                "Name": rec,
+                "Row": row["Row"],
+                "Col": row["Col"]
+            });
+        }
+    }
+    console.log(allNodes);
 
-    // add course
-    var course = courses.enter().append("g")
-        .attr("class", "course")
-        .on("click", d => deleteCourse(d))
-        .on("contextmenu", d => makeContextMenu(d, "COURSE"))
+    let simulation = d3.forceSimulation();
+
+    vis.selectAll(".node").remove();
+    let nodes = vis.selectAll(".node").data(allNodes);
+    nodes.selectAll("circle").exit().remove();
+
+    simulation.nodes(nodes)
+        .force("charge", d3.forceManyBody());
+
+    //update nodes
+    nodes.transition()
         .attr("transform", d => `translate(${getX(d)} ${getY(d)})`)
-        .style("opacity", 0);
-
-    course.transition()
-        .style("opacity", 1)
         .duration(500);
 
-    course.append("circle")
-        .attr("r", grid / 2)
-        .attr("stroke", "black")
-        .attr("stroke-width", 3)
-        .attr("fill", "crimson");
+    let node = nodes.enter().append("g")
+        .attr("class", "node");
 
-    course.append("text")
+    node.append("circle")
+        .attr("r", grid / 2)
+        .attr("fill", d => d.Type == "Course" ? "red" : "none")
+        .attr("stroke", d => d.Type == "Course" ? "black" : "gray")
+        .attr("stroke-dasharray", d => d.Type == "Course" ? "none" : "8 4")
+        .on("click", d => d.Type == "Course" ? deleteCourse(d) : addCourse(d.Name, d.Row))
+        .on("contextmenu", d =>
+            d.Type == "Course" ?
+            makeContextMenu(d, "COURSE") :
+            makeContextMenu(d.Name, "REC", d.Row))
+        .attr("stroke-width", 3);
+
+    node.append("text")
         .attr('text-anchor', "middle")
         .attr("font-size", "18px")
         .text(d => d.Name)
-        .attr("x", 0)
-        .attr("y", 9)
-        .attr("fill", "white");
+        .attr("x", 3.5)
+        .attr("y", 8)
+        .attr("fill", d => d.Type == "Course" ? "white" : "gray")
+        .on("click", d => d.Type == "Course" ? deleteCourse(d) : addCourse(d.Name, d.Row))
+        .on("contextmenu", d =>
+            d.Type == "Course" ?
+            makeContextMenu(d, "COURSE") :
+            makeContextMenu(d.Name, "REC", d.Row));
 
-    //add recs
-    var rec = recs.enter().append("g")
-        .attr("class", "recs")
-        .attr("transform", d => `translate(0 ${getY(d)})`);
+    simulation.on("tick", function () {
+        node.attr("transform", d => `translate(${getX(d)} ${getY(d)})`);
+    });
 
-    rec.transition()
-        .attr("transform", d => `translate(${getX(d)} ${getY(d)})`)
-        .duration(500);
-
-    for (var idx = 0; idx < recs_per_tile; idx++) {
-        const i = idx;
-        rec.append("circle")
-            .attr("r", grid / 2)
-            .attr("cx", i * grid * 1.1)
-            .attr("stroke", "gray")
-            .attr("stroke-dasharray", "8 4")
-            .attr("stroke-width", 3)
-            .attr("fill", "none")
-            .on("contextmenu", d => makeContextMenu(d.Recs[i], "REC", d.Row))
-            .on("click", d => addCourse(d.Recs[i], d.Row));
-
-        rec.append("text")
-            .attr('text-anchor', "middle")
-            .attr("font-size", "18px")
-            .text(d => d.Recs[i])
-            .attr("x", i * grid * 1.1)
-            .attr("y", 9)
-            .attr("fill", "gray")
-            .on("contextmenu", d => makeContextMenu(d.Recs[i], "REC", d.Row))
-            .on("click", d => addCourse(d.Recs[i], d.Row));
+    for (var i = 0, n = Math.ceil(Math.log(simulation.alphaMin()) / Math.log(1 - simulation.alphaDecay())); i < n; ++i) {
+        simulation.tick();
     }
+
+    // var courses = vis.selectAll(".course").data(data, d => d.Name);
+    // var recs = vis.selectAll(".recs").data(data_recs);
+    // courses.exit().remove();
+    // recs.exit().remove();
+
+    // //update position
+    // courses.transition()
+    //     .attr("transform", d => `translate(${getX(d)} ${getY(d)})`)
+    //     .duration(500);
+    // recs.transition()
+    //     .attr("transform", d => `translate(${getX(d)} ${getY(d)})`)
+    //     .duration(500);
+    // recs.selectAll("circle").remove();
+    // recs.selectAll("text").remove();
+    // for (var idx = 0; idx < recs_per_tile; idx++) {
+    //     const i = idx;
+    //     recs.append("circle")
+    //         .attr("r", grid / 2)
+    //         .attr("cx", i * grid * 1.1)
+    //         .attr("stroke", "gray")
+    //         .attr("stroke-dasharray", "8 4")
+    //         .attr("stroke-width", 3)
+    //         .attr("fill", "none")
+    //         .on("contextmenu", d => makeContextMenu(d.Recs[i], "REC", d.Row))
+    //         .on("click", d => addCourse(d.Recs[i], d.Row));
+
+    //     recs.append("text")
+    //         .attr('text-anchor', "middle")
+    //         .attr("font-size", "18px")
+    //         .text(d => d.Recs[i])
+    //         .attr("x", i * grid * 1.1)
+    //         .attr("y", 9)
+    //         .attr("fill", "gray")
+    //         .on("contextmenu", d => makeContextMenu(d.Recs[i], "REC", d.Row))
+    //         .on("click", d => addCourse(d.Recs[i], d.Row));
+    // }
+
+    // // add course
+    // var course = courses.enter().append("g")
+    //     .attr("class", "course")
+    //     .on("click", d => deleteCourse(d))
+    //     .on("contextmenu", d => makeContextMenu(d, "COURSE"))
+    //     .attr("transform", d => `translate(${getX(d)} ${getY(d)})`)
+    //     .style("opacity", 0);
+
+    // course.transition()
+    //     .style("opacity", 1)
+    //     .duration(500);
+
+    // course.append("circle")
+    //     .attr("r", grid / 2)
+    //     .attr("stroke", "black")
+    //     .attr("stroke-width", 3)
+    //     .attr("fill", "crimson");
+
+    // course.append("text")
+    //     .attr('text-anchor', "middle")
+    //     .attr("font-size", "18px")
+    //     .text(d => d.Name)
+    //     .attr("x", 0)
+    //     .attr("y", 9)
+    //     .attr("fill", "white");
+
+    // //add recs
+    // var rec = recs.enter().append("g")
+    //     .attr("class", "recs")
+    //     .attr("transform", d => `translate(0 ${getY(d)})`);
+
+    // rec.transition()
+    //     .attr("transform", d => `translate(${getX(d)} ${getY(d)})`)
+    //     .duration(500);
+
+    // for (var idx = 0; idx < recs_per_tile; idx++) {
+    //     const i = idx;
+    //     rec.append("circle")
+    //         .attr("r", grid / 2)
+    //         .attr("cx", i * grid * 1.1)
+    //         .attr("stroke", "gray")
+    //         .attr("stroke-dasharray", "8 4")
+    //         .attr("stroke-width", 3)
+    //         .attr("fill", "none")
+    //         .on("contextmenu", d => makeContextMenu(d.Recs[i], "REC", d.Row))
+    //         .on("click", d => addCourse(d.Recs[i], d.Row));
+
+    //     rec.append("text")
+    //         .attr('text-anchor', "middle")
+    //         .attr("font-size", "18px")
+    //         .text(d => d.Recs[i])
+    //         .attr("x", i * grid * 1.1)
+    //         .attr("y", 9)
+    //         .attr("fill", "gray")
+    //         .on("contextmenu", d => makeContextMenu(d.Recs[i], "REC", d.Row))
+    //         .on("click", d => addCourse(d.Recs[i], d.Row));
+    // }
 }
 
 init();
