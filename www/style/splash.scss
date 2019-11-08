@@ -30,12 +30,17 @@ $input-height: 48px;
 
     .form-inline {
         display: inline-flex;
+        width: 50vw;
 
         input {
             height: $input-height;
         }
     }
 
+}
+
+.twitter-typeahead {
+    flex-grow: 1;
 }
 
 .tt-input {
@@ -46,7 +51,7 @@ $input-height: 48px;
     @extend .list-group;
     box-shadow: 0 5px 10px rgba(0,0,0,.2);
     width: 500px;
-    top: $input-height + 10px;
+    top: $input-height + 10px !important;
 }
 
 .tt-suggestion {
@@ -62,4 +67,5 @@ $input-height: 48px;
 
 .tt-input, .tt-hint {
     @extend .form-control-lg;
+    width: 100% !important;
 }
