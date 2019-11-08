@@ -138,6 +138,7 @@ visualization project of pathways through cornell CIS
   - Add about page
   - Make the splash page look more like Bing
   - Add explanatory text to splash page
+  - Improve display of major code
 
 #### Meeting With Professor 11/4/19
 - Improve splash page 
