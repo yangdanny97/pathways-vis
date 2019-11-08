@@ -163,3 +163,5 @@ Adding a section for the backlog
 - Brainstorm and implement intuitive user flow for L-R pane interaction
 - Log using local DB instead of StackDriver
 - Reach out to CourseCrafter for API access (maybe)
+- optimization to response time - reduce graph size
+- automatic data extraction script instead of using notebooks
