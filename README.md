@@ -166,3 +166,19 @@ Adding a section for the backlog
 - Reach out to CourseCrafter for API access (maybe)
 - optimization to response time - reduce graph size
 - automatic data extraction script instead of using notebooks
+
+### Meeting 8 November
+- Sample schedule button
+  - Build a pre-filled schedule for a whole career
+- Show suggestions from each course or for all courses?
+- Create 1d list of courses by randomizing order of courses in each semester
+  - Eliminates co- vs. post- take
+  - Get a normalized positional score to place nodes in a graph
+  - Get relational positions before aggregating
+  - Use relations to add nodes into graph
+- Enable serendipity
+- Use Cases
+  - Freshman: Choosing a major
+  - Junior: CS major choosing courses
+  - Senior: Looking for fun/interesting courses
+- User interviews
