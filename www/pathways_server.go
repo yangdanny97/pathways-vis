@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"net/http"
+	"path"
 	"regexp"
 	"sort"
 	"strconv"
@@ -118,7 +119,6 @@ func remove(a []string, i int) []string {
 }
 
 func renderStaticTemplate(w http.ResponseWriter, tmpl string) {
-	// fmt.Println(tmpl)
 	t, err := template.ParseFiles("static/" + tmpl + ".html")
 	if err != nil {
 		fmt.Println("template load error")
@@ -175,7 +175,11 @@ func genRec(graph *Graph, semCourses []string, excl *map[string]bool, n int) *Re
 	// get top n candidates, if none exist then random course
 	for i := 0; i < n; i++ {
 		if i >= len(candidates) {
-			randomCourse := graph.Nodes[rand.Intn(len(graph.Nodes))]
+			allc := filter(graph.Nodes, func(x string) bool {
+				_, ok := (*excl)[x]
+				return !ok
+			})
+			randomCourse := allc[rand.Intn(len(allc))]
 			top = append(top, randomCourse)
 			(*excl)[randomCourse] = true
 		} else {
@@ -416,9 +420,11 @@ func recHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// fmt.Println(excl)
+
 	sort.Ints(semKeys)
 	// number of recs to generate per rec-tile
-	nRecs := 1
+	nRecs := 3
 
 	// calculate points and generate recs
 	for _, k := range semKeys {
