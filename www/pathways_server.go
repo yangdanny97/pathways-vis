@@ -223,7 +223,12 @@ func coreClassesHandler(w http.ResponseWriter, r *http.Request) {
 	for n, e := range numEdges {
 		courseNum, _ := strconv.Atoi(re.FindString(n))
 		courseNum = courseNum - 1
-		level := 0
+		level := courseNum
+		if courseNum <= 2 {
+			level = 0
+		} else {
+			level = courseNum
+		}
 		if e == 0 {
 			nodes, ok := levels[level]
 			if ok {
