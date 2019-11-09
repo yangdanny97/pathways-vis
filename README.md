@@ -153,20 +153,6 @@ visualization project of pathways through cornell CIS
   - When clicking on viz nodes, add exploratory card to the left side
   - Add popovers for class info
 
-#### Progress:
-- hashing for NetIDs - Danny
-- modify server endpoint to return directed edges - Danny
-
-### TODO
-Adding a section for the backlog
-- Optimize frontend compilation performance, reduce dependencies
-- Optimize webpack CSS loading (right now CSS loads after JS, which loads after the body, resulting in no styling for 1/2 sec after page load)
-- Brainstorm and implement intuitive user flow for L-R pane interaction
-- Log using local DB instead of StackDriver
-- Reach out to CourseCrafter for API access (maybe)
-- optimization to response time - reduce graph size
-- automatic data extraction script instead of using notebooks
-
 ### Meeting 8 November
 - Sample schedule button
   - Build a pre-filled schedule for a whole career
@@ -182,3 +168,17 @@ Adding a section for the backlog
   - Junior: CS major choosing courses
   - Senior: Looking for fun/interesting courses
 - User interviews
+
+#### Progress:
+- hashing for NetIDs - Danny
+- modify server endpoint to return directed edges - Danny
+- make new mockup of "selected semester" system - Danny
+
+### TODO - tasks backlog
+- Optimize frontend compilation performance, reduce dependencies
+- Optimize webpack CSS loading (right now CSS loads after JS, which loads after the body, resulting in no styling for 1/2 sec after page load)
+- Brainstorm and implement intuitive user flow for L-R pane interaction
+- Log using local DB instead of StackDriver
+- Reach out to CourseCrafter for API access (maybe)
+- optimization to response time - reduce graph size
+- automatic data extraction script instead of using notebooks
