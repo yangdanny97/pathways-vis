@@ -174,6 +174,19 @@ visualization project of pathways through cornell CIS
 - modify server endpoint to return directed edges - Danny
 - make new mockup of "selected semester" system - Danny
 
+### Week ending 11/16
+
+#### Goals
+- get "average semester" data
+- prefilled schedule button
+- display edges between nodes, label each row, add large arrow to show time
+- merge semester-select and FD layout branches to main branch
+- build out unordered reccommendation flow
+- modes for "graph/unordered", "relevance/random" courses
+
+#### Progress
+- TBD
+
 ### TODO - tasks backlog
 - Optimize frontend compilation performance, reduce dependencies
 - Optimize webpack CSS loading (right now CSS loads after JS, which loads after the body, resulting in no styling for 1/2 sec after page load)
