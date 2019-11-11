@@ -172,8 +172,10 @@ func genRec(graph *Graph, semCourses []string, excl *map[string]bool, n int) *Re
 		return !ok
 	})
 	top := []string{}
+	re := regexp.MustCompile(`[0-9]+`)
 	// get top n candidates, if none exist then random course
 	for i := 0; i < n; i++ {
+		selected := ""
 		if i >= len(candidates) {
 			allc := filter(graph.Nodes, func(x string) bool {
 				_, ok := (*excl)[x]
@@ -182,10 +184,17 @@ func genRec(graph *Graph, semCourses []string, excl *map[string]bool, n int) *Re
 			randomCourse := allc[rand.Intn(len(allc))]
 			top = append(top, randomCourse)
 			(*excl)[randomCourse] = true
+			selected = randomCourse
 		} else {
 			top = append(top, candidates[i])
 			(*excl)[candidates[i]] = true
+			selected = candidates[i]
 		}
+		// make sure recommendations in same batch come from diff departments
+		selectedDept := re.Split(selected, 1)[0]
+		candidates = filter(candidates, func(x string) bool {
+			return re.Split(x, 1)[0] != selectedDept
+		})
 	}
 	return &RecTile{Recs: top}
 }
