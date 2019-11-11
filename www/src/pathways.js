@@ -464,6 +464,15 @@ function displayCourses() {
         .attr("class", "course")
         .on("click", d => deleteCourse(d))
         .on("contextmenu", d => makeContextMenu(d, "COURSE"))
+        .on("mouseover", async d => {
+            var c = await info(d.Name);
+            render([c], "Course Info");
+        })
+        .on("mouseout", () => {
+            if (selected_sem != undefined && selected_sem != -1) {
+                selectSem(selected_sem);
+            }
+        })
         .attr("transform", d => `translate(${getX(d)} ${getY(d)})`)
         .style("opacity", 0);
 
@@ -475,11 +484,18 @@ function displayCourses() {
         .attr("r", grid / 2)
         .attr("stroke", "black")
         .attr("stroke-width", 3)
-        .attr("fill", "crimson");
+        .attr("fill", d => {
+            var major = urlParams.get('major');
+            return (d.Name.slice(0, major.length) == major) ? "darkred" : "crimson";
+        });
 
     course.append("text")
         .attr('text-anchor', "middle")
         .attr("font-size", "18px")
+        .on("mouseover", async d => {
+            var c = await info(d.Name);
+            render([c], "Course Info");
+        })
         .text(d => d.Name)
         .attr("x", 0)
         .attr("y", 9)
@@ -487,7 +503,14 @@ function displayCourses() {
 
     var selectbtn = selectbtns.enter().append("g")
         .attr("class", "sem_select")
-        .on("click", d => selectSem(d.Row))
+        .on("click", d => {
+            if (d.Row != selected_sem) {
+                selectSem(d.Row);
+            } else {
+                // deselecting a semester
+                selected_sem = -1;
+            }
+        })
         .attr("transform", d => `translate(${getX(d)} ${getY(d)})`)
         .style("opacity", 0);
 
