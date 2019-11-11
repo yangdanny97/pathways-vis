@@ -49,24 +49,21 @@ function add(code) {
         Course: code,
         Courses: data,
     };
-
+    // if no semester is selected, then smart-add
     if (selected_sem == -1) {
-        alert("please select a semester by clicking the (+) button");
-        return;
+        var req = new Request('/smart_add/', {
+            method: 'POST',
+            body: JSON.stringify(reqbody)
+        });
+
+        fetch(req)
+            .then(resp => resp.json())
+            .then(d => {
+                addCourse(code, d.Row);
+            });
+    } else {
+        addCourse(code, selected_sem);
     }
-
-    addCourse(code, selected_sem);
-
-    // var req = new Request('/smart_add/', {
-    //     method: 'POST',
-    //     body: JSON.stringify(reqbody)
-    // });
-
-    // fetch(req)
-    //     .then(resp => resp.json())
-    //     .then(d => {
-    //         addCourse(code, d.Row);
-    //     });
 }
 
 /* Remove a class from the list of preferred classes */
