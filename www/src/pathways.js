@@ -102,7 +102,7 @@ function push(courses, status) {
 }
 
 /* Render an array of grokked courses into the deck. If no array is provided, render the stack */
-function render(courses, status) {
+function render(courses, status, displayAdd = true, displayRemove = true) {
     status = status || "Courses";
     mode.innerHTML = status;
 
@@ -111,7 +111,7 @@ function render(courses, status) {
 
     //console.log(stack);
 
-    let cards = stack.map(card);
+    let cards = stack.map(x => card(x, displayAdd, displayRemove));
 
     deck.innerHTML = ""
     for (let card of cards) {
@@ -149,7 +149,7 @@ function grok(course) {
 }
 
 /* Get an html card for a grokked course */
-function card(course) {
+function card(course, displayAdd = true, displayRemove = true) {
 
     let html = `<div class='card'>
         <div class='card-header'>
@@ -160,8 +160,8 @@ function card(course) {
         <div class="card-body">
             <p class="card-text">${course.description}</p>
             <a class="btn btn-primary btn-sm" href="${course.link}" role="button" target="_blank">Details</a>
-            <button class="btn btn-success btn-sm" onclick="add('${course.subject}${course.catalogNbr}')">Add</button>
-            <button class="btn btn-danger btn-sm" onclick="remove('${course.subject}${course.catalogNbr}')">Remove</button>
+            ${(displayAdd) ? `<button class="btn btn-success btn-sm" onclick="add('${course.subject}${course.catalogNbr}')">Add</button>` : ""}
+            ${(displayRemove) ? `<button class="btn btn-danger btn-sm" onclick="remove('${course.subject}${course.catalogNbr}')">Remove</button>` : ""}
         </div>
     </div>`;
 
@@ -397,7 +397,7 @@ async function selectSem(n) {
     var rec_names = [];
     sem_recs.forEach(sr => sr.Recs.forEach(r => rec_names.push(r)));
     var rec_info = await infoAll(rec_names);
-    render(rec_info, `Group ${n+1} Recommendations`);
+    render(rec_info, `Group ${n+1} Recommendations`, true, false);
 }
 
 //displays menu next to course when clicked
@@ -466,7 +466,7 @@ function displayCourses() {
         .on("contextmenu", d => makeContextMenu(d, "COURSE"))
         .on("mouseover", async d => {
             var c = await info(d.Name);
-            render([c], "Course Info");
+            render([c], "Course Info (Click to Delete)", false, false);
         })
         .on("mouseout", () => {
             if (selected_sem != undefined && selected_sem != -1) {
@@ -494,7 +494,7 @@ function displayCourses() {
         .attr("font-size", "18px")
         .on("mouseover", async d => {
             var c = await info(d.Name);
-            render([c], "Course Info");
+            render([c], "Course Info", false, true);
         })
         .text(d => d.Name)
         .attr("x", 0)

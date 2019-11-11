@@ -191,9 +191,9 @@ func genRec(graph *Graph, semCourses []string, excl *map[string]bool, n int) *Re
 			selected = candidates[i]
 		}
 		// make sure recommendations in same batch come from diff departments
-		selectedDept := re.Split(selected, 1)[0]
+		selectedDept := re.Split(selected, 2)[0]
 		candidates = filter(candidates, func(x string) bool {
-			return re.Split(x, 1)[0] != selectedDept
+			return re.Split(x, 2)[0] != selectedDept
 		})
 	}
 	return &RecTile{Recs: top}
