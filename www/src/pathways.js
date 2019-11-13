@@ -471,6 +471,8 @@ function displayCourses() {
         .on("mouseout", () => {
             if (selected_sem != undefined && selected_sem != -1) {
                 selectSem(selected_sem);
+            } else {
+                recommend().then(c => render(c, "Recommended Courses"));
             }
         })
         .attr("transform", d => `translate(${getX(d)} ${getY(d)})`)

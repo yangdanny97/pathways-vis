@@ -149,17 +149,27 @@ func majorHandler(w http.ResponseWriter, r *http.Request) {
 
 // generate up to n recommendations based on a course graph, a list of courses,
 // an excluded courses map
-func genRec(graph *Graph, semCourses []string, excl *map[string]bool, n int) *RecTile {
+func genRec(graph *Graph, semCourses []string, excl *map[string]bool, n int, reverse bool) *RecTile {
 	points := make(map[string]int)
 	candidates := []string{}
 	// iterate thru edges and calculate scores
 	for _, e := range graph.Edges {
-		if contains(semCourses, e.Source) {
-			_, ok := points[e.Destination]
-			if !ok {
-				candidates = append(candidates, e.Destination)
+		if reverse {
+			if contains(semCourses, e.Source) {
+				_, ok := points[e.Destination]
+				if !ok {
+					candidates = append(candidates, e.Destination)
+				}
+				points[e.Destination] = points[e.Destination] + e.Weight
 			}
-			points[e.Destination] = points[e.Destination] + e.Weight
+		} else {
+			if contains(semCourses, e.Destination) {
+				_, ok := points[e.Source]
+				if !ok {
+					candidates = append(candidates, e.Source)
+				}
+				points[e.Source] = points[e.Source] + e.Weight
+			}
 		}
 	}
 	// sort candidates by points
@@ -332,8 +342,8 @@ func unorderedRecHandler(w http.ResponseWriter, r *http.Request) {
 		cnames = append(cnames, c.Name)
 	}
 
-	recPost := genRec(postGraph, cnames, &excl, 5)
-	recCo := genRec(coGraph, cnames, &excl, 5)
+	recPost := genRec(postGraph, cnames, &excl, 5, false)
+	recCo := genRec(coGraph, cnames, &excl, 5, false)
 	recs := append(recPost.Recs, recCo.Recs...)
 
 	response := CourseCodes{Codes: recs}
@@ -438,15 +448,15 @@ func recHandler(w http.ResponseWriter, r *http.Request) {
 	// calculate points and generate recs
 	for _, k := range semKeys {
 		// generate co-enrollment recs
-		coRec := genRec(coGraph, semMap[k], &excl, nRecs)
+		coRec := genRec(coGraph, semMap[k], &excl, nRecs, false)
 		coRec.Col = len(semMap[k]) + nRecs
 		coRec.Row = k
 		recs = append(recs, *coRec)
 
 		// first semester has no post-enrollment rec
 		// so generate a second co-enrollment rec
-		if k == 0 {
-			coRec = genRec(coGraph, semMap[k], &excl, nRecs)
+		if k == 0 || k == len(semKeys)-1 {
+			coRec = genRec(coGraph, semMap[k], &excl, nRecs, false)
 			coRec.Col = len(semMap[k])
 			coRec.Row = k
 			recs = append(recs, *coRec)
@@ -454,10 +464,19 @@ func recHandler(w http.ResponseWriter, r *http.Request) {
 		// for all semesters but the last
 		// generate post-enrollment recs for next semester
 		if k < len(semKeys)-1 {
-			postRec := genRec(postGraph, semMap[k], &excl, nRecs)
+			postRec := genRec(postGraph, semMap[k], &excl, nRecs, false)
 			postRec.Col = len(semMap[k+1])
 			postRec.Row = k + 1
 			recs = append(recs, *postRec)
+		}
+
+		// for all semesters but the first
+		// generate post-enrollment recs for prev semester
+		if k > 0 {
+			preRec := genRec(postGraph, semMap[k], &excl, nRecs, true)
+			preRec.Col = len(semMap[k+2])
+			preRec.Row = k - 1
+			recs = append(recs, *preRec)
 		}
 	}
 	visEdges := edgeGenerator(postGraph, semMap)
