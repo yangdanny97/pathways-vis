@@ -173,6 +173,8 @@ visualization project of pathways through cornell CIS
 - hashing for NetIDs - Danny
 - modify server endpoint to return directed edges - Danny
 - make new mockup of "selected semester" system - Danny
+- updated to force graph viz - Eric
+- added directed edges to viz - Eric
 
 ### Week ending 11/16
 
