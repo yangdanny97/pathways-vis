@@ -5,12 +5,15 @@ import 'bootstrap';
 import '../style/pathways.scss';
 
 var vis = d3.select("#vis");
+// size of grid
 var grid = 120;
+// current courses
 var data = [];
+// current recs
 var data_recs = [];
+// semester selection tiles
 var sem_select = [];
 var selected_sem = -1;
-var recs_per_tile = 1;
 
 var courses;
 var selectbtns;
