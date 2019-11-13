@@ -506,6 +506,8 @@ function displayCourses() {
             } else {
                 // deselecting a semester
                 selected_sem = -1;
+                d3.selectAll(".sem").attr("fill", "none");
+                recommend().then(c => render(c, "Recommended Courses"));
             }
         })
         .attr("transform", d => `translate(${getX(d)} ${getY(d)})`)
