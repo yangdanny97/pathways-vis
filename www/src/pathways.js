@@ -497,17 +497,15 @@ function displayCourses() {
             .links(allEdges).id(d => d.Name))
         .force("charge", d3.forceManyBody());
 
-    //update nodes
-    nodes.attr("transform", d => `translate(${getX(d)} ${getY(d)})`);
-
-    let node = nodes.enter().append("g").merge(nodes)
-        .attr("class", "node");
+    nodes = nodes.enter().append("g").merge(nodes)
+        .attr("class", "node")
+        .attr("transform", d => `translate(${getX(d)} ${getY(d)})`);
 
     simulation.on("tick", function () {
-        node
-            // .transition()
+        nodes
+            .transition()
             .attr("transform", d => `translate(${getX(d)} ${getY(d)})`)
-            // .duration(500);
+            .duration(500);
         
         edge.attr("d", d => 'M ' + getX(d.source) + ' ' + getY(d.source) 
             + ' L ' + getX(d.target) + ' ' + getY(d.target))
@@ -521,7 +519,7 @@ function displayCourses() {
         simulation.tick();
     }
 
-    node.append("circle")
+    nodes.append("circle")
         .attr("r", grid / 2)
         .attr("fill", d => d.Type == "Course" ? "red" : "white")
         .attr("stroke", d => d.Type == "Course" ? "black" : "gray")
@@ -533,7 +531,7 @@ function displayCourses() {
             makeContextMenu(d.Name, "REC", d.Row))
         .attr("stroke-width", 3);
 
-    node.append("text")
+    nodes.append("text")
         .attr('text-anchor', "middle")
         .attr("font-size", "18px")
         .text(d => d.Name)
