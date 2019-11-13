@@ -5,17 +5,27 @@ import 'bootstrap';
 import '../style/pathways.scss';
 
 var vis = d3.select("#vis");
+// size of grid
 var grid = 120;
+// current courses
 var data = [];
+// current recs
 var data_recs = [];
-var recs_per_tile = 1;
+// semester selection tiles
+var sem_select = [];
+var selected_sem = -1;
+
+var courses;
+var selectbtns;
 
 // Get major from url query string
 let urlParams = new URLSearchParams(window.location.search);
 const major = urlParams.get('major');
 
 
-var req = new Request("/majors/", { method: 'POST', });
+var req = new Request("/majors/", {
+    method: 'POST',
+});
 fetch(req)
     .then(resp => resp.json())
     .then(json => json.filter(obj => obj.Code == major)[0])
@@ -42,22 +52,26 @@ function add(code) {
         Course: code,
         Courses: data,
     };
-
-    var req = new Request('/smart_add/', {
-        method: 'POST',
-        body: JSON.stringify(reqbody)
-    });
-
-    fetch(req)
-        .then(resp => resp.json())
-        .then(d => {
-            addCourse(code, d.Row);
+    // if no semester is selected, then smart-add
+    if (selected_sem == -1) {
+        var req = new Request('/smart_add/', {
+            method: 'POST',
+            body: JSON.stringify(reqbody)
         });
+
+        fetch(req)
+            .then(resp => resp.json())
+            .then(d => {
+                addCourse(code, d.Row);
+            });
+    } else {
+        addCourse(code, selected_sem);
+    }
 }
 
 /* Remove a class from the list of preferred classes */
 function remove(code) {
-    console.log(code);
+    // console.log(code);
     var c = data.find(x => x.Name === code);
     if (c) {
         deleteCourse(c);
@@ -88,16 +102,16 @@ function push(courses, status) {
 }
 
 /* Render an array of grokked courses into the deck. If no array is provided, render the stack */
-function render(courses, status) {
+function render(courses, status, displayAdd = true, displayRemove = true) {
     status = status || "Courses";
     mode.innerHTML = status;
 
-    stack = courses;
+    stack = courses.filter(c => c !== undefined);
     window.stack = stack;
 
     //console.log(stack);
 
-    let cards = stack.map(card);
+    let cards = stack.map(x => card(x, displayAdd, displayRemove));
 
     deck.innerHTML = ""
     for (let card of cards) {
@@ -120,15 +134,22 @@ function grok(course) {
         titleLong: course.titleLong,
         titleShort: course.titleShort,
         description: course.description,
-        credits: course.enrollGroups[0].unitsMinimum,
-        link: `https://classes.cornell.edu/browse/roster/SP20/class/${course.subject}/${course.catalogNbr}`
+        link: `https://classes.cornell.edu/browse/roster/${course._sem}/class/${course.subject}/${course.catalogNbr}`,
+        credits: "? cr"
+    }
+
+    // apparently this credit selection doesn't always work
+    try {
+        trim.credits = `${course.enrollGroups[0].unitsMinimum} cr`;
+    } catch (_) {
+        return trim;
     }
 
     return trim;
 }
 
 /* Get an html card for a grokked course */
-function card(course) {
+function card(course, displayAdd = true, displayRemove = true) {
 
     let html = `<div class='card'>
         <div class='card-header'>
@@ -139,8 +160,8 @@ function card(course) {
         <div class="card-body">
             <p class="card-text">${course.description}</p>
             <a class="btn btn-primary btn-sm" href="${course.link}" role="button" target="_blank">Details</a>
-            <button class="btn btn-success btn-sm" onclick="add('${course.subject}${course.catalogNbr}')">Select</button>
-            <button class="btn btn-danger btn-sm" onclick="remove('${course.subject}${course.catalogNbr}')">Remove</button>
+            ${(displayAdd) ? `<button class="btn btn-success btn-sm" onclick="add('${course.subject}${course.catalogNbr}')">Add</button>` : ""}
+            ${(displayRemove) ? `<button class="btn btn-danger btn-sm" onclick="remove('${course.subject}${course.catalogNbr}')">Remove</button>` : ""}
         </div>
     </div>`;
 
@@ -150,7 +171,7 @@ function card(course) {
 
 /* Get grokked course for a particular code */
 async function info(code) {
-    let semesters = ["FA19", "SP20"];
+    let semesters = ["FA19", "SP20", "SP19", "FA18"];
     let dept = code.slice(0, -4);
 
     for (let semester of semesters) {
@@ -161,7 +182,7 @@ async function info(code) {
 
             for (let course of body.data.classes) {
                 if (course.catalogNbr == num) {
-                    return grok(course);
+                    return grok(course, semester);
                 }
             }
         }
@@ -176,7 +197,7 @@ async function info(code) {
 
 /* Get an array of grokked courses from an array of course codes */
 async function infoAll(codes) {
-    return Promise.all(codes.map(info));
+    return Promise.all(codes.map(info).filter(x => x !== undefined));
 }
 
 /* Get an array of popular courses based on the selected major */
@@ -222,7 +243,7 @@ var search = function (query) {
         .then(body => {
             window.body = body;
             let data = body.data;
-            search_results = data.classes.map(grok);
+            search_results = data.classes.map(grok, semester);
             render(search_results, "Search");
         });
 }
@@ -263,10 +284,9 @@ function COURSE(name, row, col) {
     };
 }
 
-function REC(suggestions, row, col) {
+function SELECT(row, col) {
     return {
-        Type: "rec",
-        Recs: suggestions,
+        Type: "select",
         Row: row,
         Col: col
     };
@@ -288,12 +308,20 @@ function init() {
         .then(d => {
             data = d.Courses;
             console.log(d.Courses);
+            for (var i = 0; i < 8; i++) {
+                var c_sem = data.filter(c => c.Row === i).map(c => c.Col);
+                if (c_sem.length == 0) {
+                    sem_select.push(SELECT(i, 0));
+                } else {
+                    sem_select.push(SELECT(i, Math.max(...c_sem) + 1));
+                }
+            }
             updateRecs();
         });
 }
 
-function updateRecs() {
-    console.log(data);
+async function updateRecs(callback) {
+    // console.log(data);
     var reqbody = {
         Major: major.toLowerCase(),
         Courses: data
@@ -305,9 +333,12 @@ function updateRecs() {
     fetch(req)
         .then(resp => resp.json())
         .then(d => {
-            console.log(d.Edges);
+            // console.log(d.Edges);
             data_recs = d.Recs;
             displayCourses();
+            if (callback !== undefined) {
+                callback();
+            }
         });
 }
 
@@ -323,8 +354,9 @@ function addCourse(cname, row) {
     }
     var rowsize = data.filter(x => x.Row == row).length;
     if (rowsize < 6) {
+        sem_select.filter(x => x.Row == row)[0].Col++;
         data.push(COURSE(cname, row, rowsize));
-        updateRecs();
+        updateRecs(() => selectSem(row));
     } else {
         alert("cannot add more than 6 courses per group")
     }
@@ -337,6 +369,7 @@ function deleteCourse(c) {
         col = c.Col;
     // console.log(`DELETE ${c.Name}`);
     data = data.filter(x => x.Name !== c.Name); // remove
+    sem_select.filter(x => x.Row == row)[0].Col--;
     data.map(x => { //shift to left
         if (x.Row == row && x.Col > col) {
             x.Col = x.Col - 1;
@@ -344,7 +377,7 @@ function deleteCourse(c) {
     });
     pref.delete(c.Name);
     window.pref = pref;
-    updateRecs();
+    updateRecs(() => selectSem(c.Row));
 }
 
 // grid layout helpers
@@ -356,41 +389,16 @@ function getY(d) {
     return 30 + d.Row * grid * 1.1 + grid / 2;
 }
 
-//displays the semester next to each row
-// function displaySemesters() {
-//     let semesters = [];
-//     let currDate = new Date();
-//     let currYear = currDate.getFullYear();
-//     if (currDate.getMonth() < 5) {
-//         currYear = currYear - 1;
-//     }
-
-//     let fallSpring = ["F","S"];
-//     for (let i = 0; i < 8; i++){
-//         if (i % 2 == 1) {
-//             currYear = currYear + 1
-//         }
-//         semesters.push({
-//             "Year":fallSpring[i%2] + currYear.toString(),
-//             "Col":0,
-//             "Row":i});
-//     }
-
-//     let visSem = vis.selectAll(".semester").data(semesters, d => d.Year);
-//     visSem.attr("transform", d => `translate(${getX(d) - 15} ${getY(d)})`);
-//     let sem = visSem.enter().append("g")
-//         .attr("class","semester")
-//         .attr("transform", d => `translate(${getX(d) - 10} ${getY(d)})`);
-//     sem.append("text")
-//         .attr('text-anchor', "middle")
-//         .attr("font-size", "15px")
-//         .text(d => d.Year)
-//         .attr("x", 0)
-//         .attr("y", grid * 0.5)
-//         .attr("fill", "black")
-//         .style("writing-mode", "vertical-rl")
-//         .style("text-orientation","upright");
-// }
+async function selectSem(n) {
+    selected_sem = n;
+    d3.selectAll(".sem").attr("fill", "none");
+    d3.selectAll(`.sem${n}`).attr("fill", "pink");
+    var sem_recs = data_recs.filter(d => d.Row == n);
+    var rec_names = [];
+    sem_recs.forEach(sr => sr.Recs.forEach(r => rec_names.push(r)));
+    var rec_info = await infoAll(rec_names);
+    render(rec_info, `Group ${n+1} Recommendations`, true, false);
+}
 
 //displays menu next to course when clicked
 function makeContextMenu(d, type, row = 0) {
@@ -438,50 +446,33 @@ function makeContextMenu(d, type, row = 0) {
 }
 
 function displayCourses() {
-    // console.log(data);
-    // console.log(data_recs);
-    var courses = vis.selectAll(".course").data(data, d => d.Name);
-    var recs = vis.selectAll(".recs").data(data_recs);
+    courses = vis.selectAll(".course").data(data, d => d.Name);
+    selectbtns = vis.selectAll(".sem_select").data(sem_select, d => d.Row);;
     courses.exit().remove();
-    recs.exit().remove();
 
     //update position
     courses.transition()
         .attr("transform", d => `translate(${getX(d)} ${getY(d)})`)
         .duration(500);
-    recs.transition()
+
+    selectbtns.transition()
         .attr("transform", d => `translate(${getX(d)} ${getY(d)})`)
         .duration(500);
-    recs.selectAll("circle").remove();
-    recs.selectAll("text").remove();
-    for (var idx = 0; idx < recs_per_tile; idx++) {
-        const i = idx;
-        recs.append("circle")
-            .attr("r", grid / 2)
-            .attr("cx", i * grid * 1.1)
-            .attr("stroke", "gray")
-            .attr("stroke-dasharray", "8 4")
-            .attr("stroke-width", 3)
-            .attr("fill", "none")
-            .on("contextmenu", d => makeContextMenu(d.Recs[i], "REC", d.Row))
-            .on("click", d => addCourse(d.Recs[i], d.Row));
-
-        recs.append("text")
-            .attr('text-anchor', "middle")
-            .attr("font-size", "18px")
-            .text(d => d.Recs[i])
-            .attr("x", i * grid * 1.1)
-            .attr("y", 9)
-            .attr("fill", "gray")
-            .on("contextmenu", d => makeContextMenu(d.Recs[i], "REC", d.Row))
-            .on("click", d => addCourse(d.Recs[i], d.Row));
-    }
 
     // add course
     var course = courses.enter().append("g")
         .attr("class", "course")
         .on("click", d => deleteCourse(d))
         .on("contextmenu", d => makeContextMenu(d, "COURSE"))
+        .on("mouseover", async d => {
+            var c = await info(d.Name);
+            render([c], "Course Info (Click to Delete)", false, false);
+        })
+        .on("mouseout", () => {
+            if (selected_sem != undefined && selected_sem != -1) {
+                selectSem(selected_sem);
+            }
+        })
         .attr("transform", d => `translate(${getX(d)} ${getY(d)})`)
         .style("opacity", 0);
 
@@ -493,55 +484,65 @@ function displayCourses() {
         .attr("r", grid / 2)
         .attr("stroke", "black")
         .attr("stroke-width", 3)
-        .attr("fill", "crimson");
+        .attr("fill", d => {
+            var major = urlParams.get('major');
+            return (d.Name.slice(0, major.length) == major) ? "darkred" : "crimson";
+        });
 
     course.append("text")
         .attr('text-anchor', "middle")
         .attr("font-size", "18px")
+        .on("mouseover", async d => {
+            var c = await info(d.Name);
+            render([c], "Course Info", false, true);
+        })
         .text(d => d.Name)
         .attr("x", 0)
         .attr("y", 9)
         .attr("fill", "white");
 
-    //add recs
-    var rec = recs.enter().append("g")
-        .attr("class", "recs")
-        .attr("transform", d => `translate(0 ${getY(d)})`);
-
-    rec.transition()
+    var selectbtn = selectbtns.enter().append("g")
+        .attr("class", "sem_select")
+        .on("click", d => {
+            if (d.Row != selected_sem) {
+                selectSem(d.Row);
+            } else {
+                // deselecting a semester
+                selected_sem = -1;
+                d3.selectAll(".sem").attr("fill", "none");
+                recommend().then(c => render(c, "Recommended Courses"));
+            }
+        })
         .attr("transform", d => `translate(${getX(d)} ${getY(d)})`)
+        .style("opacity", 0);
+
+    selectbtn.transition()
+        .style("opacity", 1)
         .duration(500);
 
-    for (var idx = 0; idx < recs_per_tile; idx++) {
-        const i = idx;
-        rec.append("circle")
-            .attr("r", grid / 2)
-            .attr("cx", i * grid * 1.1)
-            .attr("stroke", "gray")
-            .attr("stroke-dasharray", "8 4")
-            .attr("stroke-width", 3)
-            .attr("fill", "none")
-            .on("contextmenu", d => makeContextMenu(d.Recs[i], "REC", d.Row))
-            .on("click", d => addCourse(d.Recs[i], d.Row));
+    selectbtn.append("circle")
+        .attr("class", d => `sem sem${d.Row}`)
+        .attr("r", grid / 2)
+        .attr("stroke", "gray")
+        .attr("stroke-dasharray", "8 4")
+        .attr("stroke-width", 3)
+        .attr("fill", "none");
 
-        rec.append("text")
-            .attr('text-anchor', "middle")
-            .attr("font-size", "18px")
-            .text(d => d.Recs[i])
-            .attr("x", i * grid * 1.1)
-            .attr("y", 9)
-            .attr("fill", "gray")
-            .on("contextmenu", d => makeContextMenu(d.Recs[i], "REC", d.Row))
-            .on("click", d => addCourse(d.Recs[i], d.Row));
-    }
+    selectbtn.append("text")
+        .attr('text-anchor', "middle")
+        .attr("font-size", "64px")
+        .text("+")
+        .attr("x", 0)
+        .attr("y", 16)
+        .attr("fill", "gray");
 }
 
 init();
 
-get_popular().then(c => render(c, "Popular"));
+get_popular().then(c => render(c, "Common Courses"));
 
 d3.select("#popular").on("click", () => {
-    get_popular().then(c => render(c, 'Popular'))
+    get_popular().then(c => render(c, 'Common Courses'))
 });
 
 d3.select("#recommended").on("click", () => {
@@ -571,3 +572,5 @@ window.get_popular = get_popular;
 window.search = search;
 
 window.data = data;
+window.sem_select = sem_select;
+window.selected_sem = selected_sem;

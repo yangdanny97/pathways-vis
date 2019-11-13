@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"net/http"
+	"path"
 	"regexp"
 	"sort"
 	"strconv"
@@ -118,7 +119,6 @@ func remove(a []string, i int) []string {
 }
 
 func renderStaticTemplate(w http.ResponseWriter, tmpl string) {
-	// fmt.Println(tmpl)
 	t, err := template.ParseFiles("static/" + tmpl + ".html")
 	if err != nil {
 		fmt.Println("template load error")
@@ -172,16 +172,29 @@ func genRec(graph *Graph, semCourses []string, excl *map[string]bool, n int) *Re
 		return !ok
 	})
 	top := []string{}
+	re := regexp.MustCompile(`[0-9]+`)
 	// get top n candidates, if none exist then random course
 	for i := 0; i < n; i++ {
+		selected := ""
 		if i >= len(candidates) {
-			randomCourse := graph.Nodes[rand.Intn(len(graph.Nodes))]
+			allc := filter(graph.Nodes, func(x string) bool {
+				_, ok := (*excl)[x]
+				return !ok
+			})
+			randomCourse := allc[rand.Intn(len(allc))]
 			top = append(top, randomCourse)
 			(*excl)[randomCourse] = true
+			selected = randomCourse
 		} else {
 			top = append(top, candidates[i])
 			(*excl)[candidates[i]] = true
+			selected = candidates[i]
 		}
+		// make sure recommendations in same batch come from diff departments
+		selectedDept := re.Split(selected, 2)[0]
+		candidates = filter(candidates, func(x string) bool {
+			return re.Split(x, 2)[0] != selectedDept
+		})
 	}
 	return &RecTile{Recs: top}
 }
@@ -416,9 +429,11 @@ func recHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// fmt.Println(excl)
+
 	sort.Ints(semKeys)
 	// number of recs to generate per rec-tile
-	nRecs := 1
+	nRecs := 3
 
 	// calculate points and generate recs
 	for _, k := range semKeys {

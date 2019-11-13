@@ -74,7 +74,7 @@ $cornell_red: #B31B1B;
         }
 
         div.cred {
-            flex: 0 0 20px;
+            flex: 0 0 40px;
             text-align: right;
         }
     }
@@ -89,7 +89,7 @@ $cornell_red: #B31B1B;
     
     .card { margin-top: 15px; }
 
-    rect,text { cursor: pointer; }
+    circle,text { cursor: pointer; }
 }
 
 .context-menu {
