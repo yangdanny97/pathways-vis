@@ -473,9 +473,19 @@ function displayCourses() {
         .attr('fill', "black")
         .style('stroke', 'none');
 
-    let links = vis.selectAll(".link").data(data_links, d => d.source.Name + d.target.Name);
+    let links = vis.selectAll(".link")
+        .data(data_links, d => d.source.Name + d.source.Row.toString() 
+        + d.target.Name + d.target.Row.toString());
     links.exit().remove();
-    let link =links.enter().append("polyline")
+    links.transition() //update position
+        .attr("points", function(d){
+            let x1 = getX(d.source);
+            let x2 = getX(d.target);
+            let y1 = getY(d.source) + 14;
+            let y2 = getY(d.target);
+            return x1 + "," + y1 + " " + (x1 + x2)/2 + "," + (y1 + y2)/2 + " " + x2 + "," + y2;
+        }).duration(500);
+    let link = links.enter().append("polyline")
         .attr("class","link")
         .attr("stroke", "black")
         .attr("points", function(d){
@@ -488,7 +498,7 @@ function displayCourses() {
         .attr("marker-mid", "url(#arrowhead)")
         .style("opacity", 0);
     link.transition().style("opacity",1).duration(500);
-    vis.selectAll("polyline").sort(function(a, b){ return -1; })
+    vis.selectAll("polyline").sort(function(a, b){ return -1; }) //put to back of viz
 
     courses = vis.selectAll(".course").data(data, d => d.Name);
     selectbtns = vis.selectAll(".sem_select").data(sem_select, d => d.Row);
@@ -634,7 +644,6 @@ function choosingCourses(){
                 chosenCourses.push(majorCourses[i]);
             }
         });
-        console.log(chosenCourses);
     })
 }
 choosingCourses();
