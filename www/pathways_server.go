@@ -154,7 +154,7 @@ func genRec(graph *Graph, semCourses []string, excl *map[string]bool, n int, rev
 	candidates := []string{}
 	// iterate thru edges and calculate scores
 	for _, e := range graph.Edges {
-		if reverse {
+		if !reverse {
 			if contains(semCourses, e.Source) {
 				_, ok := points[e.Destination]
 				if !ok {
@@ -251,7 +251,7 @@ func coreClassesHandler(w http.ResponseWriter, r *http.Request) {
 	for n, e := range numEdges {
 		courseNum, _ := strconv.Atoi(re.FindString(n))
 		courseNum = courseNum - 1
-		level := 0
+		level := courseNum
 		if e == 0 {
 			nodes, ok := levels[level]
 			if ok {
@@ -447,37 +447,27 @@ func recHandler(w http.ResponseWriter, r *http.Request) {
 
 	// calculate points and generate recs
 	for _, k := range semKeys {
+		// get post-enrollment recs if they exist
+		if k > 0 {
+			postRec := genRec(postGraph, semMap[k-1], &excl, nRecs, false)
+			postRec.Col = len(semMap[k])
+			postRec.Row = k
+			recs = append(recs, *postRec)
+		}
+
+		// get pre-enrollment recs if they exist
+		if k < len(semKeys)-1 {
+			preRec := genRec(postGraph, semMap[k+1], &excl, nRecs, true)
+			preRec.Col = len(semMap[k])
+			preRec.Row = k
+			recs = append(recs, *preRec)
+		}
+
 		// generate co-enrollment recs
 		coRec := genRec(coGraph, semMap[k], &excl, nRecs, false)
 		coRec.Col = len(semMap[k]) + nRecs
 		coRec.Row = k
 		recs = append(recs, *coRec)
-
-		// first semester has no post-enrollment rec
-		// so generate a second co-enrollment rec
-		if k == 0 || k == len(semKeys)-1 {
-			coRec = genRec(coGraph, semMap[k], &excl, nRecs, false)
-			coRec.Col = len(semMap[k])
-			coRec.Row = k
-			recs = append(recs, *coRec)
-		}
-		// for all semesters but the last
-		// generate post-enrollment recs for next semester
-		if k < len(semKeys)-1 {
-			postRec := genRec(postGraph, semMap[k], &excl, nRecs, false)
-			postRec.Col = len(semMap[k+1])
-			postRec.Row = k + 1
-			recs = append(recs, *postRec)
-		}
-
-		// for all semesters but the first
-		// generate post-enrollment recs for prev semester
-		if k > 0 {
-			preRec := genRec(postGraph, semMap[k], &excl, nRecs, true)
-			preRec.Col = len(semMap[k+2])
-			preRec.Row = k - 1
-			recs = append(recs, *preRec)
-		}
 	}
 	visEdges := edgeGenerator(postGraph, semMap)
 	response := RecResponse{Recs: recs, Edges: visEdges}
