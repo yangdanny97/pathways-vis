@@ -446,6 +446,25 @@ function makeContextMenu(d, type, row = 0) {
 }
 
 function displayCourses() {
+    let data_links = [];
+    for (let edge of data_edges){
+        data_links.push({"source":edge["Source"],"target":edge["Destination"]})
+    }
+
+    //arrowhead
+    vis.append('defs').append('marker')
+        .attr("id", "arrowhead")
+        .attr("viewBox", "0 -5 10 10")
+        .attr("refX", 13)
+        .attr("refY", 0)
+        .attr("markerWidth", 9)
+        .attr("markerHeight", 9)
+        .attr("orient", "auto")
+        .append("path")
+        .attr("d", "M0,-5 L10,0 L0,5")
+        .attr('fill', "black")
+        .style('stroke', 'none');
+
     courses = vis.selectAll(".course").data(data, d => d.Name);
     selectbtns = vis.selectAll(".sem_select").data(sem_select, d => d.Row);;
     courses.exit().remove();
@@ -502,6 +521,15 @@ function displayCourses() {
         .attr("x", 0)
         .attr("y", 9)
         .attr("fill", "white");
+
+    let links = viz.selectAll(".link").data(data_links);
+    let link = links.enter().append("line")
+        .attr("class","link")
+        .attr("x1", d => getX(d => getX(d.source)))
+        .attr("x2", d => getX(d => getX(d.target)))
+        .attr("y1", d => getY(d => getX(d.source)))
+        .attr("y2", d => getY(d => getX(d.target)))
+        .attr("marker-end", "url(#arrowhead)");
 
     var selectbtn = selectbtns.enter().append("g")
         .attr("class", "sem_select")
