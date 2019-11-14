@@ -461,15 +461,16 @@ function displayCourses() {
         data_links.push({"source":nodeMap.get(d.Source), "target":nodeMap.get(d.Destination)}))
 
     //arrowhead
-    vis.append('defs').append('marker')
+    vis.append('defs').append('svg:marker')
         .attr("id", "arrowhead")
         .attr("viewBox", "0 -5 10 10")
         .attr("refX", 13)
         .attr("refY", 0)
-        .attr("markerWidth", 9)
-        .attr("markerHeight", 9)
+        .attr("markerWidth", 15)
+        .attr("markerHeight", 8)
         .attr("orient", "auto")
-        .append("path")
+        .attr("viewbox", "-5 -5 10 10")
+        .append("svg:path")
         .attr("d", "M0,-5 L10,0 L0,5")
         .attr('fill', "black")
         .style('stroke', 'none');
@@ -477,19 +478,20 @@ function displayCourses() {
     let links = vis.selectAll(".link").data(data_links, d => d.source.Name + d.target.Name);
     links.exit().remove();
     console.log(data_links);
-    let link =links.enter().append("path")
+    let link =links.enter().append("polyline")
         .attr("class","link")
         .attr("stroke", "black")
-        .attr("fill","none")
-        .attr("d", d => 'M ' + getX(d.source) + ' ' + getY(d.source)
-                + ' L ' + getX(d.target) + ' ' + getY(d.target))
-        // .attr("x1", d => getX(d.source))
-        // .attr("x2", d => getX(d.target))
-        // .attr("y1", d => getY(d.source))
-        // .attr("y2", d => getY(d.target))
-        .attr("marker-end", "url(#arrowhead)")
+        .attr("points", function(d){
+            let x1 = getX(d.source);
+            let x2 = getX(d.target);
+            let y1 = getY(d.source) + 14;
+            let y2 = getY(d.target);
+            return x1 + "," + y1 + " " + (x1 + x2)/2 + "," + (y1 + y2)/2 + " " + x2 + "," + y2;
+        })
+        .attr("marker-mid", "url(#arrowhead)")
         .style("opacity", 0);
     link.transition().style("opacity",1).duration(500);
+    vis.selectAll("polyline").sort(function(a, b){ return -1; })
 
     courses = vis.selectAll(".course").data(data, d => d.Name);
     selectbtns = vis.selectAll(".sem_select").data(sem_select, d => d.Row);
