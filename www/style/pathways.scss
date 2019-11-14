@@ -143,3 +143,9 @@ $cornell_red: #B31B1B;
     background-color: #4677f8;
     color: #fefefe;
   }
+
+  .scrollable-menu {
+    height: auto;
+    max-height: 200px;
+    overflow-x: hidden;
+}

@@ -14,6 +14,7 @@ import (
 	"regexp"
 	"sort"
 	"strconv"
+	"strings"
 
 	"cloud.google.com/go/logging"
 	"google.golang.org/api/option"
@@ -213,6 +214,42 @@ func genRec(graph *Graph, semCourses []string, excl *map[string]bool, n int, rev
 	return &RecTile{Recs: top}
 }
 
+func majorCoursesHandler(w http.ResponseWriter, r *http.Request) {
+	req := PathwaysRequest{}
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	graph, err := loadGraph(req.Major + "_co")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	var majorCourses []Course
+	for _, n := range graph.Nodes {
+		matched, _ := regexp.MatchString(strings.ToUpper("^"+req.Major), n)
+		if matched {
+			majorCourses = append(majorCourses, Course{Name: n, Row: 0, Col: 0})
+		}
+	}
+	reFull := regexp.MustCompile("[0-9]+")
+	sort.SliceStable(majorCourses, func(i, j int) bool {
+		courseNum1, _ := strconv.Atoi(reFull.FindString(majorCourses[i].Name))
+		courseNum2, _ := strconv.Atoi(reFull.FindString(majorCourses[j].Name))
+		return courseNum1 < courseNum2
+	})
+
+	response := CourseResponse{Courses: majorCourses}
+	responseJSON, err := json.Marshal(response)
+	if err != nil {
+		fmt.Println("response marshal error")
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(responseJSON)
+}
+
 // endpoint handler for requests for core classes (JSON response)
 func coreClassesHandler(w http.ResponseWriter, r *http.Request) {
 	req := PathwaysRequest{}
@@ -255,7 +292,12 @@ func coreClassesHandler(w http.ResponseWriter, r *http.Request) {
 	for n, e := range numEdges {
 		courseNum, _ := strconv.Atoi(re.FindString(n))
 		courseNum = courseNum - 1
-		level := courseNum
+		level := 0
+		if courseNum <= 2 {
+			level = 0
+		} else {
+			level = courseNum
+		}
 		if e == 0 {
 			nodes, ok := levels[level]
 			if ok {
@@ -655,6 +697,7 @@ func main() {
 	http.HandleFunc("/unordered_rec/", unorderedRecHandler)
 	http.HandleFunc("/smart_add/", addHandler)
 	http.HandleFunc("/core_courses/", coreClassesHandler)
+	http.HandleFunc("/major_courses/", majorCoursesHandler)
 	http.HandleFunc("/log/", logHandler)
 	http.HandleFunc("/majors/", majorHandler)
 	fmt.Println(http.ListenAndServe(":8000", nil))
