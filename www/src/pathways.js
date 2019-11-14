@@ -313,7 +313,6 @@ function init() {
         .then(resp => resp.json())
         .then(d => {
             data = d.Courses;
-            console.log(d.Courses);
             for (var i = 0; i < 8; i++) {
                 var c_sem = data.filter(c => c.Row === i).map(c => c.Col);
                 if (c_sem.length == 0) {
@@ -340,7 +339,6 @@ async function updateRecs(callback) {
     fetch(req)
         .then(resp => resp.json())
         .then(d => {
-            // console.log(d.Edges);
             data_edges = d.Edges;
             data_recs = d.Recs;
             displayCourses();
@@ -477,7 +475,6 @@ function displayCourses() {
 
     let links = vis.selectAll(".link").data(data_links, d => d.source.Name + d.target.Name);
     links.exit().remove();
-    console.log(data_links);
     let link =links.enter().append("polyline")
         .attr("class","link")
         .attr("stroke", "black")
@@ -606,6 +603,48 @@ d3.select("#auto-gen").on("click", () => {
     }
     updateRecs();
 });
+
+// choosing courses
+function choosingCourses(){
+    let majorCourses = [];
+    let chosenCourses = [];
+    var reqbody = {
+        Major: major.toLowerCase(),
+        Courses: data
+    };
+    var req = new Request('/major_courses/', {
+        method: 'POST',
+        body: JSON.stringify(reqbody)
+    });
+    fetch(req)
+        .then(resp => resp.json())
+        .then(d => {
+            d.Courses.forEach(course => majorCourses.push(course.Name));
+            majorCourses.forEach(function(course){
+                let dropdown = d3.select("#dropdownlist");
+                let ele = dropdown.append("li").append("label");
+                ele.html("<input type=checkbox> " + course);
+            })
+        });
+    
+    d3.select("#selectCourses").on("click", function(){
+        chosenCourses = [];
+        d3.select("#dropdownlist").selectAll("input").each(function(_,i){
+            if (this.checked == true){
+                chosenCourses.push(majorCourses[i]);
+            }
+        });
+        console.log(chosenCourses);
+    })
+}
+choosingCourses();
+
+// $(".checkbox-menu").on("change", "input[type='checkbox']", function() {
+//     $(this).closest("li").toggleClass("active", this.checked);
+// });
+// $(document).on('click', '.allow-focus', function (e) {
+//     e.stopPropagation();
+// });
 
 window.d3 = d3;
 

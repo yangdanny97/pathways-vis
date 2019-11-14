@@ -40,14 +40,27 @@
         <div id='right' class="col-md-8">
             <div class="card">
                 <div class="card-body">
-                    Instructions: Hover over red courses for more info, or click to remove. Select a semester using (+) to view detailed recommendations for that group. Click "auto-generate" to automatically populate the schedule.
+                    Instructions: Hover over red courses for more info, or click to remove. Select a semester using (+)
+                    to view detailed recommendations for that group. Click "auto-generate" to automatically populate the
+                    schedule.
                 </div>
-                <button id="auto-gen" type="button">
+                <button id="auto-gen" type="button" class="btn btn-primary">
                     Auto-generate Schedule
                 </button>
+                <div class="btn-group btn-group-sm">
+                    <button type="button" class="btn btn-primary" id="selectCourses">Select
+                        Courses Taken</button>
+                    <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <span class="sr-only">Toggle Dropdown</span>
+                    </button>
+                    <ul class="dropdown-menu checkbox-menu allow-focus scrollable-menu" id="dropdownlist"
+                        aria-labelledby="dropdownMenu1">
+                    </ul>
+                </div>
             </div>
             <svg id="vis" width="1000px" , height="1200px"></svg>
         </div>
+    </div>
     </div>
 </body>
 <script src='/static/dist/pathways.bundle.js'></script>
