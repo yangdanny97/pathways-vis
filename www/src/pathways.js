@@ -474,6 +474,23 @@ function displayCourses() {
         .attr('fill', "black")
         .style('stroke', 'none');
 
+    let links = vis.selectAll(".link").data(data_links, d => d.source.Name + d.target.Name);
+    links.exit().remove();
+    console.log(data_links);
+    let link =links.enter().append("path")
+        .attr("class","link")
+        .attr("stroke", "black")
+        .attr("fill","none")
+        .attr("d", d => 'M ' + getX(d.source) + ' ' + getY(d.source)
+                + ' L ' + getX(d.target) + ' ' + getY(d.target))
+        // .attr("x1", d => getX(d.source))
+        // .attr("x2", d => getX(d.target))
+        // .attr("y1", d => getY(d.source))
+        // .attr("y2", d => getY(d.target))
+        .attr("marker-end", "url(#arrowhead)")
+        .style("opacity", 0);
+    link.transition().style("opacity",1).duration(500);
+
     courses = vis.selectAll(".course").data(data, d => d.Name);
     selectbtns = vis.selectAll(".sem_select").data(sem_select, d => d.Row);
     courses.exit().remove();
@@ -486,21 +503,6 @@ function displayCourses() {
     selectbtns.transition()
         .attr("transform", d => `translate(${getX(d)} ${getY(d)})`)
         .duration(500);
-
-    let links = vis.selectAll(".link").select("path").data(data_links);
-    console.log(data_links);
-    links.enter().append("path")
-        .attr("class","link")
-        .attr("stroke", "black")
-        .attr("fill","none")
-        .attr("d", d => 'M ' + getX(d.source) + ' ' + getY(d.source)
-                + ' L ' + getX(d.target) + ' ' + getY(d.target))
-        // .attr("x1", d => getX(d.source))
-        // .attr("x2", d => getX(d.target))
-        // .attr("y1", d => getY(d.source))
-        // .attr("y2", d => getY(d.target))
-        .attr("marker-end", "url(#arrowhead)");
-    links.exit().remove();
 
     // add course
     var course = courses.enter().append("g")
