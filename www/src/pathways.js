@@ -15,6 +15,9 @@ var data_recs = [];
 var sem_select = [];
 var selected_sem = -1;
 
+// TRUE == LIMIT SAME DEPARTMENT COURSE SUGGESTIONS
+var limitDept = true;
+
 var courses;
 var selectbtns;
 
@@ -254,7 +257,8 @@ async function recommend(codes) {
 
     var reqbody = {
         Major: major.toLowerCase(),
-        Courses: data
+        Courses: data,
+        LimitDept: limitDept
     };
 
     var req = new Request('/unordered_rec/', {
@@ -324,7 +328,8 @@ async function updateRecs(callback) {
     // console.log(data);
     var reqbody = {
         Major: major.toLowerCase(),
-        Courses: data
+        Courses: data,
+        LimitDept: limitDept
     };
     var req = new Request('/rec/', {
         method: 'POST',
