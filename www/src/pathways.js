@@ -15,6 +15,9 @@ var data_recs = [];
 var sem_select = [];
 var selected_sem = -1;
 
+// TRUE == LIMIT SAME DEPARTMENT COURSE SUGGESTIONS
+var limitDept = true;
+
 var courses;
 var selectbtns;
 
@@ -254,7 +257,8 @@ async function recommend(codes) {
 
     var reqbody = {
         Major: major.toLowerCase(),
-        Courses: data
+        Courses: data,
+        LimitDept: limitDept
     };
 
     var req = new Request('/unordered_rec/', {
@@ -324,7 +328,8 @@ async function updateRecs(callback) {
     // console.log(data);
     var reqbody = {
         Major: major.toLowerCase(),
-        Courses: data
+        Courses: data,
+        LimitDept: limitDept
     };
     var req = new Request('/rec/', {
         method: 'POST',
@@ -491,7 +496,7 @@ function displayCourses() {
             if (selected_sem != undefined && selected_sem != -1) {
                 selectSem(selected_sem);
             } else {
-                recommend().then(c => render(c, "Recommended Courses"));
+                recommend().then(c => render(c, "Recommended Courses", true, false));
             }
         })
         .attr("transform", d => `translate(${getX(d)} ${getY(d)})`)
@@ -540,7 +545,7 @@ function displayCourses() {
                 // deselecting a semester
                 selected_sem = -1;
                 d3.selectAll(".sem").attr("fill", "none");
-                recommend().then(c => render(c, "Recommended Courses"));
+                recommend().then(c => render(c, "Recommended Courses", true, false));
             }
         })
         .attr("transform", d => `translate(${getX(d)} ${getY(d)})`)
@@ -569,14 +574,23 @@ function displayCourses() {
 
 init();
 
-get_popular().then(c => render(c, "Common Courses"));
+recommend().then(c => render(c, "Recommended Courses", true, false));
 
-d3.select("#popular").on("click", () => {
-    get_popular().then(c => render(c, 'Common Courses'))
-});
-
-d3.select("#recommended").on("click", () => {
-    recommend().then(c => render(c, 'Recommended'))
+// auto-schedule generation
+// adds a lot of courses all at once before refreshing
+d3.select("#auto-gen").on("click", () => {
+    for (var i = 0; i < 8; i++) {
+        var c_sem = data.filter(c => c.Row === i);
+        var sem_recs = data_recs.filter(d => d.Row == i);
+        var rec_names = [];
+        sem_recs.forEach(sr => sr.Recs.forEach(r => rec_names.push(r)));
+        for (var j = 0; j < 6 - c_sem.length; j++) {
+            var cname = rec_names[j];
+            console.log(cname);
+            data.push(COURSE(cname, i, c_sem.length + j));
+        }
+    }
+    updateRecs();
 });
 
 window.d3 = d3;

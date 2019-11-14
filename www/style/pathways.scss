@@ -42,6 +42,24 @@ $cornell_red: #B31B1B;
         flex-grow: 1;
         overflow-y: scroll;
     }
+
+    // slide in animation (need to debug before using bc it looks funny rn)
+
+    // .card {
+    //     position: absolute;
+    //     transform: translateX(-100%);
+    //     -webkit-transform: translateX(-100%);
+    //     animation: slide-in 0.5s forwards;
+    //     -webkit-animation: slide-in 0.5s forwards;
+    // }
+        
+    // @keyframes slide-in {
+    //     100% { transform: translateX(0%); }
+    // }
+    
+    // @-webkit-keyframes slide-in {
+    //     100% { -webkit-transform: translateX(0%); }
+    // }
 }
 
 #left #deck .card {
@@ -89,7 +107,13 @@ $cornell_red: #B31B1B;
     
     .card { margin-top: 15px; }
 
-    circle,text { cursor: pointer; }
+    circle,text { 
+        cursor: pointer; 
+        -webkit-user-select: none; /* Safari */        
+        -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* IE10+/Edge */
+        user-select: none; /* Standard */
+    }
 }
 
 .context-menu {
