@@ -60,9 +60,10 @@ type RecResponse struct {
 }
 
 type PathwaysRequest struct {
-	Major   string
-	Courses []Course
-	Course  string
+	Major     string
+	Courses   []Course
+	Course    string
+	LimitDept bool
 }
 
 type LogRequest struct {
@@ -149,12 +150,12 @@ func majorHandler(w http.ResponseWriter, r *http.Request) {
 
 // generate up to n recommendations based on a course graph, a list of courses,
 // an excluded courses map
-func genRec(graph *Graph, semCourses []string, excl *map[string]bool, n int, reverse bool) *RecTile {
+func genRec(graph *Graph, semCourses []string, excl *map[string]bool, n int, reverse bool, limitDept bool) *RecTile {
 	points := make(map[string]int)
 	candidates := []string{}
 	// iterate thru edges and calculate scores
 	for _, e := range graph.Edges {
-		if reverse {
+		if !reverse {
 			if contains(semCourses, e.Source) {
 				_, ok := points[e.Destination]
 				if !ok {
@@ -200,11 +201,14 @@ func genRec(graph *Graph, semCourses []string, excl *map[string]bool, n int, rev
 			(*excl)[candidates[i]] = true
 			selected = candidates[i]
 		}
-		// make sure recommendations in same batch come from diff departments
-		selectedDept := re.Split(selected, 2)[0]
-		candidates = filter(candidates, func(x string) bool {
-			return re.Split(x, 2)[0] != selectedDept
-		})
+
+		if limitDept {
+			// make sure recommendations in same batch come from diff departments
+			selectedDept := re.Split(selected, 2)[0]
+			candidates = filter(candidates, func(x string) bool {
+				return re.Split(x, 2)[0] != selectedDept
+			})
+		}
 	}
 	return &RecTile{Recs: top}
 }
@@ -251,7 +255,7 @@ func coreClassesHandler(w http.ResponseWriter, r *http.Request) {
 	for n, e := range numEdges {
 		courseNum, _ := strconv.Atoi(re.FindString(n))
 		courseNum = courseNum - 1
-		level := 0
+		level := courseNum
 		if e == 0 {
 			nodes, ok := levels[level]
 			if ok {
@@ -342,8 +346,8 @@ func unorderedRecHandler(w http.ResponseWriter, r *http.Request) {
 		cnames = append(cnames, c.Name)
 	}
 
-	recPost := genRec(postGraph, cnames, &excl, 5, false)
-	recCo := genRec(coGraph, cnames, &excl, 5, false)
+	recPost := genRec(postGraph, cnames, &excl, 5, false, req.LimitDept)
+	recCo := genRec(coGraph, cnames, &excl, 5, false, req.LimitDept)
 	recs := append(recPost.Recs, recCo.Recs...)
 
 	response := CourseCodes{Codes: recs}
@@ -447,37 +451,27 @@ func recHandler(w http.ResponseWriter, r *http.Request) {
 
 	// calculate points and generate recs
 	for _, k := range semKeys {
-		// generate co-enrollment recs
-		coRec := genRec(coGraph, semMap[k], &excl, nRecs, false)
-		coRec.Col = len(semMap[k]) + nRecs
-		coRec.Row = k
-		recs = append(recs, *coRec)
-
-		// first semester has no post-enrollment rec
-		// so generate a second co-enrollment rec
-		if k == 0 || k == len(semKeys)-1 {
-			coRec = genRec(coGraph, semMap[k], &excl, nRecs, false)
-			coRec.Col = len(semMap[k])
-			coRec.Row = k
-			recs = append(recs, *coRec)
-		}
-		// for all semesters but the last
-		// generate post-enrollment recs for next semester
-		if k < len(semKeys)-1 {
-			postRec := genRec(postGraph, semMap[k], &excl, nRecs, false)
-			postRec.Col = len(semMap[k+1])
-			postRec.Row = k + 1
+		// get post-enrollment recs if they exist
+		if k > 0 {
+			postRec := genRec(postGraph, semMap[k-1], &excl, nRecs, false, req.LimitDept)
+			postRec.Col = len(semMap[k])
+			postRec.Row = k
 			recs = append(recs, *postRec)
 		}
 
-		// for all semesters but the first
-		// generate post-enrollment recs for prev semester
-		if k > 0 {
-			preRec := genRec(postGraph, semMap[k], &excl, nRecs, true)
-			preRec.Col = len(semMap[k+2])
-			preRec.Row = k - 1
+		// get pre-enrollment recs if they exist
+		if k < len(semKeys)-1 {
+			preRec := genRec(postGraph, semMap[k+1], &excl, nRecs, true, req.LimitDept)
+			preRec.Col = len(semMap[k])
+			preRec.Row = k
 			recs = append(recs, *preRec)
 		}
+
+		// generate co-enrollment recs
+		coRec := genRec(coGraph, semMap[k], &excl, nRecs, false, req.LimitDept)
+		coRec.Col = len(semMap[k]) + nRecs
+		coRec.Row = k
+		recs = append(recs, *coRec)
 	}
 	visEdges := edgeGenerator(postGraph, semMap)
 	response := RecResponse{Recs: recs, Edges: visEdges}
