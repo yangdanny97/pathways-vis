@@ -11,6 +11,8 @@ var grid = 120;
 var data = [];
 // current recs
 var data_recs = [];
+// current edges
+var data_edges = [];
 // semester selection tiles
 var sem_select = [];
 var selected_sem = -1;
@@ -339,6 +341,7 @@ async function updateRecs(callback) {
         .then(resp => resp.json())
         .then(d => {
             // console.log(d.Edges);
+            data_edges = d.Edges;
             data_recs = d.Recs;
             displayCourses();
             if (callback !== undefined) {
@@ -452,9 +455,10 @@ function makeContextMenu(d, type, row = 0) {
 
 function displayCourses() {
     let data_links = [];
-    for (let edge of data_edges){
-        data_links.push({"source":edge["Source"],"target":edge["Destination"]})
-    }
+    let nodeMap = new Map();
+    data.forEach(d => nodeMap.set(d.Name, d));
+    data_edges.forEach(d => 
+        data_links.push({"source":nodeMap.get(d.Source), "target":nodeMap.get(d.Destination)}))
 
     //arrowhead
     vis.append('defs').append('marker')
@@ -471,7 +475,7 @@ function displayCourses() {
         .style('stroke', 'none');
 
     courses = vis.selectAll(".course").data(data, d => d.Name);
-    selectbtns = vis.selectAll(".sem_select").data(sem_select, d => d.Row);;
+    selectbtns = vis.selectAll(".sem_select").data(sem_select, d => d.Row);
     courses.exit().remove();
 
     //update position
@@ -482,6 +486,21 @@ function displayCourses() {
     selectbtns.transition()
         .attr("transform", d => `translate(${getX(d)} ${getY(d)})`)
         .duration(500);
+
+    let links = vis.selectAll(".link").select("path").data(data_links);
+    console.log(data_links);
+    links.enter().append("path")
+        .attr("class","link")
+        .attr("stroke", "black")
+        .attr("fill","none")
+        .attr("d", d => 'M ' + getX(d.source) + ' ' + getY(d.source)
+                + ' L ' + getX(d.target) + ' ' + getY(d.target))
+        // .attr("x1", d => getX(d.source))
+        // .attr("x2", d => getX(d.target))
+        // .attr("y1", d => getY(d.source))
+        // .attr("y2", d => getY(d.target))
+        .attr("marker-end", "url(#arrowhead)");
+    links.exit().remove();
 
     // add course
     var course = courses.enter().append("g")
@@ -526,15 +545,6 @@ function displayCourses() {
         .attr("x", 0)
         .attr("y", 9)
         .attr("fill", "white");
-
-    let links = viz.selectAll(".link").data(data_links);
-    let link = links.enter().append("line")
-        .attr("class","link")
-        .attr("x1", d => getX(d => getX(d.source)))
-        .attr("x2", d => getX(d => getX(d.target)))
-        .attr("y1", d => getY(d => getX(d.source)))
-        .attr("y2", d => getY(d => getX(d.target)))
-        .attr("marker-end", "url(#arrowhead)");
 
     var selectbtn = selectbtns.enter().append("g")
         .attr("class", "sem_select")
