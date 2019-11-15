@@ -643,7 +643,6 @@ func addMultipleHandler(w http.ResponseWriter, r *http.Request) {
 		rowColCount[row] = rowColCount[row] + 1
 		finalCourses = append(finalCourses, Course{Name: course, Row: row, Col: col})
 		courses = append(finalCourses, Course{Name: course, Row: row, Col: col})
-		fmt.Println(courses)
 	}
 
 	response := CourseResponse{Courses: finalCourses}
