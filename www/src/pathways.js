@@ -644,6 +644,32 @@ function choosingCourses(){
                 chosenCourses.push(majorCourses[i]);
             }
         });
+
+        data = [];
+        sem_select = [];
+        var reqbody = {
+            Major: major.toLowerCase(),
+            Selected: chosenCourses,
+            Courses: [],
+        };
+        var req = new Request('/multiple_smart_add/', {
+            method: 'POST',
+            body: JSON.stringify(reqbody)
+        });
+        fetch(req)
+            .then(resp => resp.json())
+            .then(d => {
+                data = d.Courses;
+                for (var i = 0; i < 8; i++) {
+                    var c_sem = data.filter(c => c.Row === i).map(c => c.Col);
+                    if (c_sem.length == 0) {
+                        sem_select.push(SELECT(i, 0));
+                    } else {
+                        sem_select.push(SELECT(i, Math.max(...c_sem) + 1));
+                    }
+                }
+                updateRecs();
+            });
     })
 }
 choosingCourses();
