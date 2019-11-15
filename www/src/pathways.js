@@ -392,7 +392,7 @@ function getX(d) {
 }
 
 function getY(d) {
-    return 30 + d.Row * grid * 1.1 + grid / 2;
+    return 30 + d.Row * grid * 1.25 + grid / 2;
 }
 
 async function selectSem(n) {
@@ -518,17 +518,6 @@ function displayCourses() {
         .attr("class", "course")
         .on("click", d => deleteCourse(d))
         .on("contextmenu", d => makeContextMenu(d, "COURSE"))
-        .on("mouseover", async d => {
-            var c = await info(d.Name);
-            render([c], "Course Info (Click to Delete)", false, false);
-        })
-        .on("mouseout", () => {
-            if (selected_sem != undefined && selected_sem != -1) {
-                selectSem(selected_sem);
-            } else {
-                recommend().then(c => render(c, "Recommended Courses", true, false));
-            }
-        })
         .attr("transform", d => `translate(${getX(d)} ${getY(d)})`)
         .style("opacity", 0);
 
@@ -548,14 +537,28 @@ function displayCourses() {
     course.append("text")
         .attr('text-anchor', "middle")
         .attr("font-size", "18px")
-        .on("mouseover", async d => {
-            var c = await info(d.Name);
-            render([c], "Course Info", false, true);
-        })
         .text(d => d.Name)
         .attr("x", 0)
         .attr("y", 9)
         .attr("fill", "white");
+
+    course.append("circle")
+        .attr("r", grid / 2)
+        .attr("stroke", "black")
+        .attr("stroke-width", 3)
+        .attr("fill", "white")
+        .style("opacity", 0)
+        .on("mouseover", async d => {
+            var c = await info(d.Name);
+            render([c], "Course Info (Click to Delete)", false, false);
+        })
+        .on("mouseout", () => {
+            if (selected_sem != undefined && selected_sem != -1) {
+                selectSem(selected_sem);
+            } else {
+                recommend().then(c => render(c, "Recommended Courses", true, false));
+            }
+        });
 
     var selectbtn = selectbtns.enter().append("g")
         .attr("class", "sem_select")
@@ -591,12 +594,21 @@ function displayCourses() {
         .attr("x", 0)
         .attr("y", 16)
         .attr("fill", "gray");
+
+    selectbtn.append("text")
+        .text(d => `Group ${d.Row + 1}`)
+        .attr("font-size", "18px")
+        .attr("x", grid * 0.6)
+        .attr("y", 9)
+        .attr("fill", "gray");
+
 }
 
 init();
 
 recommend().then(c => render(c, "Recommended Courses", true, false));
 
+var fill_per_sem = 5;
 // auto-schedule generation
 // adds a lot of courses all at once before refreshing
 d3.select("#auto-gen").on("click", () => {
@@ -605,11 +617,13 @@ d3.select("#auto-gen").on("click", () => {
         var sem_recs = data_recs.filter(d => d.Row == i);
         var rec_names = [];
         sem_recs.forEach(sr => sr.Recs.forEach(r => rec_names.push(r)));
-        for (var j = 0; j < 6 - c_sem.length; j++) {
+        for (var j = 0; j < fill_per_sem - c_sem.length; j++) {
             var cname = rec_names[j];
-            console.log(cname);
             data.push(COURSE(cname, i, c_sem.length + j));
         }
+        sem_select.forEach(d => {
+            d.Col = fill_per_sem;
+        });
     }
     updateRecs();
 });

@@ -114,6 +114,10 @@ $cornell_red: #B31B1B;
         -ms-user-select: none; /* IE10+/Edge */
         user-select: none; /* Standard */
     }
+
+    button {
+        margin: 10px;
+    }
 }
 
 .context-menu {
