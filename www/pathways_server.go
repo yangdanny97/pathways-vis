@@ -67,6 +67,13 @@ type PathwaysRequest struct {
 	LimitDept bool
 }
 
+type SelectPathwaysRequest struct {
+	Major     string
+	Courses   []Course
+	Selected  []string
+	LimitDept bool
+}
+
 type LogRequest struct {
 	Message string
 }
@@ -535,6 +542,121 @@ func findSmallerSem(semMap *map[int][]string, a int, b int) int {
 	return a
 }
 
+func findSemester(courses []Course, semMap map[int][]string,
+	semKeys []int, cnames []string, coGraph *Graph, postGraph *Graph,
+	semPoints map[int]int, course string) int {
+	// build semester -> courses mapping, build excluded courses set
+	for _, c := range courses {
+		_, ok := semMap[c.Row]
+		if !ok {
+			semKeys = append(semKeys, c.Row)
+		}
+		semMap[c.Row] = append(semMap[c.Row], c.Name)
+		cnames = append(cnames, c.Name)
+	}
+	for i := 0; i < 8; i++ {
+		_, ok := semMap[i]
+		if !ok {
+			semKeys = append(semKeys, i)
+			semMap[i] = []string{}
+		}
+	}
+
+	// calculate points and generate recs
+	for _, e := range coGraph.Edges {
+		for _, k := range semKeys {
+			if contains(semMap[k], e.Source) && e.Destination == course {
+				semPoints[k] = semPoints[k] + e.Weight/len(semMap[k])
+			}
+		}
+	}
+
+	for _, e := range postGraph.Edges {
+		for _, k := range semKeys {
+			if contains(semMap[k], e.Source) && e.Destination == course && containsint(semKeys, k+1) {
+				semPoints[k+1] = semPoints[k+1] + e.Weight/len(semMap[k])
+			}
+			if contains(semMap[k], e.Destination) && e.Source == course && containsint(semKeys, k-1) {
+				semPoints[k-1] = semPoints[k-1] + e.Weight/len(semMap[k])
+			}
+		}
+	}
+
+	// get semester of maximum points
+	addSem := 0
+	maxWt := 0
+	for k, v := range semPoints {
+		if v > maxWt {
+			maxWt = v
+			addSem = k
+		}
+	}
+
+	// if course is unrelated to current schedule,
+	// place according to course number
+	digits := regexp.MustCompile("[0-9]+")
+	if maxWt == 0 {
+		courseNum, _ := strconv.Atoi(digits.FindString(course))
+		if courseNum > 4000 {
+			addSem = findSmallerSem(&semMap, 6, 7)
+		} else if courseNum > 3000 {
+			addSem = findSmallerSem(&semMap, 4, 5)
+		} else if courseNum > 2000 {
+			addSem = findSmallerSem(&semMap, 2, 3)
+		} else {
+			addSem = findSmallerSem(&semMap, 0, 1)
+		}
+	}
+	return addSem
+}
+
+func addMultipleHandler(w http.ResponseWriter, r *http.Request) {
+	req := SelectPathwaysRequest{}
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		fmt.Println("request decode error")
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	coGraph, err := loadGraph(req.Major + "_co")
+	if err != nil {
+		fmt.Println("graph load error")
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	postGraph, err := loadGraph(req.Major + "_post")
+	if err != nil {
+		fmt.Println("graph load error")
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	addCourses := req.Selected
+	courses := req.Courses
+	cnames := []string{}
+	semMap := make(map[int][]string)
+	semKeys := []int{}
+	semPoints := make(map[int]int)
+
+	finalCourses := []Course{}
+	rowColCount := []int{0, 0, 0, 0, 0, 0, 0, 0}
+	for _, course := range addCourses {
+		row := findSemester(courses, semMap, semKeys, cnames, coGraph, postGraph, semPoints, course)
+		col := rowColCount[row]
+		rowColCount[row] = rowColCount[row] + 1
+		finalCourses = append(finalCourses, Course{Name: course, Row: row, Col: col})
+		courses = append(finalCourses, Course{Name: course, Row: row, Col: col})
+		fmt.Println(courses)
+	}
+
+	response := CourseResponse{Courses: finalCourses}
+	responseJSON, err := json.Marshal(response)
+	if err != nil {
+		fmt.Println("response marshal error")
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(responseJSON)
+}
+
 func addHandler(w http.ResponseWriter, r *http.Request) {
 	req := PathwaysRequest{}
 	err := json.NewDecoder(r.Body).Decode(&req)
@@ -577,51 +699,7 @@ func addHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// calculate points and generate recs
-	for _, e := range coGraph.Edges {
-		for _, k := range semKeys {
-			if contains(semMap[k], e.Source) && e.Destination == addCourse {
-				semPoints[k] = semPoints[k] + e.Weight/len(semMap[k])
-			}
-		}
-	}
-
-	for _, e := range postGraph.Edges {
-		for _, k := range semKeys {
-			if contains(semMap[k], e.Source) && e.Destination == addCourse && containsint(semKeys, k+1) {
-				semPoints[k+1] = semPoints[k+1] + e.Weight/len(semMap[k])
-			}
-			if contains(semMap[k], e.Destination) && e.Source == addCourse && containsint(semKeys, k-1) {
-				semPoints[k-1] = semPoints[k-1] + e.Weight/len(semMap[k])
-			}
-		}
-	}
-
-	// get semester of maximum points
-	addSem := 0
-	maxWt := 0
-	for k, v := range semPoints {
-		if v > maxWt {
-			maxWt = v
-			addSem = k
-		}
-	}
-
-	// if course is unrelated to current schedule,
-	// place according to course number
-	digits := regexp.MustCompile("[0-9]+")
-	if maxWt == 0 {
-		courseNum, _ := strconv.Atoi(digits.FindString(addCourse))
-		if courseNum > 4000 {
-			addSem = findSmallerSem(&semMap, 6, 7)
-		} else if courseNum > 3000 {
-			addSem = findSmallerSem(&semMap, 4, 5)
-		} else if courseNum > 2000 {
-			addSem = findSmallerSem(&semMap, 2, 3)
-		} else {
-			addSem = findSmallerSem(&semMap, 0, 1)
-		}
-	}
+	addSem := findSemester(courses, semMap, semKeys, cnames, coGraph, postGraph, semPoints, addCourse)
 
 	response := AddResponse{Row: addSem}
 	responseJSON, err := json.Marshal(response)
@@ -696,6 +774,7 @@ func main() {
 	http.HandleFunc("/rec/", recHandler)
 	http.HandleFunc("/unordered_rec/", unorderedRecHandler)
 	http.HandleFunc("/smart_add/", addHandler)
+	http.HandleFunc("/multiple_smart_add/", addMultipleHandler)
 	http.HandleFunc("/core_courses/", coreClassesHandler)
 	http.HandleFunc("/major_courses/", majorCoursesHandler)
 	http.HandleFunc("/log/", logHandler)
