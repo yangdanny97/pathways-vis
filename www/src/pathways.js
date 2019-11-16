@@ -672,6 +672,7 @@ function choosingCourses(){
                 let dropdown = d3.select("#dropdownlist");
                 let ele = dropdown.append("li").append("label");
                 ele.html("<input type=checkbox> " + course);
+                dropdown.on("click", function() { d3.event.stopPropagation(); });
             })
         });
     
