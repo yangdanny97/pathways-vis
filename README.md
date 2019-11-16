@@ -187,12 +187,20 @@ visualization project of pathways through cornell CIS
 - modes for "graph/unordered", "relevance/random" courses
 
 #### Progress
-- TBD
+- prefilled schedule button
+- edges between courses + semester select workflow merged with main branch
+- hover tooltips
+- quick-fill schedule using dropdown menu
+
+#### Midterm Presentations Feedback 11/15
+- hoverover -> change circle text to "Remove" (done)
+- reorder nodes to reduce edge overlap
+- transparency over "how" for recs, give users more control over results (bias diversity vs relevance)
 
 ### TODO - tasks backlog
 - Optimize frontend compilation performance, reduce dependencies
 - Optimize webpack CSS loading (right now CSS loads after JS, which loads after the body, resulting in no styling for 1/2 sec after page load)
-- Brainstorm and implement intuitive user flow for L-R pane interaction
+- ~Brainstorm and implement intuitive user flow for L-R pane interaction~
 - Log using local DB instead of StackDriver
 - Reach out to CourseCrafter for API access (maybe)
 - optimization to response time - reduce graph size
