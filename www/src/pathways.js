@@ -670,8 +670,10 @@ function choosingCourses(){
             d.Courses.forEach(course => majorCourses.push(course.Name));
             majorCourses.forEach(function(course){
                 let dropdown = d3.select("#dropdownlist");
-                let ele = dropdown.append("li").append("label");
+                let li = dropdown.append("li").attr("class", "form-check");
+                let ele = li.append("label").attr("class","form-check-label");
                 ele.html("<input type=checkbox> " + course);
+                ele.select("input").attr("class", "form-check-input");
                 dropdown.on("click", function() { d3.event.stopPropagation(); });
             })
         });
