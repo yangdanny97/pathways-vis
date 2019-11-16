@@ -153,7 +153,7 @@ visualization project of pathways through cornell CIS
   - When clicking on viz nodes, add exploratory card to the left side
   - Add popovers for class info
 
-### Meeting 8 November
+#### Meeting 8 November
 - Sample schedule button
   - Build a pre-filled schedule for a whole career
 - Show suggestions from each course or for all courses?
