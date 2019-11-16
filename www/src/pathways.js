@@ -669,18 +669,18 @@ function choosingCourses(){
         .then(d => {
             d.Courses.forEach(course => majorCourses.push(course.Name));
             majorCourses.forEach(function(course){
-                let dropdown = d3.select("#dropdownlist");
-                let li = dropdown.append("li").attr("class", "form-check");
-                let ele = li.append("label").attr("class","form-check-label");
-                ele.html("<input type=checkbox> " + course);
-                ele.select("input").attr("class", "form-check-input");
-                dropdown.on("click", function() { d3.event.stopPropagation(); });
+                let checkboxes = d3.select("#menu").append("ul");
+                let div = checkboxes.append("li").attr("class", "form-check");
+                div.append("input").attr("class","form-check-input")
+                    .attr("type","checkbox");
+                div.append("label").attr("class", "form-check-label")
+                    .text(course);
             })
         });
     
-    d3.select("#selectCourses").on("click", function(){
+    d3.select("#updatecourses").on("click", function(){
         chosenCourses = [];
-        d3.select("#dropdownlist").selectAll("input").each(function(_,i){
+        d3.select("#menu").selectAll("input").each(function(_,i){
             if (this.checked == true){
                 chosenCourses.push(majorCourses[i]);
             }
