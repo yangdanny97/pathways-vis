@@ -17,6 +17,8 @@ var data_edges = [];
 var sem_select = [];
 var selected_sem = -1;
 
+var render_id = "";
+
 // TRUE == LIMIT SAME DEPARTMENT COURSE SUGGESTIONS
 var limitDept = true;
 
@@ -108,6 +110,7 @@ function push(courses, status) {
 
 /* Render an array of grokked courses into the deck. If no array is provided, render the stack */
 function render(courses, status, displayAdd = true, displayRemove = true) {
+    if (status !== render_id) return;
     status = status || "Courses";
     mode.innerHTML = status;
 
@@ -127,8 +130,7 @@ function render(courses, status, displayAdd = true, displayRemove = true) {
             clamp: 3
         });
     }
-
-    return 0;
+    return;
 }
 
 /* Package the API course data into a smaller, neater object */
@@ -238,6 +240,7 @@ var search = function (query) {
     let url = `https://classes.cornell.edu/api/2.0/search/classes.json?roster=${semester}&q=${query}&subject=${major}`;
 
     let r = new Request(url);
+    render_id = "Search";
     fetch(r)
         .then(resp => {
             if (!resp.ok) {
@@ -399,10 +402,12 @@ async function selectSem(n) {
     selected_sem = n;
     d3.selectAll(".sem").attr("fill", "none");
     d3.selectAll(`.sem${n}`).attr("fill", "pink");
+    d3.select(`#selectText2_${n + 1}`).text("Deselect");
     var sem_recs = data_recs.filter(d => d.Row == n);
     var rec_names = [];
     sem_recs.forEach(sr => sr.Recs.forEach(r => rec_names.push(r)));
     var rec_info = await infoAll(rec_names);
+    render_id = `Group ${n+1} Recommendations`;
     render(rec_info, `Group ${n+1} Recommendations`, true, false);
 }
 
@@ -535,6 +540,7 @@ function displayCourses() {
         });
 
     course.append("text")
+        .attr("id", d => `text_${d.Name}`)
         .attr('text-anchor', "middle")
         .attr("font-size", "18px")
         .text(d => d.Name)
@@ -550,12 +556,16 @@ function displayCourses() {
         .style("opacity", 0)
         .on("mouseover", async d => {
             var c = await info(d.Name);
-            render([c], "Course Info (Click to Delete)", false, false);
+            render_id = "Course Info";
+            render([c], "Course Info", false, false);
+            d3.select(`#text_${d.Name}`).text("Remove");
         })
-        .on("mouseout", () => {
+        .on("mouseout", d => {
+            d3.select(`#text_${d.Name}`).text(d.Name);
             if (selected_sem != undefined && selected_sem != -1) {
                 selectSem(selected_sem);
             } else {
+                render_id = "Recommended Courses";
                 recommend().then(c => render(c, "Recommended Courses", true, false));
             }
         });
@@ -568,7 +578,9 @@ function displayCourses() {
             } else {
                 // deselecting a semester
                 selected_sem = -1;
+                d3.select(`#selectText2_${d.Row + 1}`).text("Select");
                 d3.selectAll(".sem").attr("fill", "none");
+                render_id = "Recommended Courses";
                 recommend().then(c => render(c, "Recommended Courses", true, false));
             }
         })
@@ -588,11 +600,21 @@ function displayCourses() {
         .attr("fill", "none");
 
     selectbtn.append("text")
+        .attr("id",d => `selectText1_${d.Row + 1}`)
         .attr('text-anchor', "middle")
-        .attr("font-size", "64px")
-        .text("+")
+        .attr("font-size", "18px")
+        .text("Click to")
         .attr("x", 0)
-        .attr("y", 16)
+        .attr("y", -6)
+        .attr("fill", "gray");
+
+    selectbtn.append("text")
+        .attr("id",d => `selectText2_${d.Row + 1}`)
+        .attr('text-anchor', "middle")
+        .attr("font-size", "18px")
+        .text("Select")
+        .attr("x", 0)
+        .attr("y", 18)
         .attr("fill", "gray");
 
     selectbtn.append("text")
@@ -606,6 +628,7 @@ function displayCourses() {
 
 init();
 
+render_id = "Recommended Courses";
 recommend().then(c => render(c, "Recommended Courses", true, false));
 
 var fill_per_sem = 5;
