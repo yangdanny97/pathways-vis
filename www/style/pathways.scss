@@ -24,7 +24,9 @@ $cornell_red: #B31B1B;
 
     margin: auto;
 
-    & > div { height: 100%; }
+    &>div {
+        height: 100%;
+    }
 }
 
 #left {
@@ -52,11 +54,11 @@ $cornell_red: #B31B1B;
     //     animation: slide-in 0.5s forwards;
     //     -webkit-animation: slide-in 0.5s forwards;
     // }
-        
+
     // @keyframes slide-in {
     //     100% { transform: translateX(0%); }
     // }
-    
+
     // @-webkit-keyframes slide-in {
     //     100% { -webkit-transform: translateX(0%); }
     // }
@@ -64,7 +66,7 @@ $cornell_red: #B31B1B;
 
 #left #deck .card {
     margin: 10px;
-    
+
     .card-header {
         display: flex;
         flex-direction: row;
@@ -88,7 +90,9 @@ $cornell_red: #B31B1B;
             overflow: hidden;
             white-space: nowrap;
 
-            a { color: black; }
+            a {
+                color: black;
+            }
         }
 
         div.cred {
@@ -96,27 +100,38 @@ $cornell_red: #B31B1B;
             text-align: right;
         }
     }
-    
+
     .card-text {
         font-family: nunito;
     }
 }
 
 #right {
-    overflow:scroll;
-    
-    .card { margin-top: 15px; }
+    overflow: scroll;
 
-    circle,text { 
-        cursor: pointer; 
-        -webkit-user-select: none; /* Safari */        
-        -moz-user-select: none; /* Firefox */
-        -ms-user-select: none; /* IE10+/Edge */
-        user-select: none; /* Standard */
+    .card {
+        margin-top: 15px;
+    }
+
+    circle,
+    text {
+        cursor: pointer;
+        -webkit-user-select: none;
+        /* Safari */
+        -moz-user-select: none;
+        /* Firefox */
+        -ms-user-select: none;
+        /* IE10+/Edge */
+        user-select: none;
+        /* Standard */
     }
 
     button {
         margin: 10px;
+    }
+
+    ul {
+        padding: 5px;
     }
 }
 
@@ -129,27 +144,27 @@ $cornell_red: #B31B1B;
     font-size: 14px;
     min-width: 150px;
     border: 1px solid #d4d4d4;
-    z-index:1200;
-  }
-  
-  .context-menu ul {
+    z-index: 1200;
+}
+
+.context-menu ul {
     list-style-type: none;
     margin: 4px 0px;
     padding: 0px;
     cursor: default;
-  }
-  
-  .context-menu ul li {
+}
+
+.context-menu ul li {
     padding: 4px 16px;
-  }
-  
-  .context-menu ul li:hover {
+}
+
+.context-menu ul li:hover {
     background-color: #4677f8;
     color: #fefefe;
-  }
+}
 
-  .scrollable-menu {
+.scrollable-menu {
     height: auto;
-    max-height: 500px;
+    max-height: 300px;
     overflow-x: hidden;
 }
