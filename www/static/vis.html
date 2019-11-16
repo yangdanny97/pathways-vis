@@ -47,15 +47,33 @@
                 <button id="auto-gen" type="button" class="btn btn-primary">
                     Auto-generate Schedule
                 </button>
-                <div class="btn-group btn-group-sm">
-                    <button type="button" class="btn btn-primary" id="selectCourses">Select
-                        Courses Taken</button>
-                    <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <span class="sr-only">Toggle Dropdown</span>
-                    </button>
-                    <ul class="dropdown-menu checkbox-menu allow-focus scrollable-menu" id="dropdownlist"
-                        aria-labelledby="dropdownMenu1">
-                    </ul>
+                <!-- Button trigger modal -->
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal">
+                    Select Classes
+                </button>
+
+                <!-- Modal -->
+                <div class="modal fade" id="modal" tabindex="-1" role="dialog"
+                    aria-labelledby="modalLongTitle" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title"
+                                id="modalLongTitle">Select Courses You've
+                                Taken</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body" id="menu">
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                <button id="updatecourses" type="button"
+                                class="btn btn-primary" data-dismiss="modal">Update</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <svg id="vis" width="1000px" , height="1250px"></svg>
