@@ -402,7 +402,8 @@ async function selectSem(n) {
     selected_sem = n;
     d3.selectAll(".sem").attr("fill", "none");
     d3.selectAll(`.sem${n}`).attr("fill", "pink");
-    d3.select(`#selectText2_${n + 1}`).text("Deselect");
+    d3.selectAll(`.selectText2`).text("Select");
+    d3.selectAll(`.selectText2_${n + 1}`).text("Deselect");
     var sem_recs = data_recs.filter(d => d.Row == n);
     var rec_names = [];
     sem_recs.forEach(sr => sr.Recs.forEach(r => rec_names.push(r)));
@@ -578,7 +579,7 @@ function displayCourses() {
             } else {
                 // deselecting a semester
                 selected_sem = -1;
-                d3.select(`#selectText2_${d.Row + 1}`).text("Select");
+                d3.select(`.selectText2_${d.Row + 1}`).text("Select");
                 d3.selectAll(".sem").attr("fill", "none");
                 render_id = "Recommended Courses";
                 recommend().then(c => render(c, "Recommended Courses", true, false));
@@ -600,7 +601,7 @@ function displayCourses() {
         .attr("fill", "none");
 
     selectbtn.append("text")
-        .attr("id",d => `selectText1_${d.Row + 1}`)
+        .attr("class",d => `selectText1 selectText1_${d.Row + 1}`)
         .attr('text-anchor', "middle")
         .attr("font-size", "18px")
         .text("Click to")
@@ -609,7 +610,7 @@ function displayCourses() {
         .attr("fill", "gray");
 
     selectbtn.append("text")
-        .attr("id",d => `selectText2_${d.Row + 1}`)
+        .attr("class",d => `selectText2 selectText2_${d.Row + 1}`)
         .attr('text-anchor', "middle")
         .attr("font-size", "18px")
         .text("Select")
