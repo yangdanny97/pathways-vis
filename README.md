@@ -196,6 +196,13 @@ visualization project of pathways through cornell CIS
 - hoverover -> change circle text to "Remove" (done)
 - reorder nodes to reduce edge overlap
 - transparency over "how" for recs, give users more control over results (bias diversity vs relevance)
+- maybe use shading to show differences between semesters
+
+### Week ending 11/23
+
+#### Goals
+- Danny - tasks backlog, performance improvements and bug fixes
+- Eric - investigate algs to reorder nodes to reduce edge overlap
 
 ### TODO - tasks backlog
 - Optimize frontend compilation performance, reduce dependencies
