@@ -39,28 +39,49 @@
         </div>
         <div id='right' class="col-md-8">
             <div class="card">
-                <div class="card-body">
+                <!-- <div class="card-body">
                     Instructions: Hover over red courses for more info, or click to remove. Select a semester using (+)
                     to view detailed recommendations for that group. Click "auto-generate" to automatically populate the
                     schedule.
+                </div> -->
+                <div class="row">
+                    <div class="col-md-4">
+                        <button id="auto-gen" type="button" class="btn btn-primary">
+                            Auto-fill Schedule
+                        </button>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal">
+                            Add Classes
+                        </button>
+                    </div>
+                    <div class="col-md-4">
+                        <div>Tune Recommendations:</div>
+                        <div class="form-check">
+                            <input class="form-check-input tuning" type="radio" name="tuning" id="tuning_diversity"
+                                value="diversity" checked>
+                            <label class="form-check-label" for="tuning_diversity">
+                                Prioritize Diversity
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input tuning" type="radio" name="tuning" id="tuning_relevance"
+                                value="relevance">
+                            <label class="form-check-label" for="tuning_relevance">
+                                Prioritize Major-Relevance
+                            </label>
+                        </div>
+                        <br>
+                    </div>
                 </div>
-                <button id="auto-gen" type="button" class="btn btn-primary">
-                    Auto-fill Schedule
-                </button>
-                <!-- Button trigger modal -->
-                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal">
-                    Select Classes
-                </button>
 
-                <!-- Modal -->
-                <div class="modal fade" id="modal" tabindex="-1" role="dialog"
-                    aria-labelledby="modalLongTitle" aria-hidden="true">
+                <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="modalLongTitle"
+                    aria-hidden="true">
                     <div class="modal-dialog" role="document">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h5 class="modal-title"
-                                id="modalLongTitle">Select Courses You've
-                                Taken</h5>
+                                <h5 class="modal-title" id="modalLongTitle">Select Courses You've
+                                    Taken</h5>
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                     <span aria-hidden="true">&times;</span>
                                 </button>
@@ -72,8 +93,8 @@
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                                <button id="updatecourses" type="button"
-                                class="btn btn-primary" data-dismiss="modal">Update</button>
+                                <button id="updatecourses" type="button" class="btn btn-primary"
+                                    data-dismiss="modal">Update</button>
                             </div>
                         </div>
                     </div>
