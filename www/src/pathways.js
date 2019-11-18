@@ -20,7 +20,7 @@ var selected_sem = -1;
 var render_id = "";
 
 // TRUE == LIMIT SAME DEPARTMENT COURSE SUGGESTIONS
-var limitDept = true;
+var limitDept = (d3.select('input[name="tuning"]:checked').node().value == "diversity");
 
 var courses;
 var selectbtns;
@@ -78,7 +78,6 @@ function add(code) {
 
 /* Remove a class from the list of preferred classes */
 function remove(code) {
-    // console.log(code);
     var c = data.find(x => x.Name === code);
     if (c) {
         deleteCourse(c);
@@ -116,8 +115,6 @@ function render(courses, status, displayAdd = true, displayRemove = true) {
 
     stack = courses.filter(c => c !== undefined);
     window.stack = stack;
-
-    //console.log(stack);
 
     let cards = stack.map(x => card(x, displayAdd, displayRemove));
 
@@ -302,7 +299,6 @@ function SELECT(row, col) {
 }
 
 function init() {
-    console.log(major);
     // displaySemesters();
     var reqbody = {
         Major: major.toLowerCase(),
@@ -329,7 +325,6 @@ function init() {
 }
 
 async function updateRecs(callback) {
-    // console.log(data);
     var reqbody = {
         Major: major.toLowerCase(),
         Courses: data,
@@ -356,7 +351,6 @@ function addCourse(cname, row) {
     log(`add|${major}|${cname}`);
     pref.add(cname);
     window.pref = pref;
-    // console.log(`ADD ${cname}`);
     if (data.find(x => x.Name === cname)) {
         alert("course is already selected")
         return
@@ -376,7 +370,6 @@ function deleteCourse(c) {
     log(`delete|${major}|${c.Name}`);
     var row = c.Row,
         col = c.Col;
-    // console.log(`DELETE ${c.Name}`);
     data = data.filter(x => x.Name !== c.Name); // remove
     sem_select.filter(x => x.Row == row)[0].Col--;
     data.map(x => { //shift to left
@@ -461,8 +454,11 @@ function displayCourses() {
     let data_links = [];
     let nodeMap = new Map();
     data.forEach(d => nodeMap.set(d.Name, d));
-    data_edges.forEach(d => 
-        data_links.push({"source":nodeMap.get(d.Source), "target":nodeMap.get(d.Destination)}))
+    data_edges.forEach(d =>
+        data_links.push({
+            "source": nodeMap.get(d.Source),
+            "target": nodeMap.get(d.Destination)
+        }))
 
     //arrowhead
     vis.append('defs').append('svg:marker')
@@ -480,26 +476,28 @@ function displayCourses() {
         .style('stroke', 'none');
 
     let links = vis.selectAll(".link")
-        .data(data_links, d => d.source.Name + d.source.Row.toString() 
-        + d.target.Name + d.target.Row.toString());
+        .data(data_links, d => d.source.Name + d.source.Row.toString() +
+            d.target.Name + d.target.Row.toString());
     links.exit().remove();
-    let polylinePoints = function(d){
+    let polylinePoints = function (d) {
         let x1 = getX(d.source);
         let x2 = getX(d.target);
         let y1 = getY(d.source) + 14;
         let y2 = getY(d.target);
-        return x1 + "," + y1 + " " + (x1 + x2)/2 + "," + (y1 + y2)/2 + " " + x2 + "," + y2;
+        return x1 + "," + y1 + " " + (x1 + x2) / 2 + "," + (y1 + y2) / 2 + " " + x2 + "," + y2;
     }
     links.transition() //update position
         .attr("points", d => polylinePoints(d)).duration(500);
     let link = links.enter().append("polyline")
-        .attr("class","link")
+        .attr("class", "link")
         .attr("stroke", "black")
         .attr("points", d => polylinePoints(d))
         .attr("marker-mid", "url(#arrowhead)")
         .style("opacity", 0);
-    link.transition().style("opacity",1).duration(500);
-    vis.selectAll("polyline").sort(function(a, b){ return -1; }) //put to back of viz
+    link.transition().style("opacity", 1).duration(500);
+    vis.selectAll("polyline").sort(function (a, b) {
+        return -1;
+    }) //put to back of viz
 
     courses = vis.selectAll(".course").data(data, d => d.Name);
     selectbtns = vis.selectAll(".sem_select").data(sem_select, d => d.Row);
@@ -514,13 +512,13 @@ function displayCourses() {
         .attr("transform", d => `translate(${getX(d)} ${getY(d)})`)
         .duration(500);
 
-    
-    d3.selection.prototype.moveToFront = function() {
-        return this.each(function(){
+
+    d3.selection.prototype.moveToFront = function () {
+        return this.each(function () {
             this.parentNode.appendChild(this);
         });
-        };
-    
+    };
+
     courses.moveToFront();
     // add course
     var course = courses.enter().append("g")
@@ -573,7 +571,7 @@ function displayCourses() {
                 recommend().then(c => render(c, "Recommended Courses", true, false));
             }
         });
-    
+
     var selectbtn = selectbtns.enter().append("g")
         .attr("class", "sem_select")
         .on("click", d => {
@@ -604,7 +602,7 @@ function displayCourses() {
         .attr("fill", "none");
 
     selectbtn.append("text")
-        .attr("class",d => `selectText1 selectText1_${d.Row + 1}`)
+        .attr("class", d => `selectText1 selectText1_${d.Row + 1}`)
         .attr('text-anchor', "middle")
         .attr("font-size", "18px")
         .text("Click to")
@@ -613,7 +611,7 @@ function displayCourses() {
         .attr("fill", "gray");
 
     selectbtn.append("text")
-        .attr("class",d => `selectText2 selectText2_${d.Row + 1}`)
+        .attr("class", d => `selectText2 selectText2_${d.Row + 1}`)
         .attr('text-anchor', "middle")
         .attr("font-size", "18px")
         .text("Select")
@@ -655,8 +653,19 @@ d3.select("#auto-gen").on("click", () => {
     updateRecs();
 });
 
+d3.selectAll(".tuning").on("change", () => {
+    limitDept = (d3.select('input[name="tuning"]:checked').node().value == "diversity");
+    updateRecs(() => {
+        if (selected_sem !== -1 && selected_sem !== undefined) {
+            selectSem(selected_sem);
+        } else {
+            recommend().then(c => render(c, "Recommended Courses", true, false));
+        }
+    });
+});
+
 // choosing courses
-function choosingCourses(){
+function choosingCourses() {
     let majorCourses = [];
     let chosenCourses = [];
     var reqbody = {
@@ -671,26 +680,26 @@ function choosingCourses(){
         .then(resp => resp.json())
         .then(d => {
             d.Courses.forEach(course => majorCourses.push(course.Name));
-            majorCourses.forEach(function(course){
+            majorCourses.forEach(function (course) {
                 let table = d3.select("#menu");
                 let tbody = table.select("tbody");
                 let tr = tbody.append("tr");
                 tr.append("td").text(course)
-                    .on("click", function(){
+                    .on("click", function () {
                         let ele = d3.select(this);
-                        if (ele.attr("class") == "hover"){
-                            ele.attr("class", ""); 
+                        if (ele.attr("class") == "hover") {
+                            ele.attr("class", "");
                         } else {
                             ele.attr("class", "hover");
                         }
                     });
             })
         });
-    
-    d3.select("#updatecourses").on("click", function(){
+
+    d3.select("#updatecourses").on("click", function () {
         chosenCourses = [];
-        d3.select("#menu").selectAll("td").each(function(_,i){
-            if (d3.select(this).attr("class") == "hover"){
+        d3.select("#menu").selectAll("td").each(function (_, i) {
+            if (d3.select(this).attr("class") == "hover") {
                 chosenCourses.push(majorCourses[i]);
             }
         });
