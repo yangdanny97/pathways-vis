@@ -202,7 +202,11 @@ visualization project of pathways through cornell CIS
 
 #### Goals
 - Danny - tasks backlog, performance improvements and bug fixes
+- Danny - toggling between diversity and relevance
 - Eric - investigate algs to reorder nodes to reduce edge overlap
+
+#### Progress
+- data extraction script (raw CSV -> graph JSON, easily configurable) - Danny
 
 ### TODO - tasks backlog
 - Optimize frontend compilation performance, reduce dependencies
@@ -211,4 +215,4 @@ visualization project of pathways through cornell CIS
 - Log using local DB instead of StackDriver
 - Reach out to CourseCrafter for API access (maybe)
 - optimization to response time - reduce graph size
-- automatic data extraction script instead of using notebooks
+- ~automatic data extraction script instead of using notebooks~
