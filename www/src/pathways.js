@@ -672,19 +672,25 @@ function choosingCourses(){
         .then(d => {
             d.Courses.forEach(course => majorCourses.push(course.Name));
             majorCourses.forEach(function(course){
-                let checkboxes = d3.select("#menu").append("ul");
-                let div = checkboxes.append("li").attr("class", "form-check");
-                div.append("input").attr("class","form-check-input")
-                    .attr("type","checkbox");
-                div.append("label").attr("class", "form-check-label")
-                    .text(course);
+                let table = d3.select("#menu");
+                let tbody = table.select("tbody");
+                let tr = tbody.append("tr");
+                tr.append("td").text(course)
+                    .on("click", function(){
+                        let ele = d3.select(this);
+                        if (ele.attr("class") == "hover"){
+                            ele.attr("class", ""); 
+                        } else {
+                            ele.attr("class", "hover");
+                        }
+                    });
             })
         });
     
     d3.select("#updatecourses").on("click", function(){
         chosenCourses = [];
-        d3.select("#menu").selectAll("input").each(function(_,i){
-            if (this.checked == true){
+        d3.select("#menu").selectAll("td").each(function(_,i){
+            if (d3.select(this).attr("class") == "hover"){
                 chosenCourses.push(majorCourses[i]);
             }
         });
