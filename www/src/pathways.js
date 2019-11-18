@@ -483,24 +483,19 @@ function displayCourses() {
         .data(data_links, d => d.source.Name + d.source.Row.toString() 
         + d.target.Name + d.target.Row.toString());
     links.exit().remove();
+    let polylinePoints = function(d){
+        let x1 = getX(d.source);
+        let x2 = getX(d.target);
+        let y1 = getY(d.source) + 14;
+        let y2 = getY(d.target);
+        return x1 + "," + y1 + " " + (x1 + x2)/2 + "," + (y1 + y2)/2 + " " + x2 + "," + y2;
+    }
     links.transition() //update position
-        .attr("points", function(d){
-            let x1 = getX(d.source);
-            let x2 = getX(d.target);
-            let y1 = getY(d.source) + 14;
-            let y2 = getY(d.target);
-            return x1 + "," + y1 + " " + (x1 + x2)/2 + "," + (y1 + y2)/2 + " " + x2 + "," + y2;
-        }).duration(500);
+        .attr("points", d => polylinePoints(d)).duration(500);
     let link = links.enter().append("polyline")
         .attr("class","link")
         .attr("stroke", "black")
-        .attr("points", function(d){
-            let x1 = getX(d.source);
-            let x2 = getX(d.target);
-            let y1 = getY(d.source) + 14;
-            let y2 = getY(d.target);
-            return x1 + "," + y1 + " " + (x1 + x2)/2 + "," + (y1 + y2)/2 + " " + x2 + "," + y2;
-        })
+        .attr("points", d => polylinePoints(d))
         .attr("marker-mid", "url(#arrowhead)")
         .style("opacity", 0);
     link.transition().style("opacity",1).duration(500);
@@ -519,6 +514,14 @@ function displayCourses() {
         .attr("transform", d => `translate(${getX(d)} ${getY(d)})`)
         .duration(500);
 
+    
+    d3.selection.prototype.moveToFront = function() {
+        return this.each(function(){
+            this.parentNode.appendChild(this);
+        });
+        };
+    
+    courses.moveToFront();
     // add course
     var course = courses.enter().append("g")
         .attr("class", "course")
@@ -570,7 +573,7 @@ function displayCourses() {
                 recommend().then(c => render(c, "Recommended Courses", true, false));
             }
         });
-
+    
     var selectbtn = selectbtns.enter().append("g")
         .attr("class", "sem_select")
         .on("click", d => {
@@ -669,16 +672,25 @@ function choosingCourses(){
         .then(d => {
             d.Courses.forEach(course => majorCourses.push(course.Name));
             majorCourses.forEach(function(course){
-                let dropdown = d3.select("#dropdownlist");
-                let ele = dropdown.append("li").append("label");
-                ele.html("<input type=checkbox> " + course);
+                let table = d3.select("#menu");
+                let tbody = table.select("tbody");
+                let tr = tbody.append("tr");
+                tr.append("td").text(course)
+                    .on("click", function(){
+                        let ele = d3.select(this);
+                        if (ele.attr("class") == "hover"){
+                            ele.attr("class", ""); 
+                        } else {
+                            ele.attr("class", "hover");
+                        }
+                    });
             })
         });
     
-    d3.select("#selectCourses").on("click", function(){
+    d3.select("#updatecourses").on("click", function(){
         chosenCourses = [];
-        d3.select("#dropdownlist").selectAll("input").each(function(_,i){
-            if (this.checked == true){
+        d3.select("#menu").selectAll("td").each(function(_,i){
+            if (d3.select(this).attr("class") == "hover"){
                 chosenCourses.push(majorCourses[i]);
             }
         });
@@ -711,13 +723,6 @@ function choosingCourses(){
     })
 }
 choosingCourses();
-
-// $(".checkbox-menu").on("change", "input[type='checkbox']", function() {
-//     $(this).closest("li").toggleClass("active", this.checked);
-// });
-// $(document).on('click', '.allow-focus', function (e) {
-//     e.stopPropagation();
-// });
 
 window.d3 = d3;
 
