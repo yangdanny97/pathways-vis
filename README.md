@@ -207,6 +207,7 @@ visualization project of pathways through cornell CIS
 
 #### Progress
 - data extraction script (raw CSV -> graph JSON, easily configurable) - Danny
+- toggling between diversity and relevance - Danny
 
 ### TODO - tasks backlog
 - Optimize frontend compilation performance, reduce dependencies
