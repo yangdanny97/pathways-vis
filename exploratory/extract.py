@@ -1,7 +1,7 @@
 import os
 import json
 from typing import Dict, List, Tuple, Any, Callable, Set
-rootdir = './data'
+
 schema_desc = """
 term: (2018, 0) second item is 0 for SP, 2 for FA
 term number: 2
