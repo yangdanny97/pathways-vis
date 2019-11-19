@@ -1,0 +1,116 @@
+<html>
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<style></style>
+
+<body>
+    <script>
+        var width = 800;
+        var height = 800;
+        var svg = d3.select("body").append("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+        var graph = {};
+
+        var vis = svg.append("g").attr("transform", `translate(${width * .1},${height * .1})`);
+        var link = vis.selectAll(".link");
+        var nodes = vis.selectAll(".node");
+
+        function initializeGraph(data) {
+            data.edges.forEach(e => {
+                graph[e.source] = [];
+                graph[e.destination] = [];
+            });
+            data.edges.forEach(e => {
+                graph[e.source].push({ "dest": e.destination, "weight": e.weight });
+            });
+            data.edges.forEach(e => {
+                if (graph[e.destination].length > 3) {
+                    graph[e.destination].sort((a, b) => b.weight - a.weight);
+                    graph[e.destination] = graph[e.destination].slice(0, 3);
+                }
+
+                if (graph[e.source].length > 3) {
+                    graph[e.source].sort((a, b) => b.weight - a.weight);
+                    graph[e.source] = graph[e.source].slice(0, 3);
+                }
+            });
+            data.nodes.forEach(n => {
+                graph[n].sort((a, b) => b.weight - a.weight);
+                if (graph[n].length > 3) {
+                    graph[n] = graph[n].slice(0, 3);
+                }
+            });
+        }
+
+        function buildTree(node) {
+            var root = { "name": node, "children": [] };
+            graph[node].forEach(e => {
+                var child = { "name": e.dest, "value": e.weight, "children": [] }
+                graph[e.dest].forEach(e_ => {
+                    child.children.push({ "name": e_.dest, "value": e_.weight });
+                });
+                root.children.push(child);
+            });
+            return root;
+        }
+
+        function renderNode(n) {
+            var treedata = buildTree(n);
+            treedata = d3.hierarchy(treedata);
+            var tree = d3.tree().size([width * .8, height * .8]);
+            var root = tree(treedata);
+
+            var _links = link.data(root.descendants().slice(1));
+            var _nodes = nodes.data(root.descendants());
+            d3.selectAll(".link").remove();
+            d3.selectAll(".node").remove();
+
+            linkg = _links.enter().append("g")
+                .attr("class", "link");
+
+            // for some reason x and y are flipped
+
+            linkg.append("line")
+                .attr("class", "link")
+                .attr("fill", "none")
+                .attr("stroke", "gray")
+                .attr("stroke-width", 3)
+                .attr("x1", d => d.y)
+                .attr("x2", d => d.parent.y)
+                .attr("y1", d => d.x)
+                .attr("y2", d => d.parent.x);
+
+            linkg.append("text")
+                .attr("class", "link")
+                .attr("x", d => (d.y + d.parent.y) / 2)
+                .attr("y", d => (d.x + d.parent.x) / 2)
+                .text(d => d.data.value)
+                .attr("stroke", "black");
+
+            node = _nodes.enter().append("g")
+                .attr("class", "node")
+                .attr("transform", d => `translate(${d.y},${d.x})`);
+
+            node.append("circle")
+                .attr("class", "node")
+                .attr("fill", "silver")
+                .attr("stroke", "gray")
+                .attr("r", 10)
+                .on("click", d => renderNode(d.data.name));
+
+            node.append("text")
+                .attr("class", "node")
+                .text(d => d.data.name)
+                .attr("stroke", "black")
+                .on("click", d => renderNode(d.data.name));
+        }
+
+        d3.json("./data/cs_post.json").then(function (data) {
+            initializeGraph(data);
+            renderNode("CS1110");
+        });
+    </script>
+</body>
+
+</html>
