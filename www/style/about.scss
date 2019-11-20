@@ -8,12 +8,20 @@ $cornell_red: #B31B1B;
     box-sizing: border-box;
 }
 
+body {
+    background-image: url(/static/cornell.jpg);
+    background-repeat: no-repeat;
+    background-position: top;
+    background-size: 100% auto;
+    background-color: black;
+}
+
 .navbar {
     background-color: $cornell_red;
     height: 10vh;
 
     .navbar-brand {
-        font-family: Montserrat;
+        font-family: Raleway;
         font-size: 20px;
     }
 }
@@ -21,9 +29,13 @@ $cornell_red: #B31B1B;
 #content {
     width: 1100px;
     margin: 20px auto;
-    border: 1px solid gray;
+    border: 1px solid #eee;
+    background-color: #eee;
     border-radius: 10px;
-    padding: 15px;
+    padding: 20px;
+
+    h1,h2,h3,h4 { font-family: Raleway }
+    p, h6 { font-family: Nunito; }
 }
 
 #team {
