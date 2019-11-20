@@ -151,6 +151,10 @@ func splashHandler(w http.ResponseWriter, r *http.Request) {
 	renderStaticTemplate(w, "index")
 }
 
+func aboutHandler(w http.ResponseWriter, r *http.Request) {
+	renderStaticTemplate(w, "about")
+}
+
 func majorHandler(w http.ResponseWriter, r *http.Request) {
 	fp := path.Join("data", "majors.json")
 	http.ServeFile(w, r, fp)
@@ -769,6 +773,7 @@ func main() {
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 	http.HandleFunc("/", splashHandler)
+	http.HandleFunc("/about/", aboutHandler)
 	http.HandleFunc("/vis/", visHandler)
 	http.HandleFunc("/rec/", recHandler)
 	http.HandleFunc("/unordered_rec/", unorderedRecHandler)

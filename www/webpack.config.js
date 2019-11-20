@@ -6,6 +6,7 @@ module.exports = {
   entry: {
     splash: './src/splash.js',
     pathways: './src/pathways.js',
+    about: './src/about.js',
   },
   output: {
     filename: '[name].bundle.js',
