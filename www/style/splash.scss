@@ -9,7 +9,6 @@ $input-height: 48px;
     height: 100vh;
     
     display: flex;
-    align-items: center;
 
     background: url(static/cornell.jpg) no-repeat center/cover;
 }
@@ -23,6 +22,7 @@ $input-height: 48px;
     flex-direction: row;
 
     h1 { 
+        //font-family: Montserrat;
         display: inline;
         color: white;
         margin-right: 20px;
@@ -37,6 +37,18 @@ $input-height: 48px;
         }
     }
 
+}
+
+footer {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+
+    width: 100%;
+    padding: 10px;
+
+    background-color: rgba(255, 255, 255, 0.473);
+    text-align: center;
 }
 
 .twitter-typeahead {
