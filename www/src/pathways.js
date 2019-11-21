@@ -557,10 +557,10 @@ function displayCourses() {
         .attr("fill", "white")
         .style("opacity", 0)
         .on("mouseover", async d => {
+            d3.select(`#text_${d.Name}`).text("Remove");
             var c = await info(d.Name);
             render_id = "Course Info";
             render([c], "Course Info", false, false);
-            d3.select(`#text_${d.Name}`).text("Remove");
         })
         .on("mouseout", d => {
             d3.select(`#text_${d.Name}`).text(d.Name);
