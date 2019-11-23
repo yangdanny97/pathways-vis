@@ -500,7 +500,7 @@ func recHandler(w http.ResponseWriter, r *http.Request) {
 
 	sort.Ints(semKeys)
 	// number of recs to generate per rec-tile
-	nRecs := 3
+	nRecs := 2
 
 	// calculate points and generate recs
 	for _, k := range semKeys {
