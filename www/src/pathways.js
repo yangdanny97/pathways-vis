@@ -633,7 +633,7 @@ init();
 render_id = "Recommended Courses";
 recommend().then(c => render(c, "Recommended Courses", true, false));
 
-var fill_per_sem = 5;
+var fill_per_sem = 4;
 // auto-schedule generation
 // adds a lot of courses all at once before refreshing
 d3.select("#auto-gen").on("click", () => {
