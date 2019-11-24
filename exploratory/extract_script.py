@@ -2,14 +2,14 @@ import extract
 import graph
 import time
 
-MAJORS = ["Computer Science","Statistical Science","Information Science"]
-CODES = ["cs","stsci","info"]
+MAJORS = ["Computer Science","Statistical Science","Information Science"] # majors to process (individually)
+CODES = ["cs","stsci","info"] # codes for the above majors, for naming graphs
 FILE_PATH = "./data/CIS_enrollment.csv"
 OUTPUT_DIR = "./data/"
-MIN_EDGE_WEIGHT = 1
+MIN_EDGE_WEIGHT = 0
 
-for i in range(len(majors)):
-    major, code = majors[i], codes[i]
+for i in range(len(MAJORS)):
+    major, code = MAJORS[i], CODES[i]
     print("Processing: "+major)
     data = extract.Data(FILE_PATH, [major])
     print("extraction done!")
@@ -49,7 +49,17 @@ for i in range(len(majors)):
                 if cname2 in s.term_numbers and s.term_numbers[cname2] == s.term_numbers[cname1] + 1:
                     count += 1
             if count > 0:
-                g.addEdge(cname1, cname2, count)
+                # if the weight of A -> B and B -> A differ by a factor of 2 or more then we only keep 
+                # the one with larger weight
+                if (cname2, cname1) not in g.edges:
+                    g.addEdge(cname1, cname2, count)
+                elif g.edges[(cname2, cname1)].weight  > count * 2:
+                    pass
+                elif g.edges[(cname2, cname1)].weight  < count / 2:
+                    g.addEdge(cname1, cname2, count)
+                    del g.edges[(cname2, cname1)]
+                else:
+                    g.addEdge(cname1, cname2, count)
         c += 1
     print("post-enrollment graph done!")
     fname = OUTPUT_DIR + code + "_post"
