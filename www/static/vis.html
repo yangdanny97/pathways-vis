@@ -11,20 +11,6 @@
     <nav class='navbar navbar-expand-sm navbar-dark'>
         <a class='navbar-brand' href='/'>Pathway</a>
         <span class='navbar-text mx-lg-3' id='major'></span>
-
-        <!-- <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-            <div class="navbar-nav">
-                <a class="nav-item nav-link" href='#' id="popular">Popular</a>
-                
-                <a class="nav-item nav-link" href="#" id="recommended">Recommendations</a>
-            </div>
-        </div> -->
-
-        <form class='form-inline' action="javascript:;" onsubmit="window.search()">
-            <input class="form-control mr-sm-1" type="search" placeholder="Class">
-            <button class="btn btn-outline-light" type="submit" id="search">Search</button>
-        </form>
-
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -33,30 +19,30 @@
 
     <div id='container' class="row">
         <div id='left' class="col-md-4">
+            <div id="searchbar">
+                <form class='form-inline' action="javascript:;" onsubmit="window.search()">
+                    <input class="form-control mr-sm-1" type="search" placeholder="Class">
+                    <button class="btn btn-primary" type="submit" id="search">Search</button>
+                </form>
+            </div>
             <h2 id='status'></h2>
 
             <div id='deck'></div>
         </div>
         <div id='right' class="col-md-8">
             <div class="card">
-                <!-- <div class="card-body">
-                    Instructions: Hover over red courses for more info, or click to remove. Select a semester using (+)
-                    to view detailed recommendations for that group. Click "auto-generate" to automatically populate the
-                    schedule.
-                </div> -->
-                <div class="row">
-                    <div class="col-md-4">
-                        <button id="auto-gen" type="button" class="btn btn-primary">
-                            Auto-fill Schedule
-                        </button>
-                    </div>
-                    <div class="col-md-4">
-                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal">
-                            Add Classes
-                        </button>
-                    </div>
-                    <div class="col-md-4">
-                        <div>Tune Recommendations:</div>
+                <div class="row tune-select">
+                    <div class="col-md-5">
+                        <div class="tune-select">Tune Recommendations:
+                            <span class="tune-info">
+                                (?)
+                                <span class="tooltiptext">
+                                    Prioritize Diversity: get more recommendations from a variety of majors
+                                    <br>
+                                    Prioritize Major-Relevance: get more recommendations from the selected major
+                                </span>
+                            </span>
+                        </div>
                         <div class="form-check">
                             <input class="form-check-input tuning" type="radio" name="tuning" id="tuning_diversity"
                                 value="diversity" checked>
@@ -72,6 +58,16 @@
                             </label>
                         </div>
                         <br>
+                    </div>
+                    <div class="col-md-4">
+                        <button id="auto-gen" type="button" class="btn btn-primary">
+                            Show Example Pathway
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal">
+                            Bulk Add Courses
+                        </button>
                     </div>
                 </div>
 
