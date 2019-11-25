@@ -220,10 +220,10 @@ visualization project of pathways through cornell CIS
 #### Feedback from Prof. Kizilcec
 - Improve how the header bar looks: remove the red color, just show the Pathway logo top left
 move the selected major down into the page body, add a label that says "XXX Major Pathway" and allow students to select a different one
-- the search bar should be at the top of the list of courses I think
-- rename "Auto-fill Schedule" with something that better describes what it does (Show an Example Pathway), same for "Add - Classes" (i wondered why it is only CS classes, also it is a very long list to navigate)
-- Add a small (info) symbol next to the Course Recommendation type that has a hover-explanation of what it means to prioritize diversity and major-relevance - Danny
-- ~Change Group to Semester and put the numbers 1 to 8 on the left hand side. I know it's not exact, but it is way more intuitive.~ - Danny
+- ~the search bar should be at the top of the list of courses I think~ - Danny
+- ~rename "Auto-fill Schedule" with something that better describes what it does (Show an Example Pathway), same for "Add - Classes"~ - Danny (i wondered why it is only CS classes, also it is a very long list to navigate)
+- ~Add a small (info) symbol next to the Course Recommendation type that has a hover-explanation of what it means to prioritize diversity and major-relevance~ - Danny
+- ~Change Group to Semester and~ put the numbers 1 to 8 on the left hand side. ~I know it's not exact, but it is way more intuitive.~ - Danny
 - Change the hover effect for courses (that shows course info) to a click-based effect. If you click a class circle, it will show the info on the left and let you remove it using the red button, be sure to highlight the selected class on the right hand side (maybe change the circle border color to blue. Can you also highlight the arrows that are connected to that node? - Danny
 - ~The dashed circle text should say something more descriptive than "click to select", maybe "Add course" or "Course Recommendations"~ - Danny
 - The way the layout is set up it seems that the auto-fill schedule feature should respond to the tune recommendations setting (which it doesn't, and that's fine), but it makes me think that this setting should be on the left side with the actual recommendations.
