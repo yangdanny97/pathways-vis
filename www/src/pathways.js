@@ -139,12 +139,12 @@ function grok(course) {
         titleShort: course.titleShort,
         description: course.description,
         link: `https://classes.cornell.edu/browse/roster/${course._sem}/class/${course.subject}/${course.catalogNbr}`,
-        credits: "? cr"
+        credits: "? units"
     }
 
     // apparently this credit selection doesn't always work
     try {
-        trim.credits = `${course.enrollGroups[0].unitsMinimum} cr`;
+        trim.credits = `${course.enrollGroups[0].unitsMinimum} units`;
     } catch (_) {
         return trim;
     }
@@ -361,7 +361,7 @@ function addCourse(cname, row) {
         data.push(COURSE(cname, row, rowsize));
         updateRecs(() => selectSem(row));
     } else {
-        alert("cannot add more than 6 courses per group")
+        alert("cannot add more than 6 courses per semester");
     }
 }
 
@@ -395,14 +395,14 @@ async function selectSem(n) {
     selected_sem = n;
     d3.selectAll(".sem").attr("fill", "none");
     d3.selectAll(`.sem${n}`).attr("fill", "pink");
-    d3.selectAll(`.selectText2`).text("Select");
+    d3.selectAll(`.selectText2`).text("Add Courses");
     d3.selectAll(`.selectText2_${n + 1}`).text("Deselect");
     var sem_recs = data_recs.filter(d => d.Row == n);
     var rec_names = [];
     sem_recs.forEach(sr => sr.Recs.forEach(r => rec_names.push(r)));
     var rec_info = await infoAll(rec_names);
-    render_id = `Group ${n+1} Recommendations`;
-    render(rec_info, `Group ${n+1} Recommendations`, true, false);
+    render_id = `Semester ${n+1} Recommendations`;
+    render(rec_info, `Semester ${n+1} Recommendations`, true, false);
 }
 
 //displays menu next to course when clicked
@@ -580,7 +580,7 @@ function displayCourses() {
             } else {
                 // deselecting a semester
                 selected_sem = -1;
-                d3.select(`.selectText2_${d.Row + 1}`).text("Select");
+                d3.select(`.selectText2_${d.Row + 1}`).text("Add Courses");
                 d3.selectAll(".sem").attr("fill", "none");
                 render_id = "Recommended Courses";
                 recommend().then(c => render(c, "Recommended Courses", true, false));
@@ -601,26 +601,26 @@ function displayCourses() {
         .attr("stroke-width", 3)
         .attr("fill", "none");
 
-    selectbtn.append("text")
-        .attr("class", d => `selectText1 selectText1_${d.Row + 1}`)
-        .attr('text-anchor', "middle")
-        .attr("font-size", "18px")
-        .text("Click to")
-        .attr("x", 0)
-        .attr("y", -6)
-        .attr("fill", "gray");
+    // selectbtn.append("text")
+    //     .attr("class", d => `selectText1 selectText1_${d.Row + 1}`)
+    //     .attr('text-anchor', "middle")
+    //     .attr("font-size", "18px")
+    //     .text("View")
+    //     .attr("x", 0)
+    //     .attr("y", -6)
+    //     .attr("fill", "gray");
 
     selectbtn.append("text")
         .attr("class", d => `selectText2 selectText2_${d.Row + 1}`)
         .attr('text-anchor', "middle")
         .attr("font-size", "18px")
-        .text("Select")
+        .text("Add Courses")
         .attr("x", 0)
-        .attr("y", 18)
+        .attr("y", 9)
         .attr("fill", "gray");
 
     selectbtn.append("text")
-        .text(d => `Group ${d.Row + 1}`)
+        .text(d => `Semester ${d.Row + 1}`)
         .attr("font-size", "18px")
         .attr("x", grid * 0.6)
         .attr("y", 9)
