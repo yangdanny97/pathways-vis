@@ -209,6 +209,7 @@ visualization project of pathways through cornell CIS
 - data extraction script (raw CSV -> graph JSON, easily configurable) - Danny
 - toggling between diversity and relevance - Danny
 - added about page - Sam
+- began working on edge overlap resort - Eric
 
 ### Week ending 12/7
 

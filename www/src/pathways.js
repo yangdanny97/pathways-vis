@@ -733,6 +733,24 @@ function choosingCourses() {
 }
 choosingCourses();
 
+// function resort(){
+//     let edgeCount = {};
+//     let nodeMap = new Map();
+//     data.forEach(d => {
+//         edgeCount[d.Name] =  {"row":d.Row, "outedges":0, "inedges":0};
+//         nodeMap.set(d.Name, d);
+//     });
+//     data_edges.forEach(d =>{
+//         edgeCount[d.Source]["outedges"] += 1;
+//         edgeCount[d.Destination]["inedges"] += 1;
+//     });
+
+//     for(let key in Object.keys(edgeCount)){
+//         let value = edgeCount[key];
+        
+//     }
+// }
+
 window.d3 = d3;
 
 window.stack = stack;
