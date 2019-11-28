@@ -14,16 +14,16 @@
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup">
             <span class="navbar-toggler-icon"></span>
         </button>
+        <form class='form-inline' action="javascript:;" onsubmit="window.search()">
+            <input class="form-control mr-sm-1" type="search" placeholder="Class">
+            <button class="btn btn-outline-light" type="submit" id="search">Search</button>
+        </form>
 
     </nav>
 
     <div id='container' class="row">
         <div id='left' class="col-md-4">
             <div id="searchbar">
-                <form class='form-inline' action="javascript:;" onsubmit="window.search()">
-                    <input class="form-control mr-sm-1" type="search" placeholder="Class">
-                    <button class="btn btn-primary" type="submit" id="search">Search</button>
-                </form>
             </div>
             <h2 id='status'></h2>
 
