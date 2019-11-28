@@ -16,6 +16,7 @@ var data_edges = [];
 // semester selection tiles
 var sem_select = [];
 var selected_sem = -1;
+var selected_course = "";
 
 var render_id = "";
 
@@ -322,6 +323,34 @@ function init() {
             }
             updateRecs();
         });
+    //arrowhead
+    vis.append('defs').append('svg:marker')
+        .attr("id", "arrowhead")
+        .attr("viewBox", "0 -5 10 10")
+        .attr("refX", 13)
+        .attr("refY", 0)
+        .attr("markerWidth", 15)
+        .attr("markerHeight", 8)
+        .attr("orient", "auto")
+        .attr("viewbox", "-5 -5 10 10")
+        .append("svg:path")
+        .attr("d", "M0,-5 L10,0 L0,5")
+        .attr('fill', "black")
+        .style('stroke', 'none');
+
+    vis.append('defs').append('svg:marker')
+        .attr("id", "arrowhead_selected")
+        .attr("viewBox", "0 -5 10 10")
+        .attr("refX", 13)
+        .attr("refY", 0)
+        .attr("markerWidth", 15)
+        .attr("markerHeight", 8)
+        .attr("orient", "auto")
+        .attr("viewbox", "-5 -5 10 10")
+        .append("svg:path")
+        .attr("d", "M0,-5 L10,0 L0,5")
+        .attr('fill', "blue")
+        .style('stroke', 'none');
 }
 
 async function updateRecs(callback) {
@@ -384,7 +413,7 @@ function deleteCourse(c) {
 
 // grid layout helpers
 function getX(d) {
-    return 30 + d.Col * grid * 1.1 + grid / 2;
+    return 50 + d.Col * grid * 1.1 + grid / 2;
 }
 
 function getY(d) {
@@ -396,7 +425,7 @@ async function selectSem(n) {
     d3.selectAll(".sem").attr("fill", "none");
     d3.selectAll(`.sem${n}`).attr("fill", "pink");
     d3.selectAll(`.selectText2`).text("Add Courses");
-    d3.selectAll(`.selectText2_${n + 1}`).text("Deselect");
+    d3.selectAll(`.selectText2_${n + 1}`).text("Selected");
     var sem_recs = data_recs.filter(d => d.Row == n);
     var rec_names = [];
     sem_recs.forEach(sr => sr.Recs.forEach(r => rec_names.push(r)));
@@ -460,20 +489,17 @@ function displayCourses() {
             "target": nodeMap.get(d.Destination)
         }))
 
-    //arrowhead
-    vis.append('defs').append('svg:marker')
-        .attr("id", "arrowhead")
-        .attr("viewBox", "0 -5 10 10")
-        .attr("refX", 13)
-        .attr("refY", 0)
-        .attr("markerWidth", 15)
-        .attr("markerHeight", 8)
-        .attr("orient", "auto")
-        .attr("viewbox", "-5 -5 10 10")
-        .append("svg:path")
-        .attr("d", "M0,-5 L10,0 L0,5")
-        .attr('fill', "black")
-        .style('stroke', 'none');
+    for (var s = 0; s < 8; s++) {
+        vis.append("text")
+            .attr('text-anchor', "middle")
+            .attr("font-size", "18px")
+            .text(`${s+1}`)
+            .attr("x", 25)
+            .attr("y", getY({
+                Row: s
+            }))
+            .attr("fill", "black");
+    }
 
     let links = vis.selectAll(".link")
         .data(data_links, d => d.source.Name + d.source.Row.toString() +
@@ -489,8 +515,9 @@ function displayCourses() {
     links.transition() //update position
         .attr("points", d => polylinePoints(d)).duration(500);
     let link = links.enter().append("polyline")
-        .attr("class", "link")
+        .attr("class", d => `link src_${d.source.Name} dst_${d.target.Name}`)
         .attr("stroke", "black")
+        .attr("stroke-width", 2)
         .attr("points", d => polylinePoints(d))
         .attr("marker-mid", "url(#arrowhead)")
         .style("opacity", 0);
@@ -523,7 +550,6 @@ function displayCourses() {
     // add course
     var course = courses.enter().append("g")
         .attr("class", "course")
-        .on("click", d => deleteCourse(d))
         .on("contextmenu", d => makeContextMenu(d, "COURSE"))
         .attr("transform", d => `translate(${getX(d)} ${getY(d)})`)
         .style("opacity", 0);
@@ -533,6 +559,7 @@ function displayCourses() {
         .duration(500);
 
     course.append("circle")
+        .attr("id", d => `circle_${d.Name}`)
         .attr("r", grid / 2)
         .attr("stroke", "black")
         .attr("stroke-width", 3)
@@ -556,19 +583,30 @@ function displayCourses() {
         .attr("stroke-width", 3)
         .attr("fill", "white")
         .style("opacity", 0)
-        .on("mouseover", async d => {
-            d3.select(`#text_${d.Name}`).text("Remove");
-            var c = await info(d.Name);
-            render_id = "Course Info";
-            render([c], "Course Info", false, false);
-        })
-        .on("mouseout", d => {
-            d3.select(`#text_${d.Name}`).text(d.Name);
-            if (selected_sem != undefined && selected_sem != -1) {
-                selectSem(selected_sem);
+        .on("click", async d => {
+            if (selected_course === d.Name) {
+                //deselect
+                d3.select(`#circle_${d.Name}`).attr("stroke", "black");
+                if (selected_sem != undefined && selected_sem != -1) {
+                    selectSem(selected_sem);
+                } else {
+                    render_id = "Recommended Courses";
+                    recommend().then(c => render(c, "Recommended Courses", true, false));
+                }
+                selected_course = undefined;
+                d3.selectAll(".link").attr("stroke", "black").attr("marker-mid", "url(#arrowhead)");
             } else {
-                render_id = "Recommended Courses";
-                recommend().then(c => render(c, "Recommended Courses", true, false));
+                //select
+                d3.select(`#circle_${d.Name}`).attr("stroke", "blue");
+                d3.selectAll(`.src_${d.Name}`).attr("stroke", "blue")
+                    .attr("marker-mid", "url(#arrowhead_selected)");
+                d3.selectAll(`.dst_${d.Name}`).attr("stroke", "blue")
+                    .attr("marker-mid", "url(#arrowhead_selected)");
+                selected_course = d.Name;
+                selected_sem = d.Row;
+                var c = await info(d.Name);
+                render_id = "Course Info";
+                render([c], "Course Info", false, true);
             }
         });
 
@@ -747,7 +785,7 @@ choosingCourses();
 
 //     for(let key in Object.keys(edgeCount)){
 //         let value = edgeCount[key];
-        
+
 //     }
 // }
 
