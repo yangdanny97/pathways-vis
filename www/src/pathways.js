@@ -1,4 +1,5 @@
 var d3 = require('d3');
+var $ = require('jquery');
 
 import 'bootstrap';
 
@@ -30,6 +31,9 @@ var selectbtns;
 let urlParams = new URLSearchParams(window.location.search);
 const major = urlParams.get('major');
 
+$(function () {
+    $('[data-toggle="tooltip"]').tooltip()
+})
 
 var req = new Request("/majors/", {
     method: 'POST',
