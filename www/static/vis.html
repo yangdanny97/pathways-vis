@@ -14,12 +14,24 @@
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup">
             <span class="navbar-toggler-icon"></span>
         </button>
+
         <button type="button" class="btn btn-outline-light mx-lg-3" data-toggle="modal" data-target="#modal">
             Bulk Add Courses
         </button>
+
+        <div class="btn-group btn-group-toggle mr-lg-3 tuning" data-toggle="buttons">
+            <label class="btn btn-outline-light active">
+                <input type="radio" name="tuning" value="diversity" checked> Diversity
+            </label>
+            <label class="btn btn-outline-light tuning">
+                <input type="radio" name="tuning" value="relevance"> Relevance
+            </label>
+        </div>
+
         <button id="auto-gen" type="button" class="btn btn-outline-light mr-lg-3">
             Show Example Pathway
         </button>
+
         <form class='form-inline' action="javascript:;" onsubmit="window.search()">
             <input class="form-control mr-sm-1" type="search" placeholder="Class">
             <button class="btn btn-outline-light" type="submit" id="search">Search</button>
@@ -29,8 +41,6 @@
 
     <div id='container' class="row">
         <div id='left' class="col-md-4">
-            <div id="searchbar">
-            </div>
             <h2 id='status'></h2>
 
             <div id='deck'></div>
@@ -49,6 +59,8 @@
                                 </span>
                             </span>
                         </div>
+
+                        <!--
                         <div class="form-check">
                             <input class="form-check-input tuning" type="radio" name="tuning" id="tuning_diversity"
                                 value="diversity" checked>
@@ -64,10 +76,7 @@
                             </label>
                         </div>
                         <br>
-                    </div>
-                    <div class="col-md-4">
-                    </div>
-                    <div class="col-md-3">
+                        -->
                     </div>
                 </div>
 
