@@ -20,7 +20,6 @@ var selected_sem = -1;
 var render_id = "";
 
 // TRUE == LIMIT SAME DEPARTMENT COURSE SUGGESTIONS
-// var limitDept = (d3.select('input[name="tuning"]:checked').node().value == "diversity");
 var limitDept = d3.select("input[name='tuning']:checked").node().value == "diversity";
 console.log(limitDept);
 
@@ -655,12 +654,7 @@ d3.select("#auto-gen").on("click", () => {
     updateRecs();
 });
 
-//var $ = require("jquery");
-//$(".tuning").change(function() { console.log("changed"); });
-//d3.select(".tuning").on("click", () => { console.log("changed w/ d3") });
-
 d3.select(".tuning").on("click", () => {
-    //limitDept = (d3.select('input[name="tuning"]:checked').node().value == "diversity");
     limitDept = d3.select("input[name='tuning']:checked").node().value == "diversity";
     window.limitDept = limitDept;
     console.log("triggered", limitDept);
