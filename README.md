@@ -243,3 +243,4 @@ move the selected major down into the page body, add a label that says "XXX Majo
 - Give more course information
 - Clean up some styling
 - ~automatic data extraction script instead of using notebooks~
+- Fix tuning option selection
