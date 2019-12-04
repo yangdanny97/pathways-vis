@@ -22,6 +22,7 @@ env/
 
 /www/node_modules/
 /www/static/dist/
+/www/static/css/
 /www/pathways_server
 *.exe
 
