@@ -23,7 +23,6 @@ var render_id = "";
 
 // TRUE == LIMIT SAME DEPARTMENT COURSE SUGGESTIONS
 var limitDept = d3.select("input[name='tuning']:checked").node().value == "diversity";
-console.log(limitDept);
 
 var courses;
 var selectbtns;
@@ -641,10 +640,10 @@ d3.select("#auto-gen").on("click", () => {
     updateRecs();
 });
 
-d3.select(".tuning").on("click", () => {
-    limitDept = d3.select("input[name='tuning']:checked").node().value == "diversity";
+function tuning(limit) {
+    if (limitDept == limit) return;
+    limitDept = limit;
     window.limitDept = limitDept;
-    console.log("triggered", limitDept);
     updateRecs(() => {
         if (selected_sem !== -1 && selected_sem !== undefined) {
             selectSem(selected_sem);
@@ -652,7 +651,13 @@ d3.select(".tuning").on("click", () => {
             recommend().then(c => render(c, "Recommended Courses", true, false));
         }
     });
-});
+}
+
+d3.select("#tuning-diversity").on("click", () => tuning(true));
+
+d3.select("#tuning-relevance").on("click", () => tuning(false));
+
+
 
 // choosing courses
 function choosingCourses() {
