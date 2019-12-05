@@ -10,9 +10,7 @@
 
 <body>
     <nav class='navbar navbar-expand-sm navbar-dark'>
-        <a class='navbar-brand' href='/'>Pathway</a>
-
-        <span class='navbar-text mx-lg-3' id='major'></span>
+        <a class='navbar-brand' href='/'>Pathway for <span id='major'></span></a>
 
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup">
             <span class="navbar-toggler-icon"></span>
@@ -22,22 +20,21 @@
             Bulk Add Courses
         </button>
 
+        <button id="auto-gen" type="button" class="btn btn-outline-light mr-lg-3">
+            Show Example Pathway
+        </button>
+
+        <span class='navbar-text'>Tune Recommendations: </span>
         <div class="btn-group btn-group-toggle mr-lg-3 tuning" data-toggle="buttons">
-            <label class="btn btn-outline-light active" data-toggle="tooltip"
-            data-placement="bottom" title="Get more recommendations from a
+            <label id="tuning-diversity" class="btn btn-outline-light active" data-toggle="tooltip" data-placement="bottom" title="Get more recommendations from a
             variety of majors">
                 <input type="radio" name="tuning" value="diversity" checked> Diversity
             </label>
-            <label class="btn btn-outline-light tuning" data-toggle="tooltip"
-            data-placement="bottom" title="Get more recommendations from the
+            <label id="tuning-relevance" class="btn btn-outline-light tuning" data-toggle="tooltip" data-placement="bottom" title="Get more recommendations from the
             selected major">
                 <input type="radio" name="tuning" value="relevance"> Relevance
             </label>
         </div>
-
-        <button id="auto-gen" type="button" class="btn btn-outline-light mr-lg-3">
-            Show Example Pathway
-        </button>
 
         <form class='form-inline ml-auto' action="javascript:;" onsubmit="window.search()">
             <input class="form-control mr-sm-1" type="search" placeholder="Class">
@@ -47,37 +44,36 @@
     </nav>
 
     <div id='container' class="row">
-        <div id='left' class="col-md-4">
-            <h2 id='status'></h2>
-
-            <div id='deck'></div>
-        </div>
-        <div id='right' class="col-md-8">
-                <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="modalLongTitle"
-                    aria-hidden="true">
-                    <div class="modal-dialog" role="document">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="modalLongTitle">Select Courses You've
-                                    Taken</h5>
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-                            <div class="modal-body" id="menu">
-                                <table class="table table-hover">
-                                    <tbody></tbody>
-                                </table>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                                <button id="updatecourses" type="button" class="btn btn-primary"
-                                    data-dismiss="modal">Update</button>
-                            </div>
+        <div id='left' class="col-md-8">
+            <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="modalLongTitle"
+                aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="modalLongTitle">Select Courses You've
+                                Taken</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body" id="menu">
+                            <table class="table table-hover">
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                            <button id="updatecourses" type="button" class="btn btn-primary"
+                                data-dismiss="modal">Update</button>
                         </div>
                     </div>
                 </div>
+            </div>
             <svg id="vis" width="1000px" , height="1250px"></svg>
+        </div>
+        <div id='right' class="col-md-4">
+            <h2 id='status'></h2>
+            <div id='deck'></div>
         </div>
     </div>
     </div>

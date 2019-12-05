@@ -130,12 +130,14 @@ func remove(a []string, i int) []string {
 func renderStaticTemplate(w http.ResponseWriter, tmpl string) {
 	t, err := template.ParseFiles("static/" + tmpl + ".html")
 	if err != nil {
+		fmt.Println(err)
 		fmt.Println("template load error")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	err = t.Execute(w, nil)
 	if err != nil {
+		fmt.Println(err)
 		fmt.Println("template execute error")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -253,6 +255,7 @@ func majorCoursesHandler(w http.ResponseWriter, r *http.Request) {
 	response := CourseResponse{Courses: majorCourses}
 	responseJSON, err := json.Marshal(response)
 	if err != nil {
+		fmt.Println(err)
 		fmt.Println("response marshal error")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -266,12 +269,12 @@ func coreClassesHandler(w http.ResponseWriter, r *http.Request) {
 	req := PathwaysRequest{}
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		// fmt.Println("request decode error")
+		fmt.Println("core handler: request decode error")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 	reqGraph, err := loadGraph(req.Major + "_req")
 	if err != nil {
-		// fmt.Println("graph load error")
+		fmt.Println("core handler: graph load error")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
@@ -364,7 +367,8 @@ func coreClassesHandler(w http.ResponseWriter, r *http.Request) {
 	response := CourseResponse{Courses: courses}
 	responseJSON, err := json.Marshal(response)
 	if err != nil {
-		fmt.Println("response marshal error")
+		fmt.Println(err)
+		fmt.Println("core handler: response marshal error")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 	w.Header().Set("Content-Type", "application/json")
@@ -377,17 +381,20 @@ func unorderedRecHandler(w http.ResponseWriter, r *http.Request) {
 	req := PathwaysRequest{}
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		fmt.Println("request decode error")
+		fmt.Println(err)
+		fmt.Println("unordered rec handler: request decode error")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 	coGraph, err := loadGraph(req.Major + "_co")
 	if err != nil {
-		fmt.Println("graph load error")
+		fmt.Println(err)
+		fmt.Println("unordered rec handler: graph load error")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 	postGraph, err := loadGraph(req.Major + "_post")
 	if err != nil {
-		fmt.Println("graph load error")
+		fmt.Println(err)
+		fmt.Println("unordered rec handler: graph load error")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
@@ -406,7 +413,8 @@ func unorderedRecHandler(w http.ResponseWriter, r *http.Request) {
 	response := CourseCodes{Codes: recs}
 	responseJSON, err := json.Marshal(response)
 	if err != nil {
-		fmt.Println("response marshal error")
+		fmt.Println(err)
+		fmt.Println("unordered rec handler: response marshal error")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 	w.Header().Set("Content-Type", "application/json")
@@ -457,17 +465,20 @@ func recHandler(w http.ResponseWriter, r *http.Request) {
 	req := PathwaysRequest{}
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		fmt.Println("request decode error")
+		fmt.Println(err)
+		fmt.Println("rec handler: request decode error")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 	coGraph, err := loadGraph(req.Major + "_co")
 	if err != nil {
-		fmt.Println("graph load error")
+		fmt.Println(err)
+		fmt.Println("rec handler: graph load error")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 	postGraph, err := loadGraph(req.Major + "_post")
 	if err != nil {
-		fmt.Println("graph load error")
+		fmt.Println(err)
+		fmt.Println("rec handler: graph load error")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
@@ -499,14 +510,12 @@ func recHandler(w http.ResponseWriter, r *http.Request) {
 	// fmt.Println(excl)
 
 	sort.Ints(semKeys)
-	// number of recs to generate per rec-tile
-	nRecs := 2
 
 	// calculate points and generate recs
 	for _, k := range semKeys {
 		// get post-enrollment recs if they exist
 		if k > 0 {
-			postRec := genRec(postGraph, semMap[k-1], &excl, nRecs, false, req.LimitDept)
+			postRec := genRec(postGraph, semMap[k-1], &excl, 3, false, req.LimitDept)
 			postRec.Col = len(semMap[k])
 			postRec.Row = k
 			recs = append(recs, *postRec)
@@ -514,15 +523,15 @@ func recHandler(w http.ResponseWriter, r *http.Request) {
 
 		// get pre-enrollment recs if they exist
 		if k < len(semKeys)-1 {
-			preRec := genRec(postGraph, semMap[k+1], &excl, nRecs, true, req.LimitDept)
+			preRec := genRec(postGraph, semMap[k+1], &excl, 1, true, req.LimitDept)
 			preRec.Col = len(semMap[k])
 			preRec.Row = k
 			recs = append(recs, *preRec)
 		}
 
 		// generate co-enrollment recs
-		coRec := genRec(coGraph, semMap[k], &excl, nRecs, false, req.LimitDept)
-		coRec.Col = len(semMap[k]) + nRecs
+		coRec := genRec(coGraph, semMap[k], &excl, 3, false, req.LimitDept)
+		coRec.Col = len(semMap[k])
 		coRec.Row = k
 		recs = append(recs, *coRec)
 	}
@@ -530,11 +539,10 @@ func recHandler(w http.ResponseWriter, r *http.Request) {
 	response := RecResponse{Recs: recs, Edges: visEdges}
 	responseJSON, err := json.Marshal(response)
 	if err != nil {
-		fmt.Println("response marshal error")
+		fmt.Println("rec handler: response marshal error")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
 	w.Write(responseJSON)
 }
 
@@ -618,17 +626,20 @@ func addMultipleHandler(w http.ResponseWriter, r *http.Request) {
 	req := SelectPathwaysRequest{}
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		fmt.Println("request decode error")
+		fmt.Println(err)
+		fmt.Println("multiadd handler: request decode error")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 	coGraph, err := loadGraph(req.Major + "_co")
 	if err != nil {
-		fmt.Println("graph load error")
+		fmt.Println(err)
+		fmt.Println("multiadd handler: graph load error")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 	postGraph, err := loadGraph(req.Major + "_post")
 	if err != nil {
-		fmt.Println("graph load error")
+		fmt.Println(err)
+		fmt.Println("multiadd handler: graph load error")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
@@ -652,6 +663,7 @@ func addMultipleHandler(w http.ResponseWriter, r *http.Request) {
 	response := CourseResponse{Courses: finalCourses}
 	responseJSON, err := json.Marshal(response)
 	if err != nil {
+		fmt.Println(err)
 		fmt.Println("response marshal error")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -664,17 +676,20 @@ func addHandler(w http.ResponseWriter, r *http.Request) {
 	req := PathwaysRequest{}
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		fmt.Println("request decode error")
+		fmt.Println(err)
+		fmt.Println("add handler: request decode error")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 	coGraph, err := loadGraph(req.Major + "_co")
 	if err != nil {
-		fmt.Println("graph load error")
+		fmt.Println(err)
+		fmt.Println("add handler: graph load error")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 	postGraph, err := loadGraph(req.Major + "_post")
 	if err != nil {
-		fmt.Println("graph load error")
+		fmt.Println(err)
+		fmt.Println("add handler: graph load error")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
@@ -707,7 +722,8 @@ func addHandler(w http.ResponseWriter, r *http.Request) {
 	response := AddResponse{Row: addSem}
 	responseJSON, err := json.Marshal(response)
 	if err != nil {
-		fmt.Println("response marshal error")
+		fmt.Println(err)
+		fmt.Println("add handler: response marshal error")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 	w.Header().Set("Content-Type", "application/json")

@@ -16,7 +16,14 @@ $cornell_red: #B31B1B;
 
     #major {
         color: white;
+        font-size: 20px;
+    }
+
+    .navbar-text {
+        color: white;
+        font-family: Raleway;
         font-size: 16px;
+        padding-right: 5px;
     }
 }
 
@@ -31,7 +38,7 @@ $cornell_red: #B31B1B;
     }
 }
 
-#left {
+#right{
     background-color: #eee;
     display: flex;
     flex-direction: column;
@@ -46,27 +53,9 @@ $cornell_red: #B31B1B;
         flex-grow: 1;
         overflow-y: scroll;
     }
-
-    // slide in animation (need to debug before using bc it looks funny rn)
-
-    // .card {
-    //     position: absolute;
-    //     transform: translateX(-100%);
-    //     -webkit-transform: translateX(-100%);
-    //     animation: slide-in 0.5s forwards;
-    //     -webkit-animation: slide-in 0.5s forwards;
-    // }
-
-    // @keyframes slide-in {
-    //     100% { transform: translateX(0%); }
-    // }
-
-    // @-webkit-keyframes slide-in {
-    //     100% { -webkit-transform: translateX(0%); }
-    // }
 }
 
-#left #deck .card {
+#right#deck .card {
     margin: 10px;
 
     .card-header {
@@ -108,7 +97,7 @@ $cornell_red: #B31B1B;
     }
 }
 
-#right {
+#left {
     overflow: scroll;
 
     .card {
