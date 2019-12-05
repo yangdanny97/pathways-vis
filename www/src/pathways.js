@@ -1,4 +1,5 @@
 var d3 = require('d3');
+var $ = require('jquery');
 
 import 'bootstrap';
 
@@ -21,7 +22,8 @@ var selected_course = "";
 var render_id = "";
 
 // TRUE == LIMIT SAME DEPARTMENT COURSE SUGGESTIONS
-var limitDept = (d3.select('input[name="tuning"]:checked').node().value == "diversity");
+var limitDept = d3.select("input[name='tuning']:checked").node().value == "diversity";
+console.log(limitDept);
 
 var courses;
 var selectbtns;
@@ -30,6 +32,9 @@ var selectbtns;
 let urlParams = new URLSearchParams(window.location.search);
 const major = urlParams.get('major');
 
+$(function () {
+    $('[data-toggle="tooltip"]').tooltip()
+})
 
 var req = new Request("/majors/", {
     method: 'POST',
@@ -691,8 +696,10 @@ d3.select("#auto-gen").on("click", () => {
     updateRecs();
 });
 
-d3.selectAll(".tuning").on("change", () => {
-    limitDept = (d3.select('input[name="tuning"]:checked').node().value == "diversity");
+d3.select(".tuning").on("click", () => {
+    limitDept = d3.select("input[name='tuning']:checked").node().value == "diversity";
+    window.limitDept = limitDept;
+    console.log("triggered", limitDept);
     updateRecs(() => {
         if (selected_sem !== -1 && selected_sem !== undefined) {
             selectSem(selected_sem);
@@ -814,3 +821,4 @@ window.search = search;
 window.data = data;
 window.sem_select = sem_select;
 window.selected_sem = selected_sem;
+window.limitDept = limitDept;
