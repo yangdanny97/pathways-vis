@@ -439,51 +439,6 @@ async function selectSem(n) {
     render(rec_info, `Semester ${n+1} Recommendations`, true, false);
 }
 
-//displays menu next to course when clicked
-function makeContextMenu(d, type, row = 0) {
-    let options = [];
-    let courseCode = "";
-    if (type == "REC") {
-        courseCode = d;
-        options = ["Add", "More Info"];
-    } else if (type == "COURSE") {
-        courseCode = d.Name;
-        options = ["Remove", "More Info"];
-    }
-
-    d3.selectAll(".context-menu")
-        .data([1])
-        .enter()
-        .append("div")
-        .attr("class", "context-menu");
-    d3.select("body").on("click.context-menu", function () {
-        d3.select(".context-menu").style("display", "none");
-    })
-    d3.selectAll(".context-menu")
-        .html("")
-        .append("ul")
-        .selectAll("li")
-        .data(options)
-        .enter()
-        .append("li")
-        .on("click", function (command) {
-            if (command == "Remove") {
-                deleteCourse(d);
-            } else if (command == "More Info") {
-                info(courseCode).then(v => window.open(v.link));
-            } else if (command == "Add") {
-                addCourse(courseCode, row);
-            }
-            d3.select('.context-menu').style('display', 'none');
-        })
-        .text(d => d);
-    d3.select('.context-menu')
-        .style('left', (d3.event.pageX - 2) + 'px')
-        .style('top', (d3.event.pageY - 2) + 'px')
-        .style('display', 'block');
-    d3.event.preventDefault();
-}
-
 function displayCourses() {
     let data_links = [];
     let nodeMap = new Map();
@@ -555,7 +510,6 @@ function displayCourses() {
     // add course
     var course = courses.enter().append("g")
         .attr("class", "course")
-        .on("contextmenu", d => makeContextMenu(d, "COURSE"))
         .attr("transform", d => `translate(${getX(d)} ${getY(d)})`)
         .style("opacity", 0);
 
@@ -643,15 +597,6 @@ function displayCourses() {
         .attr("stroke-dasharray", "8 4")
         .attr("stroke-width", 3)
         .attr("fill", "none");
-
-    // selectbtn.append("text")
-    //     .attr("class", d => `selectText1 selectText1_${d.Row + 1}`)
-    //     .attr('text-anchor', "middle")
-    //     .attr("font-size", "18px")
-    //     .text("View")
-    //     .attr("x", 0)
-    //     .attr("y", -6)
-    //     .attr("fill", "gray");
 
     selectbtn.append("text")
         .attr("class", d => `selectText2 selectText2_${d.Row + 1}`)
