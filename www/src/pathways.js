@@ -467,9 +467,9 @@ function displayCourses() {
         .attr("fill", "white")
         .style("opacity", 0)
         .on("click", async d => {
+            d3.select(`#circle_${d.Name}`).attr("stroke", "black");
+            d3.selectAll(".link").attr("stroke", "black").attr("marker-mid", "url(#arrowhead)");
             if (selected_course === d.Name) {
-                //deselect
-                d3.select(`#circle_${d.Name}`).attr("stroke", "black");
                 if (selected_sem !== undefined && selected_sem != -1) {
                     selectSem(selected_sem);
                 } else {
@@ -477,7 +477,6 @@ function displayCourses() {
                     recommend().then(c => render(c, "Recommended Courses", true, false));
                 }
                 selected_course = undefined;
-                d3.selectAll(".link").attr("stroke", "black").attr("marker-mid", "url(#arrowhead)");
             } else {
                 //select
                 d3.select(`#circle_${d.Name}`).attr("stroke", "blue");
