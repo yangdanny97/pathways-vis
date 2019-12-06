@@ -46,15 +46,12 @@ fetch(req)
 // HTML element anchors
 var mode = d3.select('#status').node();
 var deck = d3.select('#deck').node();
-var searchbar = d3.select('input').node();
+var searchbar = d3.select('#search').node();
 
 // Load classes
 var stack = [];
-
-var popular = []
 var recs = [];
 var search_results = [];
-
 var pref = new Set()
 
 /* Add a class to the list of preferred classes */
@@ -182,13 +179,13 @@ function card(course, displayAdd = true, displayRemove = true) {
 async function info(code) {
     let semesters = ["FA19", "SP20", "SP19", "FA18"];
     let dept = code.slice(0, -4);
+    let num = code.slice(-4);
 
     for (let semester of semesters) {
         let uri = `https://classes.cornell.edu/api/2.0/search/classes.json?roster=${semester}&subject=${dept}`;
 
-        function getCourseFromBody(body, code) {
-            const num = code.slice(-4);
-
+        function getCourseFromBody(body, num) {
+            if (body.data === undefined) return;
             for (let course of body.data.classes) {
                 if (course.catalogNbr == num) {
                     return grok(course, semester);
@@ -197,10 +194,9 @@ async function info(code) {
         }
 
         const response = await fetch(uri);
+        if (!response.ok) return;
         const p = await response.json();
-
-        let g = getCourseFromBody(p, code);
-        if (g != undefined) return g;
+        return getCourseFromBody(p, num);
     }
 }
 
@@ -209,53 +205,35 @@ async function infoAll(codes) {
     return Promise.all(codes.map(info).filter(x => x !== undefined));
 }
 
-/* Get an array of popular courses based on the selected major */
-async function get_popular() {
-
-    var reqbody = {
-        Major: major.toLowerCase(),
-        Courses: data
-    };
-
-    var req = new Request('/core_courses/', {
-        method: 'POST',
-        body: JSON.stringify(reqbody)
-    });
-
-    popular = await fetch(req)
-        .then(resp => resp.json())
-        .then(d => d.Courses.map(c => c.Name))
-        .then(infoAll);
-
-    window.popular = popular;
-
-    return popular;
-}
-
 /* Get an array of grokked courses matching a particular search query */
-var search = function (query) {
-    log(`search|${major}|${query}`);
+async function search(query) {
     let value = searchbar.value;
     query = query || value;
-
-    let semester = "SP20";
-    let url = `https://classes.cornell.edu/api/2.0/search/classes.json?roster=${semester}&q=${query}&subject=${major}`;
-
-    let r = new Request(url);
-    render_id = "Search";
-    fetch(r)
-        .then(resp => {
-            if (!resp.ok) {
-                alert("Invalid query - please try a different search");
-            }
-            return resp.json();
-        })
-        .then(body => {
+    query = query.replace(" ", "");
+    var dept = query.replace(new RegExp("[0-9]+"), "");
+    var num = query.replace(new RegExp("[A-Za-z]+"), "");
+    if (dept === "") {
+        dept = major;
+    }
+    log(`search|${major}|${dept}|${(num === "") ? "all" : num }`);
+    let semesters = ["SP20", "FA19"];
+    let ok = false;
+    for (let semester of semesters) {
+        let url = `https://classes.cornell.edu/api/2.0/search/classes.json?roster=${semester}&q=${num}&subject=${dept}`;
+        const response = await fetch(url);
+        const body = await response.json();
+        if (response.ok) {
+            ok = true;
+            render_id = "Search";
             window.body = body;
-            let data = body.data;
-            search_results = data.classes.map(grok, semester);
+            search_results = body.data.classes.map(grok, semester);
             render(search_results, "Search");
-        });
+            break;
+        }
+    }
+    if (!ok) {
+        alert("Invalid query - please try a different search");
+    }
 }
 
 /* Get an array of recommended courses based on the preferences list */
@@ -301,60 +279,6 @@ function SELECT(row, col) {
         Row: row,
         Col: col
     };
-}
-
-function init() {
-    // displaySemesters();
-    var reqbody = {
-        Major: major.toLowerCase(),
-        Courses: data
-    };
-    var req = new Request('/core_courses/', {
-        method: 'POST',
-        body: JSON.stringify(reqbody)
-    });
-    fetch(req)
-        .then(resp => resp.json())
-        .then(d => {
-            data = d.Courses;
-            for (var i = 0; i < 8; i++) {
-                var c_sem = data.filter(c => c.Row === i).map(c => c.Col);
-                if (c_sem.length == 0) {
-                    sem_select.push(SELECT(i, 0));
-                } else {
-                    sem_select.push(SELECT(i, Math.max(...c_sem) + 1));
-                }
-            }
-            updateRecs();
-        });
-    //arrowhead
-    vis.append('defs').append('svg:marker')
-        .attr("id", "arrowhead")
-        .attr("viewBox", "0 -5 10 10")
-        .attr("refX", 13)
-        .attr("refY", 0)
-        .attr("markerWidth", 15)
-        .attr("markerHeight", 8)
-        .attr("orient", "auto")
-        .attr("viewbox", "-5 -5 10 10")
-        .append("svg:path")
-        .attr("d", "M0,-5 L10,0 L0,5")
-        .attr('fill', "black")
-        .style('stroke', 'none');
-
-    vis.append('defs').append('svg:marker')
-        .attr("id", "arrowhead_selected")
-        .attr("viewBox", "0 -5 10 10")
-        .attr("refX", 13)
-        .attr("refY", 0)
-        .attr("markerWidth", 15)
-        .attr("markerHeight", 8)
-        .attr("orient", "auto")
-        .attr("viewbox", "-5 -5 10 10")
-        .append("svg:path")
-        .attr("d", "M0,-5 L10,0 L0,5")
-        .attr('fill', "blue")
-        .style('stroke', 'none');
 }
 
 async function updateRecs(callback) {
@@ -425,6 +349,7 @@ function getY(d) {
 }
 
 async function selectSem(n) {
+    log(`selectsem|${major}|${n}`);
     selected_sem = n;
     d3.selectAll(".sem").attr("fill", "none");
     d3.selectAll(`.sem${n}`).attr("fill", "pink");
@@ -615,15 +540,11 @@ function displayCourses() {
 
 }
 
-init();
-
-render_id = "Recommended Courses";
-recommend().then(c => render(c, "Recommended Courses", true, false));
-
 var fill_per_sem = 4;
 // auto-schedule generation
 // adds a lot of courses all at once before refreshing
 d3.select("#auto-gen").on("click", () => {
+    log(`autofill|${major}`);
     for (var i = 0; i < 8; i++) {
         var c_sem = data.filter(c => c.Row === i);
         var sem_recs = data_recs.filter(d => d.Row == i);
@@ -632,6 +553,7 @@ d3.select("#auto-gen").on("click", () => {
         for (var j = 0; j < fill_per_sem - c_sem.length; j++) {
             var cname = rec_names[j];
             data.push(COURSE(cname, i, c_sem.length + j));
+            pref.add(cname);
         }
         sem_select.forEach(d => {
             d.Col = fill_per_sem;
@@ -641,6 +563,7 @@ d3.select("#auto-gen").on("click", () => {
 });
 
 function tuning(limit) {
+    log(`tuning|${major}|${limit}`);
     if (limitDept == limit) return;
     limitDept = limit;
     window.limitDept = limitDept;
@@ -652,12 +575,6 @@ function tuning(limit) {
         }
     });
 }
-
-d3.select("#tuning-diversity").on("click", () => tuning(true));
-
-d3.select("#tuning-relevance").on("click", () => tuning(false));
-
-
 
 // choosing courses
 function choosingCourses() {
@@ -692,6 +609,7 @@ function choosingCourses() {
         });
 
     d3.select("#updatecourses").on("click", function () {
+        log(`bulkadd|${major}`);
         chosenCourses = [];
         d3.select("#menu").selectAll("td").each(function (_, i) {
             if (d3.select(this).attr("class") == "hover") {
@@ -726,7 +644,6 @@ function choosingCourses() {
             });
     })
 }
-choosingCourses();
 
 // function resort(){
 //     let edgeCount = {};
@@ -746,28 +663,89 @@ choosingCourses();
 //     }
 // }
 
+//ALL INITIALIZATION CODE GOES HERE
+function init() {
+    var reqbody = {
+        Major: major.toLowerCase(),
+        Courses: data
+    };
+    var req = new Request('/core_courses/', {
+        method: 'POST',
+        body: JSON.stringify(reqbody)
+    });
+
+    //generate core courses
+    fetch(req)
+        .then(resp => resp.json())
+        .then(d => {
+            data = d.Courses;
+            data.forEach(c => pref.add(c.Name));
+            for (var i = 0; i < 8; i++) {
+                var c_sem = data.filter(c => c.Row === i).map(c => c.Col);
+                if (c_sem.length == 0) {
+                    sem_select.push(SELECT(i, 0));
+                } else {
+                    sem_select.push(SELECT(i, Math.max(...c_sem) + 1));
+                }
+            }
+            updateRecs();
+        });
+    //arrowhead
+    vis.append('defs').append('svg:marker')
+        .attr("id", "arrowhead")
+        .attr("viewBox", "0 -5 10 10")
+        .attr("refX", 13)
+        .attr("refY", 0)
+        .attr("markerWidth", 15)
+        .attr("markerHeight", 8)
+        .attr("orient", "auto")
+        .attr("viewbox", "-5 -5 10 10")
+        .append("svg:path")
+        .attr("d", "M0,-5 L10,0 L0,5")
+        .attr('fill', "black")
+        .style('stroke', 'none');
+
+    vis.append('defs').append('svg:marker')
+        .attr("id", "arrowhead_selected")
+        .attr("viewBox", "0 -5 10 10")
+        .attr("refX", 13)
+        .attr("refY", 0)
+        .attr("markerWidth", 15)
+        .attr("markerHeight", 8)
+        .attr("orient", "auto")
+        .attr("viewbox", "-5 -5 10 10")
+        .append("svg:path")
+        .attr("d", "M0,-5 L10,0 L0,5")
+        .attr('fill', "blue")
+        .style('stroke', 'none');
+    //course selection modal
+    choosingCourses();
+
+    //tuning settings
+    d3.select("#tuning-diversity").on("click", () => tuning(true));
+    d3.select("#tuning-relevance").on("click", () => tuning(false));
+
+    //initial recommendations
+    render_id = "Recommended Courses";
+    recommend().then(c => render(c, "Recommended Courses", true, false));
+}
+//NO FUNCTIONS BELOW THIS LINE
+init();
+
 window.d3 = d3;
 
 window.stack = stack;
 window.search_results = search_results;
-window.popular = popular;
 window.recs = recs;
-
 window.pref = pref;
-
 window.add = add;
 window.remove = remove;
-
 window.render = render;
-
 window.push = push;
 window.info = info;
 window.infoAll = infoAll;
 window.search = search;
 window.recommend = recommend;
-window.get_popular = get_popular;
-window.search = search;
-
 window.data = data;
 window.sem_select = sem_select;
 window.selected_sem = selected_sem;
