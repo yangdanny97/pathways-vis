@@ -133,30 +133,27 @@ function render(courses, status, displayAdd = true, displayRemove = true) {
 }
 
 /* Package the API course data into a smaller, neater object */
-function grok(course) {
+function grok(course, semester) {
     let trim = {
         subject: course.subject,
         catalogNbr: course.catalogNbr,
         titleLong: course.titleLong,
         titleShort: course.titleShort,
         description: course.description,
-        link: `https://classes.cornell.edu/browse/roster/${course._sem}/class/${course.subject}/${course.catalogNbr}`,
+        link: `https://classes.cornell.edu/browse/roster/${semester}/class/${course.subject}/${course.catalogNbr}`,
         credits: "? units"
     }
-
     // apparently this credit selection doesn't always work
     try {
         trim.credits = `${course.enrollGroups[0].unitsMinimum} units`;
     } catch (_) {
         return trim;
     }
-
     return trim;
 }
 
 /* Get an html card for a grokked course */
 function card(course, displayAdd = true, displayRemove = true) {
-
     let html = `<div class='card'>
         <div class='card-header'>
             <div class='code'>${course.subject} ${course.catalogNbr}</div>
@@ -170,14 +167,13 @@ function card(course, displayAdd = true, displayRemove = true) {
             ${(displayRemove) ? `<button class="btn btn-danger btn-sm" onclick="remove('${course.subject}${course.catalogNbr}')">Remove</button>` : ""}
         </div>
     </div>`;
-
-    return html
+    return html;
 }
 
 
 /* Get grokked course for a particular code */
 async function info(code) {
-    let semesters = ["FA19", "SP20", "SP19", "FA18"];
+    let semesters = ["SP20", "FA19", "SP19", "FA18"];
     let dept = code.slice(0, -4);
     let num = code.slice(-4);
 
@@ -185,19 +181,22 @@ async function info(code) {
         let uri = `https://classes.cornell.edu/api/2.0/search/classes.json?roster=${semester}&subject=${dept}`;
 
         function getCourseFromBody(body, num) {
-            if (body.data === undefined) return;
             for (let course of body.data.classes) {
-                if (course.catalogNbr == num) {
+                if (course.catalogNbr === num.toString()) {
                     return grok(course, semester);
                 }
             }
         }
 
         const response = await fetch(uri);
-        if (!response.ok) return;
-        const p = await response.json();
-        return getCourseFromBody(p, num);
+        if (!response.ok) continue;
+        const body = await response.json();
+        if (body.data === undefined) continue;
+        const grokked = getCourseFromBody(body, num);
+        if (grokked === undefined) continue;
+        return grokked;
     }
+    return;
 }
 
 /* Get an array of grokked courses from an array of course codes */
@@ -216,7 +215,7 @@ async function search(query) {
         dept = major;
     }
     log(`search|${major}|${dept}|${(num === "") ? "all" : num }`);
-    let semesters = ["SP20", "FA19"];
+    let semesters = ["SP20", "FA19", "SP19", "FA18"];
     let ok = false;
     for (let semester of semesters) {
         let url = `https://classes.cornell.edu/api/2.0/search/classes.json?roster=${semester}&q=${num}&subject=${dept}`;
@@ -226,7 +225,7 @@ async function search(query) {
             ok = true;
             render_id = "Search";
             window.body = body;
-            search_results = body.data.classes.map(grok, semester);
+            search_results = body.data.classes.map(c => grok(c, semester));
             render(search_results, "Search");
             break;
         }
@@ -431,6 +430,7 @@ function displayCourses() {
     };
 
     courses.moveToFront();
+
     // add course
     var course = courses.enter().append("g")
         .attr("class", "course")
@@ -470,7 +470,7 @@ function displayCourses() {
             if (selected_course === d.Name) {
                 //deselect
                 d3.select(`#circle_${d.Name}`).attr("stroke", "black");
-                if (selected_sem != undefined && selected_sem != -1) {
+                if (selected_sem !== undefined && selected_sem != -1) {
                     selectSem(selected_sem);
                 } else {
                     render_id = "Recommended Courses";
