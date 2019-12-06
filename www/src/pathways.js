@@ -21,7 +21,7 @@ var selected_course = "";
 
 var render_id = "";
 
-// TRUE == LIMIT SAME DEPARTMENT COURSE SUGGESTIONS
+// LIMIT SAME DEPARTMENT COURSE SUGGESTIONS
 var limitDept = d3.select("input[name='tuning']:checked").node().value == "diversity";
 
 var courses;
@@ -54,7 +54,7 @@ var recs = [];
 var search_results = [];
 var pref = new Set()
 
-/* Add a class to the list of preferred classes */
+/* RHS add button, wraps addCourse */
 function add(code) {
     var reqbody = {
         Major: major.toLowerCase(),
@@ -71,18 +71,18 @@ function add(code) {
         fetch(req)
             .then(resp => resp.json())
             .then(d => {
-                addCourse(code, d.Row);
+                addCourse(code, d.Row, false);
             });
     } else {
         addCourse(code, selected_sem);
     }
 }
 
-/* Remove a class from the list of preferred classes */
+/* RHS delete button, wraps deleteCourse */
 function remove(code) {
     var c = data.find(x => x.Name === code);
     if (c) {
-        deleteCourse(c);
+        deleteCourse(c, false);
     }
 }
 
@@ -302,8 +302,8 @@ async function updateRecs(callback) {
         });
 }
 
-// cname is string, row is int
-function addCourse(cname, row) {
+// add a course to the schedule: cname is string, row is int
+function addCourse(cname, row, focus_sem = true) {
     log(`add|${major}|${cname}`);
     pref.add(cname);
     window.pref = pref;
@@ -315,14 +315,18 @@ function addCourse(cname, row) {
     if (rowsize < 6) {
         sem_select.filter(x => x.Row == row)[0].Col++;
         data.push(COURSE(cname, row, rowsize));
-        updateRecs(() => selectSem(row));
+        if (focus_sem) {
+            updateRecs(() => selectSem(c.Row));
+        } else {
+            updateRecs();
+        }
     } else {
         alert("cannot add more than 6 courses per semester");
     }
 }
 
-//c is a Course object
-function deleteCourse(c) {
+//delete a course from the schedule: c is a Course object
+function deleteCourse(c, focus_sem = true) {
     log(`delete|${major}|${c.Name}`);
     var row = c.Row,
         col = c.Col;
@@ -335,7 +339,11 @@ function deleteCourse(c) {
     });
     pref.delete(c.Name);
     window.pref = pref;
-    updateRecs(() => selectSem(c.Row));
+    if (focus_sem) {
+        updateRecs(() => selectSem(c.Row));
+    } else {
+        updateRecs();
+    }
 }
 
 // grid layout helpers
@@ -347,6 +355,7 @@ function getY(d) {
     return 30 + d.Row * grid * 1.25 + grid / 2;
 }
 
+// when user selects a semester to add courses
 async function selectSem(n) {
     log(`selectsem|${major}|${n}`);
     selected_sem = n;
@@ -362,6 +371,7 @@ async function selectSem(n) {
     render(rec_info, `Semester ${n+1} Recommendations`, true, false);
 }
 
+// main display function
 function displayCourses() {
     let data_links = [];
     let nodeMap = new Map();
@@ -540,8 +550,8 @@ function displayCourses() {
 }
 
 var fill_per_sem = 4;
-// auto-schedule generation
-// adds a lot of courses all at once before refreshing
+// example pathway generation listener
+// adds a lot of courses all at once before reloading the graph
 d3.select("#auto-gen").on("click", () => {
     log(`autofill|${major}`);
     for (var i = 0; i < 8; i++) {
@@ -561,6 +571,7 @@ d3.select("#auto-gen").on("click", () => {
     updateRecs();
 });
 
+// listener for tuning recs between diversity and relevance
 function tuning(limit) {
     log(`tuning|${major}|${limit}`);
     if (limitDept == limit) return;
@@ -575,7 +586,7 @@ function tuning(limit) {
     });
 }
 
-// choosing courses
+// bulk add functionality
 function choosingCourses() {
     let majorCourses = [];
     let chosenCourses = [];

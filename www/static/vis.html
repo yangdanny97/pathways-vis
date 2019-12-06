@@ -10,37 +10,13 @@
 
 <body>
     <nav class='navbar navbar-expand-sm navbar-dark'>
-        <a class='navbar-brand' href='/'>Pathway for <span id='major'></span></a>
-
+        <a class='navbar-brand' href='/'>Pathways
+            <span id='major'></span>
+            <span class="btn btn-outline-light menutext-sm"> Select a Different Major</span>
+        </a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup">
             <span class="navbar-toggler-icon"></span>
         </button>
-
-        <button type="button" class="btn btn-outline-light mx-lg-3" data-toggle="modal" data-target="#modal">
-            Bulk Add Courses
-        </button>
-
-        <button id="auto-gen" type="button" class="btn btn-outline-light mr-lg-3">
-            Show Example Pathway
-        </button>
-
-        <span class='navbar-text'>Tune Recommendations: </span>
-        <div class="btn-group btn-group-toggle mr-lg-3 tuning" data-toggle="buttons">
-            <label id="tuning-diversity" class="btn btn-outline-light active" data-toggle="tooltip" data-placement="bottom" title="Get more recommendations from a
-            variety of majors">
-                <input type="radio" name="tuning" value="diversity" checked> Diversity
-            </label>
-            <label id="tuning-relevance" class="btn btn-outline-light tuning" data-toggle="tooltip" data-placement="bottom" title="Get more recommendations from the
-            selected major">
-                <input type="radio" name="tuning" value="relevance"> Relevance
-            </label>
-        </div>
-
-        <form class='form-inline ml-auto' action="javascript:;" onsubmit="window.search()">
-            <input id = "search" class="form-control mr-lg-1" type="search" placeholder="Enter Course #">
-            <button class="btn btn-outline-light" type="submit" id="search">Search</button>
-        </form>
-
     </nav>
 
     <div id='container' class="row">
@@ -69,9 +45,43 @@
                     </div>
                 </div>
             </div>
+            <div id="vismenu">
+                <span class="menutext">Initialize Courses</span>
+                <button type="button" class="btn mx-lg-3 btn-outline-dark" data-toggle="modal" data-target="#modal">
+                    Add Courses You've Taken
+                </button>
+                <button id="auto-gen" type="button" class="btn btn-outline-dark mr-lg-3">
+                    Show Example Pathway
+                </button>
+            </div>
             <svg id="vis" width="1000px" , height="1250px"></svg>
         </div>
         <div id='right' class="col-md-4">
+            <div class="searchmenu">
+                <form class='form-inline ml-auto searchform' action="javascript:;" onsubmit="window.search()">
+                    <div class="input-group searchform">
+                        <input id="search" class="form-control" type="search" placeholder="Enter Course #">
+                        <span class="input-group-btn">
+                            <button class="btn btn-outline-dark" type="submit" id="search">Search</button>
+                        </span>
+                    </div>
+                </form>
+            </div>
+            <div class="searchmenu">
+                <span class='menutext-sm'>Tune Recommendations</span>
+                <div class="btn-group btn-group-toggle mr-lg-3 tuning" data-toggle="buttons">
+                    <label id="tuning-diversity" class="btn btn-outline-dark active" data-toggle="tooltip"
+                        data-placement="bottom" title="Get more recommendations from a
+                    variety of majors">
+                        <input type="radio" name="tuning" value="diversity" checked> Diversity
+                    </label>
+                    <label id="tuning-relevance" class="btn btn-outline-dark tuning" data-toggle="tooltip"
+                        data-placement="bottom" title="Get more recommendations from the
+                    selected major">
+                        <input type="radio" name="tuning" value="relevance"> Relevance
+                    </label>
+                </div>
+            </div>
             <h2 id='status'></h2>
             <div id='deck'></div>
         </div>
@@ -79,4 +89,5 @@
     </div>
 </body>
 <script src='/static/dist/pathways.bundle.js'></script>
+
 </html>

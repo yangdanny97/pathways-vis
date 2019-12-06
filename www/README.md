@@ -18,5 +18,5 @@ To Re-deploy the Site:
 5. `make clean` and `make build` to compile the changes (note that the `make` commands may need to be prefixed with sudo)
 6. `tmux`
 7. `make run` to start the server
-8. `ctrl+b d` to exit the tmux without killing the process. It is now safe to exit the ssh session.
+8. `ctrl+b d` (detach the terminal) to exit the tmux without killing the process. It is now safe to exit the ssh session.
 
