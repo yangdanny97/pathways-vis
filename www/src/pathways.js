@@ -209,7 +209,7 @@ async function search(query) {
     let value = searchbar.value;
     query = query || value;
     query = query.replace(" ", "");
-    var dept = query.replace(new RegExp("[0-9]+"), "");
+    var dept = query.replace(new RegExp("[0-9]+"), "").toUpperCase();
     var num = query.replace(new RegExp("[A-Za-z]+"), "");
     if (dept === "") {
         dept = major;
