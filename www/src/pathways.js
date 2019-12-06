@@ -226,7 +226,7 @@ async function search(query) {
             render_id = "Search";
             window.body = body;
             search_results = body.data.classes.map(c => grok(c, semester));
-            render(search_results, "Search");
+            render(search_results, "Search", true, false);
             break;
         }
     }
