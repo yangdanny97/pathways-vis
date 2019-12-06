@@ -1,6 +1,11 @@
 # pathways-vis
 visualization project of pathways through cornell CIS
 
+## Directory:
+- `unused_vis` - unused visualization code for alternative ideas that we explored, retained for reference
+- `exploratory` - files for exploratory data analysis (python notebooks, data extraction script). of these, `extract_script.py`, `explore.py`, and `graph.py` are relevant for pre-processing data
+- `www` - source code for pathways webapp (see README in that directory for more info)
+
 ## Journal:
 
 ### Week ending on 9/21:
