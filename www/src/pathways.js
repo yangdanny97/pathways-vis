@@ -21,7 +21,7 @@ var selected_course = "";
 
 var render_id = "";
 
-// TRUE == LIMIT SAME DEPARTMENT COURSE SUGGESTIONS
+// LIMIT SAME DEPARTMENT COURSE SUGGESTIONS
 var limitDept = d3.select("input[name='tuning']:checked").node().value == "diversity";
 
 var courses;
@@ -54,7 +54,7 @@ var recs = [];
 var search_results = [];
 var pref = new Set()
 
-/* Add a class to the list of preferred classes */
+/* RHS add button, wraps addCourse */
 function add(code) {
     var reqbody = {
         Major: major.toLowerCase(),
@@ -71,18 +71,18 @@ function add(code) {
         fetch(req)
             .then(resp => resp.json())
             .then(d => {
-                addCourse(code, d.Row);
+                addCourse(code, d.Row, false);
             });
     } else {
         addCourse(code, selected_sem);
     }
 }
 
-/* Remove a class from the list of preferred classes */
+/* RHS delete button, wraps deleteCourse */
 function remove(code) {
     var c = data.find(x => x.Name === code);
     if (c) {
-        deleteCourse(c);
+        deleteCourse(c, false);
     }
 }
 
@@ -133,30 +133,27 @@ function render(courses, status, displayAdd = true, displayRemove = true) {
 }
 
 /* Package the API course data into a smaller, neater object */
-function grok(course) {
+function grok(course, semester) {
     let trim = {
         subject: course.subject,
         catalogNbr: course.catalogNbr,
         titleLong: course.titleLong,
         titleShort: course.titleShort,
         description: course.description,
-        link: `https://classes.cornell.edu/browse/roster/${course._sem}/class/${course.subject}/${course.catalogNbr}`,
+        link: `https://classes.cornell.edu/browse/roster/${semester}/class/${course.subject}/${course.catalogNbr}`,
         credits: "? units"
     }
-
     // apparently this credit selection doesn't always work
     try {
         trim.credits = `${course.enrollGroups[0].unitsMinimum} units`;
     } catch (_) {
         return trim;
     }
-
     return trim;
 }
 
 /* Get an html card for a grokked course */
 function card(course, displayAdd = true, displayRemove = true) {
-
     let html = `<div class='card'>
         <div class='card-header'>
             <div class='code'>${course.subject} ${course.catalogNbr}</div>
@@ -170,14 +167,13 @@ function card(course, displayAdd = true, displayRemove = true) {
             ${(displayRemove) ? `<button class="btn btn-danger btn-sm" onclick="remove('${course.subject}${course.catalogNbr}')">Remove</button>` : ""}
         </div>
     </div>`;
-
-    return html
+    return html;
 }
 
 
 /* Get grokked course for a particular code */
 async function info(code) {
-    let semesters = ["FA19", "SP20", "SP19", "FA18"];
+    let semesters = ["SP20", "FA19", "SP19", "FA18"];
     let dept = code.slice(0, -4);
     let num = code.slice(-4);
 
@@ -185,19 +181,22 @@ async function info(code) {
         let uri = `https://classes.cornell.edu/api/2.0/search/classes.json?roster=${semester}&subject=${dept}`;
 
         function getCourseFromBody(body, num) {
-            if (body.data === undefined) return;
             for (let course of body.data.classes) {
-                if (course.catalogNbr == num) {
+                if (course.catalogNbr === num.toString()) {
                     return grok(course, semester);
                 }
             }
         }
 
         const response = await fetch(uri);
-        if (!response.ok) return;
-        const p = await response.json();
-        return getCourseFromBody(p, num);
+        if (!response.ok) continue;
+        const body = await response.json();
+        if (body.data === undefined) continue;
+        const grokked = getCourseFromBody(body, num);
+        if (grokked === undefined) continue;
+        return grokked;
     }
+    return;
 }
 
 /* Get an array of grokked courses from an array of course codes */
@@ -210,13 +209,13 @@ async function search(query) {
     let value = searchbar.value;
     query = query || value;
     query = query.replace(" ", "");
-    var dept = query.replace(new RegExp("[0-9]+"), "");
+    var dept = query.replace(new RegExp("[0-9]+"), "").toUpperCase();
     var num = query.replace(new RegExp("[A-Za-z]+"), "");
     if (dept === "") {
         dept = major;
     }
     log(`search|${major}|${dept}|${(num === "") ? "all" : num }`);
-    let semesters = ["SP20", "FA19"];
+    let semesters = ["SP20", "FA19", "SP19", "FA18"];
     let ok = false;
     for (let semester of semesters) {
         let url = `https://classes.cornell.edu/api/2.0/search/classes.json?roster=${semester}&q=${num}&subject=${dept}`;
@@ -226,8 +225,8 @@ async function search(query) {
             ok = true;
             render_id = "Search";
             window.body = body;
-            search_results = body.data.classes.map(grok, semester);
-            render(search_results, "Search");
+            search_results = body.data.classes.map(c => grok(c, semester));
+            render(search_results, "Search", true, false);
             break;
         }
     }
@@ -303,8 +302,8 @@ async function updateRecs(callback) {
         });
 }
 
-// cname is string, row is int
-function addCourse(cname, row) {
+// add a course to the schedule: cname is string, row is int
+function addCourse(cname, row, focus_sem = true) {
     log(`add|${major}|${cname}`);
     pref.add(cname);
     window.pref = pref;
@@ -316,14 +315,18 @@ function addCourse(cname, row) {
     if (rowsize < 6) {
         sem_select.filter(x => x.Row == row)[0].Col++;
         data.push(COURSE(cname, row, rowsize));
-        updateRecs(() => selectSem(row));
+        if (focus_sem) {
+            updateRecs(() => selectSem(c.Row));
+        } else {
+            updateRecs();
+        }
     } else {
         alert("cannot add more than 6 courses per semester");
     }
 }
 
-//c is a Course object
-function deleteCourse(c) {
+//delete a course from the schedule: c is a Course object
+function deleteCourse(c, focus_sem = true) {
     log(`delete|${major}|${c.Name}`);
     var row = c.Row,
         col = c.Col;
@@ -336,7 +339,11 @@ function deleteCourse(c) {
     });
     pref.delete(c.Name);
     window.pref = pref;
-    updateRecs(() => selectSem(c.Row));
+    if (focus_sem) {
+        updateRecs(() => selectSem(c.Row));
+    } else {
+        updateRecs();
+    }
 }
 
 // grid layout helpers
@@ -348,6 +355,7 @@ function getY(d) {
     return 30 + d.Row * grid * 1.25 + grid / 2;
 }
 
+// when user selects a semester to add courses
 async function selectSem(n) {
     log(`selectsem|${major}|${n}`);
     selected_sem = n;
@@ -363,6 +371,7 @@ async function selectSem(n) {
     render(rec_info, `Semester ${n+1} Recommendations`, true, false);
 }
 
+// main display function
 function displayCourses() {
     let data_links = [];
     let nodeMap = new Map();
@@ -431,6 +440,7 @@ function displayCourses() {
     };
 
     courses.moveToFront();
+
     // add course
     var course = courses.enter().append("g")
         .attr("class", "course")
@@ -467,17 +477,16 @@ function displayCourses() {
         .attr("fill", "white")
         .style("opacity", 0)
         .on("click", async d => {
+            d3.select(`#circle_${d.Name}`).attr("stroke", "black");
+            d3.selectAll(".link").attr("stroke", "black").attr("marker-mid", "url(#arrowhead)");
             if (selected_course === d.Name) {
-                //deselect
-                d3.select(`#circle_${d.Name}`).attr("stroke", "black");
-                if (selected_sem != undefined && selected_sem != -1) {
+                if (selected_sem !== undefined && selected_sem != -1) {
                     selectSem(selected_sem);
                 } else {
                     render_id = "Recommended Courses";
                     recommend().then(c => render(c, "Recommended Courses", true, false));
                 }
                 selected_course = undefined;
-                d3.selectAll(".link").attr("stroke", "black").attr("marker-mid", "url(#arrowhead)");
             } else {
                 //select
                 d3.select(`#circle_${d.Name}`).attr("stroke", "blue");
@@ -541,8 +550,8 @@ function displayCourses() {
 }
 
 var fill_per_sem = 4;
-// auto-schedule generation
-// adds a lot of courses all at once before refreshing
+// example pathway generation listener
+// adds a lot of courses all at once before reloading the graph
 d3.select("#auto-gen").on("click", () => {
     log(`autofill|${major}`);
     for (var i = 0; i < 8; i++) {
@@ -562,6 +571,7 @@ d3.select("#auto-gen").on("click", () => {
     updateRecs();
 });
 
+// listener for tuning recs between diversity and relevance
 function tuning(limit) {
     log(`tuning|${major}|${limit}`);
     if (limitDept == limit) return;
@@ -576,7 +586,7 @@ function tuning(limit) {
     });
 }
 
-// choosing courses
+// bulk add functionality
 function choosingCourses() {
     let majorCourses = [];
     let chosenCourses = [];
