@@ -592,20 +592,40 @@ function choosingCourses() {
         .then(resp => resp.json())
         .then(d => {
             d.Courses.forEach(course => majorCourses.push(course.Name));
+            let courses = {1:[],2:[],3:[],4:[],5:[]};
             majorCourses.forEach(function (course) {
-                let table = d3.select("#menu");
-                let tbody = table.select("tbody");
+                let head = parseInt(course.match(/\d/)[0],10);
+                head = (head > 5) ? 5 : head;
+                head = (head < 1) ? 1 : head;
+                courses[head].push(course);
+            });
+            let table = d3.select("#menu");
+            let thead = table.select("thead");
+            let headtr = thead.select("tr");
+            let maxCourse = 0;
+            Object.keys(courses).forEach(function(section) {
+                let th = headtr.append("th");
+                let sectionText = section.toString() + "000";
+                sectionText = (sectionText == "5000") ? "5000+" : sectionText;
+                th.attr("scope", "col").text(sectionText);
+                maxCourse = Math.max(courses[section].length, maxCourse);
+            });
+
+            let tbody = table.select("tbody");
+            for (let i = 0; i < maxCourse; i++){
                 let tr = tbody.append("tr");
-                tr.append("td").text(course)
-                    .on("click", function () {
+                Object.keys(courses).forEach(function(s){
+                    let td = tr.append("td").text(courses[s][i]);
+                    td.on("click", function(){
                         let ele = d3.select(this);
-                        if (ele.attr("class") == "hover") {
+                        if (ele.attr("class") == "hover" || ele.text() == "") {
                             ele.attr("class", "");
                         } else {
                             ele.attr("class", "hover");
                         }
-                    });
-            })
+                    })
+                })
+            }
         });
 
     d3.select("#updatecourses").on("click", function () {
@@ -613,7 +633,7 @@ function choosingCourses() {
         chosenCourses = [];
         d3.select("#menu").selectAll("td").each(function (_, i) {
             if (d3.select(this).attr("class") == "hover") {
-                chosenCourses.push(majorCourses[i]);
+                chosenCourses.push(d3.select(this).text());
             }
         });
 

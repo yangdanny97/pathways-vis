@@ -121,7 +121,14 @@ $cornell_red: #B31B1B;
         margin: 10px;
     }
 
-    .table-hover .hover {
+    .table {
+        margin:auto;
+        text-align: center;
+    }
+    td:hover {
+        background-color: #4677f8;
+    }
+    .hover {
         background-color: #4677f8;
     }
 }
