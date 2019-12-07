@@ -1,6 +1,11 @@
 # pathways-vis
 visualization project of pathways through cornell CIS
 
+## Directory:
+- `unused_vis` - unused visualization code for alternative ideas that we explored, retained for reference
+- `exploratory` - files for exploratory data analysis (python notebooks, data extraction script). of these, `extract_script.py`, `explore.py`, and `graph.py` are relevant for pre-processing data
+- `www` - source code for pathways webapp (see README in that directory for more info)
+
 ## Journal:
 
 ### Week ending on 9/21:
@@ -213,7 +218,7 @@ visualization project of pathways through cornell CIS
 
 ### Week ending 12/7
 
-### Goals:
+#### Goals:
 - continue working on tasks backlog
 - implement changes based on feedback
 - prepare final presentation (slides, writeup, poster)
@@ -230,17 +235,21 @@ move the selected major down into the page body, add a label that says "XXX Majo
 - The way the layout is set up it seems that the auto-fill schedule feature should respond to the tune recommendations setting (which it doesn't, and that's fine), but it makes me think that this setting should be on the left side with the actual recommendations.
 - ~Change "N cr" to "N units"~ - Danny
 
-#### Progress:
-- TBD
+### Week ending 12/14 (Final sprint)
 
-### TODO - tasks backlog
+#### Goals:
+- prepare CDS final presentation
+- code cleanup, add documentation and README
+- gather UI feedback and make improvements
+- prepare Git repo for handoff
+
+### Tasks backlog
 - ~Optimize frontend compilation performance, reduce dependencies~
-- Optimize webpack CSS loading (right now CSS loads after JS, which loads after the body, resulting in no styling for 1/2 sec after page load)
+- ~Optimize webpack CSS loading (right now CSS loads after JS, which loads after the body, resulting in no styling for 1/2 sec after page load)~
 - ~Brainstorm and implement intuitive user flow for L-R pane interaction~
 - Log using local DB instead of StackDriver
-- Reach out to CourseCrafter for API access (maybe)
+- Reach out to CourseCrafter for API/data scraping script access (maybe)
 - optimization to response time - reduce graph size
-- Give more course information
-- Clean up some styling
+- Code cleanup
 - ~automatic data extraction script instead of using notebooks~
-- Fix tuning option selection
+- ~Fix tuning option selection~

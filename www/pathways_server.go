@@ -406,8 +406,8 @@ func unorderedRecHandler(w http.ResponseWriter, r *http.Request) {
 		cnames = append(cnames, c.Name)
 	}
 
-	recPost := genRec(postGraph, cnames, &excl, 5, false, req.LimitDept)
-	recCo := genRec(coGraph, cnames, &excl, 5, false, req.LimitDept)
+	recPost := genRec(postGraph, cnames, &excl, 4, false, req.LimitDept)
+	recCo := genRec(coGraph, cnames, &excl, 4, false, req.LimitDept)
 	recs := append(recPost.Recs, recCo.Recs...)
 
 	response := CourseCodes{Codes: recs}

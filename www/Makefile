@@ -1,5 +1,9 @@
 build:
 	npm run-script build; go build pathways_server.go
+buildclient:
+	npm run-script build
+buildserver:
+	go build pathways_server.go
 setup:
 	export GOOGLE_APPLICATION_CREDENTIALS="pathways-logging.json"
 run:
