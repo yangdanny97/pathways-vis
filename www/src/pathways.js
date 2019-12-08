@@ -8,22 +8,25 @@ import '../style/pathways.scss';
 var vis = d3.select("#vis");
 // size of grid
 var grid = 120;
-// current courses
+// array of course objects
 var data = [];
-// current recs
+// array of rec objects (currently not displayed on grid)
 var data_recs = [];
-// current edges
+// array of edges between courses
 var data_edges = [];
-// semester selection tiles
+// semester selection tiles (one per row)
 var sem_select = [];
-var selected_sem = -1;
-var selected_course = "";
-
+// currently selected semester
+var selected_sem;
+// name of currently selected course
+var selected_course;
+// name to display on RHS card list
 var render_id = "";
 
 // LIMIT SAME DEPARTMENT COURSE SUGGESTIONS
 var limitDept = d3.select("input[name='tuning']:checked").node().value == "diversity";
 
+// courses and semester select grid elements
 var courses;
 var selectbtns;
 
@@ -62,7 +65,7 @@ function add(code) {
         Courses: data,
     };
     // if no semester is selected, then smart-add
-    if (selected_sem == -1) {
+    if (selected_sem === undefined) {
         var req = new Request('/smart_add/', {
             method: 'POST',
             body: JSON.stringify(reqbody)
@@ -347,12 +350,14 @@ function deleteCourse(c, focus_sem = true) {
 }
 
 // grid layout helpers
+// input: a course or rec tile object
+// output: x or y coordinate according to object's Row/Column field
 function getX(d) {
-    return 50 + d.Col * grid * 1.1 + grid / 2;
+    return 75 + d.Col * grid * 1.1 + grid / 2;
 }
 
 function getY(d) {
-    return 30 + d.Row * grid * 1.25 + grid / 2;
+    return 35 + d.Row * grid * 1.35 + grid / 2;
 }
 
 // when user selects a semester to add courses
@@ -382,6 +387,7 @@ function displayCourses() {
             "target": nodeMap.get(d.Destination)
         }))
 
+    // LHS numbers
     for (var s = 0; s < 8; s++) {
         vis.append("text")
             .attr('text-anchor', "middle")
@@ -394,6 +400,7 @@ function displayCourses() {
             .attr("fill", "black");
     }
 
+    // links between courses
     let links = vis.selectAll(".link")
         .data(data_links, d => d.source.Name + d.source.Row.toString() +
             d.target.Name + d.target.Row.toString());
@@ -440,6 +447,7 @@ function displayCourses() {
     };
 
     courses.moveToFront();
+    selectbtns.moveToFront();
 
     // add course
     var course = courses.enter().append("g")
@@ -453,6 +461,7 @@ function displayCourses() {
 
     course.append("circle")
         .attr("id", d => `circle_${d.Name}`)
+        .attr("class", "circle_class")
         .attr("r", grid / 2)
         .attr("stroke", "black")
         .attr("stroke-width", 3)
@@ -472,15 +481,17 @@ function displayCourses() {
 
     course.append("circle")
         .attr("r", grid / 2)
+        .attr("class", "circle_class")
         .attr("stroke", "black")
-        .attr("stroke-width", 3)
+        .attr("stroke-width", 0)
         .attr("fill", "white")
         .style("opacity", 0)
         .on("click", async d => {
-            d3.select(`#circle_${d.Name}`).attr("stroke", "black");
+            d3.selectAll(".circle_class").attr("stroke", "black");
             d3.selectAll(".link").attr("stroke", "black").attr("marker-mid", "url(#arrowhead)");
             if (selected_course === d.Name) {
-                if (selected_sem !== undefined && selected_sem != -1) {
+                // deselect
+                if (selected_sem !== undefined) {
                     selectSem(selected_sem);
                 } else {
                     render_id = "Recommended Courses";
@@ -495,7 +506,6 @@ function displayCourses() {
                 d3.selectAll(`.dst_${d.Name}`).attr("stroke", "blue")
                     .attr("marker-mid", "url(#arrowhead_selected)");
                 selected_course = d.Name;
-                selected_sem = d.Row;
                 var c = await info(d.Name);
                 render_id = "Course Info";
                 render([c], "Course Info", false, true);
@@ -509,7 +519,7 @@ function displayCourses() {
                 selectSem(d.Row);
             } else {
                 // deselecting a semester
-                selected_sem = -1;
+                selected_sem = undefined;
                 d3.select(`.selectText2_${d.Row + 1}`).text("Add Courses");
                 d3.selectAll(".sem").attr("fill", "none");
                 render_id = "Recommended Courses";
@@ -546,30 +556,7 @@ function displayCourses() {
         .attr("x", grid * 0.6)
         .attr("y", 9)
         .attr("fill", "gray");
-
 }
-
-var fill_per_sem = 4;
-// example pathway generation listener
-// adds a lot of courses all at once before reloading the graph
-d3.select("#auto-gen").on("click", () => {
-    log(`autofill|${major}`);
-    for (var i = 0; i < 8; i++) {
-        var c_sem = data.filter(c => c.Row === i);
-        var sem_recs = data_recs.filter(d => d.Row == i);
-        var rec_names = [];
-        sem_recs.forEach(sr => sr.Recs.forEach(r => rec_names.push(r)));
-        for (var j = 0; j < fill_per_sem - c_sem.length; j++) {
-            var cname = rec_names[j];
-            data.push(COURSE(cname, i, c_sem.length + j));
-            pref.add(cname);
-        }
-        sem_select.forEach(d => {
-            d.Col = fill_per_sem;
-        });
-    }
-    updateRecs();
-});
 
 // listener for tuning recs between diversity and relevance
 function tuning(limit) {
@@ -578,7 +565,7 @@ function tuning(limit) {
     limitDept = limit;
     window.limitDept = limitDept;
     updateRecs(() => {
-        if (selected_sem !== -1 && selected_sem !== undefined) {
+        if (selected_sem !== undefined) {
             selectSem(selected_sem);
         } else {
             recommend().then(c => render(c, "Recommended Courses", true, false));
@@ -684,6 +671,8 @@ function init() {
         body: JSON.stringify(reqbody)
     });
 
+    d3.select("#addCourses").node().innerHTML = `Add ${major} Courses You've Taken`;
+
     //generate core courses
     fetch(req)
         .then(resp => resp.json())
@@ -728,7 +717,8 @@ function init() {
         .attr("d", "M0,-5 L10,0 L0,5")
         .attr('fill', "blue")
         .style('stroke', 'none');
-    //course selection modal
+    
+    //initialize course selection modal
     choosingCourses();
 
     //tuning settings
@@ -738,6 +728,28 @@ function init() {
     //initial recommendations
     render_id = "Recommended Courses";
     recommend().then(c => render(c, "Recommended Courses", true, false));
+
+    var fill_per_sem = 4;
+    // example pathway generation listener
+    // adds a lot of courses all at once before reloading the graph
+    d3.select("#auto-gen").on("click", () => {
+        log(`autofill|${major}`);
+        for (var i = 0; i < 8; i++) {
+            var c_sem = data.filter(c => c.Row === i);
+            var sem_recs = data_recs.filter(d => d.Row == i);
+            var rec_names = [];
+            sem_recs.forEach(sr => sr.Recs.forEach(r => rec_names.push(r)));
+            for (var j = 0; j < fill_per_sem - c_sem.length; j++) {
+                var cname = rec_names[j];
+                data.push(COURSE(cname, i, c_sem.length + j));
+                pref.add(cname);
+            }
+            sem_select.forEach(d => {
+                d.Col = fill_per_sem;
+            });
+        }
+        updateRecs();
+    });
 }
 //NO FUNCTIONS BELOW THIS LINE
 init();

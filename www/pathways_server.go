@@ -546,7 +546,7 @@ func recHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(responseJSON)
 }
 
-//return semester with fewer courses
+//return semester with fewer courses (prioritizing the first argument on ties)
 func findSmallerSem(semMap *map[int][]string, a int, b int) int {
 	if len((*semMap)[a]) > len((*semMap)[b]) {
 		return b
@@ -554,9 +554,33 @@ func findSmallerSem(semMap *map[int][]string, a int, b int) int {
 	return a
 }
 
-func findSemester(courses []Course, semMap map[int][]string,
-	semKeys []int, cnames []string, coGraph *Graph, postGraph *Graph,
-	semPoints map[int]int, course string) int {
+//return semester with fewest courses (prioritizing the first argument on ties)
+func findSmallestSem(semMap *map[int][]string, a int, b int, c int) int {
+	return findSmallerSem(semMap, a, findSmallerSem(semMap, b, c))
+}
+
+func findSemester(courses []Course, coGraph *Graph, postGraph *Graph, course string) int {
+	cnames := []string{}
+	semMap := make(map[int][]string)
+	semKeys := []int{}
+	semPoints := make(map[int]int)
+
+	// build semester -> courses mapping, build excluded courses set
+	for _, c := range courses {
+		_, ok := semMap[c.Row]
+		if !ok {
+			semKeys = append(semKeys, c.Row)
+		}
+		semMap[c.Row] = append(semMap[c.Row], c.Name)
+		cnames = append(cnames, c.Name)
+	}
+	for i := 0; i < 8; i++ {
+		_, ok := semMap[i]
+		if !ok {
+			semKeys = append(semKeys, i)
+			semMap[i] = []string{}
+		}
+	}
 	// build semester -> courses mapping, build excluded courses set
 	for _, c := range courses {
 		_, ok := semMap[c.Row]
@@ -598,7 +622,7 @@ func findSemester(courses []Course, semMap map[int][]string,
 	addSem := 0
 	maxWt := 0
 	for k, v := range semPoints {
-		if v > maxWt {
+		if v > maxWt && len(semMap[k]) < 6 {
 			maxWt = v
 			addSem = k
 		}
@@ -610,11 +634,11 @@ func findSemester(courses []Course, semMap map[int][]string,
 	if maxWt == 0 {
 		courseNum, _ := strconv.Atoi(digits.FindString(course))
 		if courseNum > 4000 {
-			addSem = findSmallerSem(&semMap, 6, 7)
+			addSem = findSmallestSem(&semMap, 5, 6, 7)
 		} else if courseNum > 3000 {
-			addSem = findSmallerSem(&semMap, 4, 5)
+			addSem = findSmallestSem(&semMap, 3, 4, 5)
 		} else if courseNum > 2000 {
-			addSem = findSmallerSem(&semMap, 2, 3)
+			addSem = findSmallestSem(&semMap, 1, 2, 3)
 		} else {
 			addSem = findSmallerSem(&semMap, 0, 1)
 		}
@@ -644,20 +668,17 @@ func addMultipleHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	addCourses := req.Selected
-	courses := req.Courses
-	cnames := []string{}
-	semMap := make(map[int][]string)
-	semKeys := []int{}
-	semPoints := make(map[int]int)
-
+	// courses := req.Courses
 	finalCourses := []Course{}
+
 	rowColCount := []int{0, 0, 0, 0, 0, 0, 0, 0}
-	for _, course := range addCourses {
-		row := findSemester(courses, semMap, semKeys, cnames, coGraph, postGraph, semPoints, course)
+	for _, addCourse := range addCourses {
+		// row := findSemester(courses, coGraph, postGraph, addCourse)
+		row := findSemester(finalCourses, coGraph, postGraph, addCourse)
 		col := rowColCount[row]
 		rowColCount[row] = rowColCount[row] + 1
-		finalCourses = append(finalCourses, Course{Name: course, Row: row, Col: col})
-		courses = append(finalCourses, Course{Name: course, Row: row, Col: col})
+		finalCourses = append(finalCourses, Course{Name: addCourse, Row: row, Col: col})
+		// courses = append(courses, Course{Name: addCourse, Row: row, Col: col})
 	}
 
 	response := CourseResponse{Courses: finalCourses}
@@ -695,29 +716,7 @@ func addHandler(w http.ResponseWriter, r *http.Request) {
 
 	addCourse := req.Course
 	courses := req.Courses
-	cnames := []string{}
-	semMap := make(map[int][]string)
-	semKeys := []int{}
-	semPoints := make(map[int]int)
-
-	// build semester -> courses mapping, build excluded courses set
-	for _, c := range courses {
-		_, ok := semMap[c.Row]
-		if !ok {
-			semKeys = append(semKeys, c.Row)
-		}
-		semMap[c.Row] = append(semMap[c.Row], c.Name)
-		cnames = append(cnames, c.Name)
-	}
-	for i := 0; i < 8; i++ {
-		_, ok := semMap[i]
-		if !ok {
-			semKeys = append(semKeys, i)
-			semMap[i] = []string{}
-		}
-	}
-
-	addSem := findSemester(courses, semMap, semKeys, cnames, coGraph, postGraph, semPoints, addCourse)
+	addSem := findSemester(courses, coGraph, postGraph, addCourse)
 
 	response := AddResponse{Row: addSem}
 	responseJSON, err := json.Marshal(response)
