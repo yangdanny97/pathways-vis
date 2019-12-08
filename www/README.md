@@ -15,12 +15,13 @@
 
 ## To set up SQL database for logging: (THIS ONLY NEEDS TO BE DONE ONCE)
 - create a new DB in `www/logging` using `sqlite3 pathways_logging.db`
-- use `.databases` to verify it exists, then use `.quit` to exit the sqlite CLI; verify that the db file actually exists
+- run `.databases` and verify the DB exists, then use `.quit` to exit the sqlite CLI; also verify that the DB file actually exists
 - compile using `go build logging_setup.go` and run `./logging_setup`
+- open the DB again (`sqlite3 pathways_logging.db`) and run `.tables` to make sure the logs table exists
 
 ## To inspect logs (note: DB is not shared, so to read user data you need to inspect the log on production server)
 - cd into `www/logging`
-- `sudo sqlite3 pathways_logging.db`
+- `sqlite3 pathways_logging.db`
 - `select * from logs;`
 - exit with `.quit`
 
@@ -35,7 +36,7 @@
 8. `ctrl+b` then `d` (detach the terminal) to exit the tmux without killing the process. Verify that the new version is running; it is now safe to exit the ssh session.
 
 ## Troubleshooting:
-- various permission denied errors: use `sudo` for commands and/or give yourself permissions for these created files `sudo chmod +rwx <filename>`
+- various permission denied errors: use the root shell with `sudo bash` (or use `sudo` for commands and/or give yourself permissions for these created files `sudo chmod +rwx <filename>`)
 - logging_setup segfaults if the DB doesn't exist
 - tmux detaching is weird, the keypresses need to be `ctrl+b` at the same time, with `ctrl` being pressed first. then let go of both keys and press `d`
 
