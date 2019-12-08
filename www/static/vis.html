@@ -49,11 +49,27 @@
                 </div>
             </div>
             <div id="vismenu">
-                <span class="menutext">Initialize Courses</span>
-                <button type="button" class="btn mx-lg-3 btn-outline-dark" data-toggle="modal" data-target="#modal" id="addCourses"></button>
+                <span class="menutext-sm">Initialize Courses</span>
+                <button type="button" class="btn mx-lg-3 btn-outline-dark" data-toggle="modal" data-target="#modal"
+                    id="addCourses"></button>
                 <button id="auto-gen" type="button" class="btn btn-outline-dark mr-lg-3">
                     Show Example Pathway
                 </button>
+            </div>
+            <div id="vismenu">
+                <span class="menutext-sm">Tune Recommendations</span>
+                <div class="btn-group btn-group-toggle mr-lg-3 tuning" data-toggle="buttons">
+                    <label id="tuning-diversity" class="btn btn-outline-dark active" data-toggle="tooltip"
+                        data-placement="bottom" title="Get more recommendations from a
+                            variety of majors">
+                        <input type="radio" name="tuning" value="diversity" checked> Diversity
+                    </label>
+                    <label id="tuning-relevance" class="btn btn-outline-dark tuning" data-toggle="tooltip"
+                        data-placement="bottom" title="Get more recommendations from the
+                            selected major">
+                        <input type="radio" name="tuning" value="relevance"> Relevance
+                    </label>
+                </div>
             </div>
             <svg id="vis" width="1000px" , height="1250px"></svg>
         </div>
@@ -67,21 +83,6 @@
                         </span>
                     </div>
                 </form>
-            </div>
-            <div class="searchmenu">
-                <span class='menutext-sm'>Tune Recommendations</span>
-                <div class="btn-group btn-group-toggle mr-lg-3 tuning" data-toggle="buttons">
-                    <label id="tuning-diversity" class="btn btn-outline-dark active" data-toggle="tooltip"
-                        data-placement="bottom" title="Get more recommendations from a
-                    variety of majors">
-                        <input type="radio" name="tuning" value="diversity" checked> Diversity
-                    </label>
-                    <label id="tuning-relevance" class="btn btn-outline-dark tuning" data-toggle="tooltip"
-                        data-placement="bottom" title="Get more recommendations from the
-                    selected major">
-                        <input type="radio" name="tuning" value="relevance"> Relevance
-                    </label>
-                </div>
             </div>
             <h2 id='status'></h2>
             <div id='deck'></div>
