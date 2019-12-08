@@ -1,22 +1,29 @@
-Architecture:
+## Architecture:
 
 1. Apache: exposes server to internet by forwarding requests to the server which listens on `localhost:8000`, as well as handling NetID authentication. Apache files and confs are in `etc/apache2/`.
 2. Server: implemented in GoLang, in `home/dzy4/go/pathways-vis/www/`. Data is stored in JSON format. 
-3. Client: makes several types of requests to the server, such as: load core courses, generate recommendations, logging (our logging flow requires the client to tell the server to log something, then the server logs it to StackDriver).
+3. Client: makes several types of requests to the server, such as: load core courses, generate recommendations, logging (our logging flow requires the client to tell the server to log something). The frontend is built using webpack, and uses SASS, Bootstrap/JQuery, and D3 in addition to several other JS libraries.
 
-Requirements:
+## Requirements:
+
 - Node.js
-- whatever packages we listed in the `package.json`
+- all required javascript packages in `package.json`
 - GoLang
-- Google Cloud logging package (install with `go get -u cloud.google.com/go/logging`)
+- SQlite3
+- ~Google Cloud logging package (install with `go get -u cloud.google.com/go/logging`)~
+- Golang SQLITE3 package (`go get github.com/mattn/go-sqlite3` then `go install github.com/mattn/go-sqlite3`) (note that you need GCC and cgo needs to be enabled, for details see https://github.com/mattn/go-sqlite3)
 
-To Re-deploy the Site:
+## To set up SQL database for logging:
+- create a new DB in `www/logging` using `sqlite3 pathways_logging.db`
+- compile using `go build logging_setup.go` and run `./logging_setup`
+
+## To Re-deploy the Site:
 1. push your changes
 2. ssh into the server `ssh <netid>@pathway.cis.cornell.edu`
-3. make sure apache is running and no processes with name `pathways_server` are running (if both are true, then loading the page should yield 403) - apache does not need to be restarted if no changes were made to the config file
+3. make sure apache is running and no processes with name `pathways_server` are running (loading the page should yield 403) - you do NOT need to do anything to apache if no changes were made to the config file (to kill the running server, you can do `sudo killall pathways_server`)
 4. go to `home/dzy4/go/pathways-vis/www` and pull the changes
 5. `make clean` and `make build` to compile the changes (note that the `make` commands may need to be prefixed with sudo)
 6. `tmux`
 7. `make run` to start the server
-8. `ctrl+b d` (detach the terminal) to exit the tmux without killing the process. It is now safe to exit the ssh session.
+8. `ctrl+b` then `d` (detach the terminal) to exit the tmux without killing the process. Verify that the new version is running; it is now safe to exit the ssh session.
 

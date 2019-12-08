@@ -1,8 +1,8 @@
 package main
 
 import (
-	"context"
 	"crypto/sha1"
+	"database/sql"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -16,8 +16,7 @@ import (
 	"strconv"
 	"strings"
 
-	"cloud.google.com/go/logging"
-	"google.golang.org/api/option"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 type Edge struct {
@@ -756,25 +755,13 @@ func logHandler(w http.ResponseWriter, r *http.Request) {
 		// in production, hash the NetID
 		h := sha1.New()
 		h.Write([]byte(netid))
-		netid = hex.Dump(h.Sum(nil))
+		netid = hex.EncodeToString([]byte(netid))
 	}
 	msg := "log: " + netid + "|" + req.Message
-	ctx := context.Background()
-	projectID := "pathways-logging"
-
-	// create logging client (for now, non-fatal error if it fails)
-	client, err := logging.NewClient(ctx, projectID, option.WithCredentialsFile("pathways-logging.json"))
-	if err != nil {
-		fmt.Println("Failed to create client: ", err)
-		return
-	}
-	defer client.Close()
+	database, _ := sql.Open("sqlite3", "logging/pathways_logging.db")
+	statement, _ := database.Prepare("INSERT INTO logs (user, log) VALUES (?, ?)")
+	statement.Exec(netid, req.Message)
 	fmt.Println(msg)
-
-	// log the message
-	logName := "pathways-log"
-	logger := client.Logger(logName).StandardLogger(logging.Info)
-	logger.Println(msg)
 
 	// empty response (placeholder)
 	response := RecResponse{}
