@@ -17,6 +17,12 @@
 - create a new DB in `www/logging` using `sqlite3 pathways_logging.db`
 - compile using `go build logging_setup.go` and run `./logging_setup`
 
+## To inspect logs (note: DB is not shared, so to read user data you need to inspect the log on production server)
+- cd into `www/logging`
+- `sqlite3 pathways_logging.db`
+- `select * from logs;`
+- exit with `.quit`
+
 ## To Re-deploy the Site:
 1. push your changes
 2. ssh into the server `ssh <netid>@pathway.cis.cornell.edu`
