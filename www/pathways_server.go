@@ -758,9 +758,23 @@ func logHandler(w http.ResponseWriter, r *http.Request) {
 		netid = hex.EncodeToString([]byte(netid))
 	}
 	msg := "log: " + netid + "|" + req.Message
-	database, _ := sql.Open("sqlite3", "logging/pathways_logging.db")
-	statement, _ := database.Prepare("INSERT INTO logs (user, log) VALUES (?, ?)")
-	statement.Exec(netid, req.Message)
+	database, err := sql.Open("sqlite3", "logging/pathways_logging.db")
+	if err != nil {
+		fmt.Println(err)
+		fmt.Println("logging DB open error")
+		return
+	}
+	statement, err := database.Prepare("INSERT INTO logs (user, log) VALUES (?, ?)")
+	if err != nil {
+		fmt.Println(err)
+		fmt.Println("logging prepare error")
+		return
+	}
+	_, err = statement.Exec(netid, req.Message)
+	if err != nil {
+		fmt.Println(err)
+		fmt.Println("logging execute error")
+	}
 	fmt.Println(msg)
 
 	// empty response (placeholder)
