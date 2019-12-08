@@ -13,13 +13,14 @@
 - ~Google Cloud logging package (install with `go get -u cloud.google.com/go/logging`)~
 - Golang SQLITE3 package (`go get github.com/mattn/go-sqlite3` then `go install github.com/mattn/go-sqlite3`) (note that you need GCC and cgo needs to be enabled, for details see https://github.com/mattn/go-sqlite3)
 
-## To set up SQL database for logging:
+## To set up SQL database for logging: (THIS ONLY NEEDS TO BE DONE ONCE)
 - create a new DB in `www/logging` using `sqlite3 pathways_logging.db`
+- use `.databases` to verify it exists, then use `.quit` to exit the sqlite CLI; verify that the db file actually exists
 - compile using `go build logging_setup.go` and run `./logging_setup`
 
 ## To inspect logs (note: DB is not shared, so to read user data you need to inspect the log on production server)
 - cd into `www/logging`
-- `sqlite3 pathways_logging.db`
+- `sudo sqlite3 pathways_logging.db`
 - `select * from logs;`
 - exit with `.quit`
 
@@ -32,4 +33,9 @@
 6. `tmux`
 7. `make run` to start the server
 8. `ctrl+b` then `d` (detach the terminal) to exit the tmux without killing the process. Verify that the new version is running; it is now safe to exit the ssh session.
+
+## Troubleshooting:
+- various permission denied errors: use `sudo` for commands and/or give yourself permissions for these created files `sudo chmod +rwx <filename>`
+- logging_setup segfaults if the DB doesn't exist
+- tmux detaching is weird, the keypresses need to be `ctrl+b` at the same time, with `ctrl` being pressed first. then let go of both keys and press `d`
 
