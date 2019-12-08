@@ -3,7 +3,7 @@ import graph
 import time
 
 MAJORS = ["Computer Science","Statistical Science","Information Science"] # majors to process (individually)
-CODES = ["cs","stsci","info"] # codes for the above majors, for naming graphs
+CODES = ["cs","stsci","info"] # codes for the above majors, for naming graphs - must be lowercased department name
 FILE_PATH = "./data/CIS_enrollment.csv"
 OUTPUT_DIR = "./data/"
 MIN_EDGE_WEIGHT = 0
@@ -13,6 +13,10 @@ for i in range(len(MAJORS)):
     print("Processing: "+major)
     data = extract.Data(FILE_PATH, [major])
     print("extraction done!")
+    # Pre-process to remove courses not offered after 2017FA
+    for cname in list(data.courses):
+        if max(data.courses[cname].terms) < (2017,1):
+            del data.courses[cname]
     # CO-ENROLLMENT
     g = graph.Graph()
     c = 1
