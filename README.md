@@ -252,9 +252,10 @@ move the selected major down into the page body, add a label that says "XXX Majo
 - ~Optimize frontend compilation performance, reduce dependencies~
 - ~Optimize webpack CSS loading (right now CSS loads after JS, which loads after the body, resulting in no styling for 1/2 sec after page load)~
 - ~Brainstorm and implement intuitive user flow for L-R pane interaction~
-- Log using local DB instead of StackDriver
+- ~Log using local DB instead of StackDriver~
 - Reach out to CourseCrafter for API/data scraping script access (maybe)
 - optimization to response time - reduce graph size
 - Code cleanup
+- Add details view
 - ~automatic data extraction script instead of using notebooks~
 - ~Fix tuning option selection~
