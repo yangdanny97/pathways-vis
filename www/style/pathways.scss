@@ -82,7 +82,7 @@ $cornell_red: #B31B1B;
     }
 }
 
-#right#deck .card {
+#deck .card {
     margin: 10px;
 
     .card-header {
@@ -96,9 +96,10 @@ $cornell_red: #B31B1B;
         }
 
         div.code {
-            min-width: 80px;
             font-weight: bold;
             font-size: 14px;
+            flex-basis: content;
+            flex-shrink: 0;
         }
 
         div.name {
