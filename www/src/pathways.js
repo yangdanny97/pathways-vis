@@ -125,12 +125,10 @@ function render(courses, status, displayAdd = true, displayRemove = true) {
 
     deck.innerHTML = ""
     for (let card of cards) {
-        deck.innerHTML += card;
+        deck.append(card);
     }
     for (let el of d3.selectAll(".card-text").nodes()) {
-        $clamp(el, {
-            clamp: 3
-        });
+        $clamp(el, { clamp: 3 });
     }
     return;
 }
@@ -157,20 +155,28 @@ function grok(course, semester) {
 
 /* Get an html card for a grokked course */
 function card(course, displayAdd = true, displayRemove = true) {
-    let html = `<div class='card'>
-        <div class='card-header'>
+    let c = d3.create("div").attr("class","card")
+    let html = `<div class='card-header'>
             <div class='code'>${course.subject} ${course.catalogNbr}</div>
             <div class='name'><a href="${course.link}" target="_blank">${course.titleShort}</a></div>
             <div class='cred'>${course.credits}</div>
         </div>
         <div class="card-body">
             <p class="card-text">${course.description}</p>
-            <a class="btn btn-primary btn-sm" href="${course.link}" role="button" target="_blank">Details</a>
+            <button class="btn btn-primary btn-sm">Details</button>
             ${(displayAdd) ? `<button class="btn btn-success btn-sm" onclick="add('${course.subject}${course.catalogNbr}')">Add</button>` : ""}
             ${(displayRemove) ? `<button class="btn btn-danger btn-sm" onclick="remove('${course.subject}${course.catalogNbr}')">Remove</button>` : ""}
-        </div>
-    </div>`;
-    return html;
+        </div>`;
+    c.html(html)
+
+    c.select('button').on('click', () => preview_class(course));
+
+    return c.node();
+}
+
+
+function preview_class(data) {
+    alert(data);
 }
 
 
