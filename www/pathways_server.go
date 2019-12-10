@@ -601,7 +601,7 @@ func findSemester(courses []Course, coGraph *Graph, postGraph *Graph, course str
 	for _, e := range coGraph.Edges {
 		for _, k := range semKeys {
 			if contains(semMap[k], e.Source) && e.Destination == course {
-				semPoints[k] = semPoints[k] + e.Weight/len(semMap[k])
+				semPoints[k] = semPoints[k] + e.Weight ^ 2 // /len(semMap[k])
 			}
 		}
 	}
@@ -609,10 +609,10 @@ func findSemester(courses []Course, coGraph *Graph, postGraph *Graph, course str
 	for _, e := range postGraph.Edges {
 		for _, k := range semKeys {
 			if contains(semMap[k], e.Source) && e.Destination == course && containsint(semKeys, k+1) {
-				semPoints[k+1] = semPoints[k+1] + e.Weight/len(semMap[k])
+				semPoints[k+1] = semPoints[k+1] + e.Weight ^ 2 // /len(semMap[k]) //max(len(semMap[k+1]), 1)
 			}
 			if contains(semMap[k], e.Destination) && e.Source == course && containsint(semKeys, k-1) {
-				semPoints[k-1] = semPoints[k-1] + e.Weight/len(semMap[k])
+				semPoints[k-1] = semPoints[k-1] + e.Weight ^ 2 // /len(semMap[k]) //max(len(semMap[k+1]), 1)
 			}
 		}
 	}
@@ -667,17 +667,21 @@ func addMultipleHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	addCourses := req.Selected
+	reFull := regexp.MustCompile("[0-9]+")
+	sort.SliceStable(addCourses, func(i, j int) bool {
+		courseNum1, _ := strconv.Atoi(reFull.FindString(addCourses[i]))
+		courseNum2, _ := strconv.Atoi(reFull.FindString(addCourses[j]))
+		return courseNum1 < courseNum2
+	})
 	// courses := req.Courses
 	finalCourses := []Course{}
 
 	rowColCount := []int{0, 0, 0, 0, 0, 0, 0, 0}
 	for _, addCourse := range addCourses {
-		// row := findSemester(courses, coGraph, postGraph, addCourse)
 		row := findSemester(finalCourses, coGraph, postGraph, addCourse)
 		col := rowColCount[row]
 		rowColCount[row] = rowColCount[row] + 1
 		finalCourses = append(finalCourses, Course{Name: addCourse, Row: row, Col: col})
-		// courses = append(courses, Course{Name: addCourse, Row: row, Col: col})
 	}
 
 	response := CourseResponse{Courses: finalCourses}

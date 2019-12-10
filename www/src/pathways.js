@@ -357,7 +357,7 @@ function getX(d) {
 }
 
 function getY(d) {
-    return 35 + d.Row * grid * 1.35 + grid / 2;
+    return 35 + d.Row * grid * 1.5 + grid / 2;
 }
 
 // when user selects a semester to add courses
