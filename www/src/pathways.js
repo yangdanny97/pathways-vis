@@ -142,7 +142,9 @@ function grok(course, semester) {
         titleShort: course.titleShort,
         description: course.description,
         link: `https://classes.cornell.edu/browse/roster/${semester}/class/${course.subject}/${course.catalogNbr}`,
-        credits: "? units"
+        credits: "? units",
+        whenOffered: course.catalogWhenOffered,
+        comments: course.catalogComments
     }
     // apparently this credit selection doesn't always work
     try {
@@ -163,11 +165,47 @@ function card(course, displayAdd = true, displayRemove = true) {
         </div>
         <div class="card-body">
             <p class="card-text">${course.description}</p>
-            <button class="btn btn-primary btn-sm">Details</button>
+            <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#${course.subject}${course.catalogNbr}-m">More Info</button>
             ${(displayAdd) ? `<button class="btn btn-success btn-sm" onclick="add('${course.subject}${course.catalogNbr}')">Add</button>` : ""}
             ${(displayRemove) ? `<button class="btn btn-danger btn-sm" onclick="remove('${course.subject}${course.catalogNbr}')">Remove</button>` : ""}
         </div>`;
+
+    let m_html = `<div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="code">${course.subject} ${course.catalogNbr}</span>
+                <h5 class="modal-title">${course.titleLong}</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class='link'>View this class on the <a href="${course.link}">course roster</a></p>
+                <p class='course-desc'>${course.description}</p>
+                <p class='when-offered'><strong>Offered in:</strong> ${course.whenOffered}</p>
+                ${course.comments ? `<p><strong>Comments:</strong> ${course.comments}</p>` : ""}
+            </div>
+            <div class="modal-footer">
+                ${(displayAdd) ? `<button class="btn btn-success" onclick="add('${course.subject}${course.catalogNbr}')" data-dismiss="modal">Add</button>` : ""}
+                ${(displayRemove) ? `<button class="btn btn-danger" onclick="remove('${course.subject}${course.catalogNbr}')" data-dismiss="modal">Remove</button>` : ""}
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>`;
+
+    //let m_html = "<span>Hello</span>";
+    
+
     c.html(html)
+    //m.html("")
+
+    var m = d3.select("body").append("div")
+        .attr("id",`${course.subject}${course.catalogNbr}-m`)
+        .attr("class", "modal fade");
+
+    m.html(m_html);
+
+    console.log(m.node())
 
     c.select('button').on('click', () => preview_class(course));
 
@@ -175,8 +213,7 @@ function card(course, displayAdd = true, displayRemove = true) {
 }
 
 
-function preview_class(data) {
-    alert(data);
+function preview_class(course) {
 }
 
 
