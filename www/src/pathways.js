@@ -192,7 +192,7 @@ function preview_class(course, displayAdd=true, displayRemove=true) {
                 </button>
             </div>
             <div class="modal-body">
-                <p class='link'>View this class on the <a href="${course.link}">course roster</a></p>
+                <p class='link'>View this class on the <a href="${course.link}" target="_blank">course roster</a></p>
                 <p class='course-desc'>${course.description}</p>
                 <p class='when-offered'><strong>Offered in:</strong> ${course.whenOffered}</p>
                 ${course.comments ? `<p><strong>Comments:</strong> ${course.comments}</p>` : ""}
