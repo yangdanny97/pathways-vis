@@ -58,7 +58,7 @@ var search_results = [];
 var pref = new Set()
 
 /* RHS add button, wraps addCourse */
-function add(code, details=undefined) {
+function add(code, details = undefined) {
     var reqbody = {
         Major: major.toLowerCase(),
         Course: code,
@@ -128,7 +128,9 @@ function render(courses, status, displayAdd = true, displayRemove = true) {
         deck.append(card);
     }
     for (let el of d3.selectAll(".card-text").nodes()) {
-        $clamp(el, { clamp: 3 });
+        $clamp(el, {
+            clamp: 3
+        });
     }
     return;
 }
@@ -170,8 +172,8 @@ function card(course, displayAdd = true, displayRemove = true) {
             ${(displayRemove) ? `<button class="btn btn-danger btn-sm remove">Remove</button>` : ""}
         </div>`;
 
-    let c = d3.create("div").attr("class","card").html(html);
-    
+    let c = d3.create("div").attr("class", "card").html(html);
+
     c.select('button.info').on('click', () => preview_class(course, displayAdd, displayRemove));
     c.select('button.add').on('click', () => add(course.subject + course.catalogNbr, course));
     c.select('button.remove').on('click', () => remove(course.subject + course.catalogNbr));
@@ -180,7 +182,7 @@ function card(course, displayAdd = true, displayRemove = true) {
 }
 
 /* Add the data for a grokked course into the modal overlay */
-function preview_class(course, displayAdd=true, displayRemove=true) {
+function preview_class(course, displayAdd = true, displayRemove = true) {
 
     let m_html = `<div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -206,8 +208,7 @@ function preview_class(course, displayAdd=true, displayRemove=true) {
             </div>
         </div>
     </div>`;
-    
-    d3.select("#deets").html(m_html)
+    d3.select("#deets").html(m_html);
 }
 
 
@@ -304,7 +305,7 @@ async function recommend(codes) {
 }
 
 // course and recommendation factory methods
-function COURSE(name, row, col, details=undefined) {
+function COURSE(name, row, col, details = undefined) {
     return {
         Type: "course",
         Name: name,
@@ -345,7 +346,7 @@ async function updateRecs(callback) {
 }
 
 // add a course to the schedule: cname is string, row is int
-function addCourse(cname, row, focus_sem = true, details=undefined) {
+function addCourse(cname, row, focus_sem = true, details = undefined) {
     log(`add|${major}|${cname}`);
     pref.add(cname);
     window.pref = pref;
@@ -528,8 +529,8 @@ function displayCourses() {
         .attr("data-target", "deets")
         .style("opacity", 0)
         .on("click", d => {
-            d3.selectAll(".circle_class").attr("stroke", "black");
-            d3.selectAll(".link").attr("stroke", "black").attr("marker-mid", "url(#arrowhead)");
+            // d3.selectAll(".circle_class").attr("stroke", "black");
+            // d3.selectAll(".link").attr("stroke", "black").attr("marker-mid", "url(#arrowhead)");
             if (selected_course === d.Name) {
                 // deselect
                 if (selected_sem !== undefined) {
@@ -549,15 +550,12 @@ function displayCourses() {
                     preview_class(d.Details, false, true);
                     $("#deets").modal("show");
                 }
-
-
-                d3.select(`#circle_${d.Name}`).attr("stroke", "blue");
-                d3.selectAll(`.src_${d.Name}`).attr("stroke", "blue")
-                    .attr("marker-mid", "url(#arrowhead_selected)");
-                d3.selectAll(`.dst_${d.Name}`).attr("stroke", "blue")
-                    .attr("marker-mid", "url(#arrowhead_selected)");
+                // d3.select(`#circle_${d.Name}`).attr("stroke", "blue");
+                // d3.selectAll(`.src_${d.Name}`).attr("stroke", "blue")
+                //     .attr("marker-mid", "url(#arrowhead_selected)");
+                // d3.selectAll(`.dst_${d.Name}`).attr("stroke", "blue")
+                //     .attr("marker-mid", "url(#arrowhead_selected)");
                 selected_course = d.Name;
-
                 //var c = await info(d.Name);
                 //render_id = "Course Info";
                 //render([c], "Course Info", false, true);
@@ -641,9 +639,15 @@ function choosingCourses() {
         .then(resp => resp.json())
         .then(d => {
             d.Courses.forEach(course => majorCourses.push(course.Name));
-            let courses = {1:[],2:[],3:[],4:[],5:[]};
+            let courses = {
+                1: [],
+                2: [],
+                3: [],
+                4: [],
+                5: []
+            };
             majorCourses.forEach(function (course) {
-                let head = parseInt(course.match(/\d/)[0],10);
+                let head = parseInt(course.match(/\d/)[0], 10);
                 head = (head > 5) ? 5 : head;
                 head = (head < 1) ? 1 : head;
                 courses[head].push(course);
@@ -652,7 +656,7 @@ function choosingCourses() {
             let thead = table.select("thead");
             let headtr = thead.select("tr");
             let maxCourse = 0;
-            Object.keys(courses).forEach(function(section) {
+            Object.keys(courses).forEach(function (section) {
                 let th = headtr.append("th");
                 let sectionText = section.toString() + "000";
                 sectionText = (sectionText == "5000") ? "5000+" : sectionText;
@@ -661,11 +665,11 @@ function choosingCourses() {
             });
 
             let tbody = table.select("tbody");
-            for (let i = 0; i < maxCourse; i++){
+            for (let i = 0; i < maxCourse; i++) {
                 let tr = tbody.append("tr");
-                Object.keys(courses).forEach(function(s){
+                Object.keys(courses).forEach(function (s) {
                     let td = tr.append("td").text(courses[s][i]);
-                    td.on("click", function(){
+                    td.on("click", function () {
                         let ele = d3.select(this);
                         if (ele.attr("class") == "hover" || ele.text() == "") {
                             ele.attr("class", "");
@@ -790,7 +794,7 @@ function init() {
         .attr("d", "M0,-5 L10,0 L0,5")
         .attr('fill', "blue")
         .style('stroke', 'none');
-    
+
     //initialize course selection modal
     choosingCourses();
 
@@ -823,6 +827,11 @@ function init() {
         }
         updateRecs();
     });
+    // d3.select("#deets").on('hidden.bs.modal', () => {
+    //     alert("modal closed");
+    //     d3.selectAll(".circle_class").attr("stroke", "black");
+    //     d3.selectAll(".link").attr("stroke", "black").attr("marker-mid", "url(#arrowhead)");
+    // });
 }
 //NO FUNCTIONS BELOW THIS LINE
 init();
