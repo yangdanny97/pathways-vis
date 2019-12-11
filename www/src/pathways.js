@@ -179,10 +179,8 @@ function card(course, displayAdd = true, displayRemove = true) {
     return c.node();
 }
 
-
+/* Add the data for a grokked course into the modal overlay */
 function preview_class(course, displayAdd=true, displayRemove=true) {
-    //let displayAdd = true;
-    //let displayRemove = true;
 
     let m_html = `<div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -215,6 +213,7 @@ function preview_class(course, displayAdd=true, displayRemove=true) {
 
 /* Get grokked course for a particular code */
 async function info(code) {
+    //console.log("Making request: ", code);
     let semesters = ["SP20", "FA19", "SP19", "FA18"];
     let dept = code.slice(0, -4);
     let num = code.slice(-4);
@@ -528,7 +527,7 @@ function displayCourses() {
         .attr("data-toggle", "modal")
         .attr("data-target", "deets")
         .style("opacity", 0)
-        .on("click", async d => {
+        .on("click", d => {
             d3.selectAll(".circle_class").attr("stroke", "black");
             d3.selectAll(".link").attr("stroke", "black").attr("marker-mid", "url(#arrowhead)");
             if (selected_course === d.Name) {
