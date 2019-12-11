@@ -373,6 +373,7 @@ async function selectSem(n) {
 
 // main display function
 function displayCourses() {
+    resort();
     let data_links = [];
     let nodeMap = new Map();
     data.forEach(d => nodeMap.set(d.Name, d));
@@ -675,23 +676,139 @@ function choosingCourses() {
     })
 }
 
-// function resort(){
-//     let edgeCount = {};
-//     let nodeMap = new Map();
-//     data.forEach(d => {
-//         edgeCount[d.Name] =  {"row":d.Row, "outedges":0, "inedges":0};
-//         nodeMap.set(d.Name, d);
-//     });
-//     data_edges.forEach(d =>{
-//         edgeCount[d.Source]["outedges"] += 1;
-//         edgeCount[d.Destination]["inedges"] += 1;
-//     });
+function resort(){
+    let edgeCount = {};
+    let nodeMap = {};
+    data.forEach(d => {
+        edgeCount[d.Name] =  {"Row":d.Row,"Out":0, "In":0,"Outedges":[],"Inedges":[]};
+        nodeMap[d.Name] = {};
+    });
 
-//     for(let key in Object.keys(edgeCount)){
-//         let value = edgeCount[key];
+    let edgeSet = new Set();
+    data_edges.forEach(d =>{
+        let check = d.Source + d.Destination + d.Weight;
+        if (!edgeSet.has(check)){
+            edgeCount[d.Source]["Out"] += 1;
+            edgeCount[d.Source]["Outedges"].push(d.Destination);
+            edgeCount[d.Destination]["In"] += 1;
+            edgeCount[d.Destination]["Inedges"].push(d.Source);
+        }
+        edgeSet.add(check);
+    });
 
-//     }
-// }
+    let rowEdgeCount = {0:[],1:[],2:[],3:[],4:[],5:[],6:[],7:[]};
+    Object.keys(edgeCount).forEach(node => {
+        let value = edgeCount[node];
+        value["Name"] = node;
+        value["Diff"] = value.Out - value.In;
+        let newNode = {"Diff":value.Out-value.In,"Inedges":value.Inedges,"Outedges":value.Outedges};
+        rowEdgeCount[value.Row].push(value);
+        nodeMap[node] = newNode;
+    })
+    
+    let numSems = 8;
+    //sort first row: first sort by out edges, then move first ele to back
+    let row1 = rowEdgeCount[0]
+    row1 = row1.sort(function(a,b){
+        if(a.Out == b.Out){
+            //get children in edges
+            let aChild = a.Outedges[0];
+            let bChild = b.Outedges[0];
+            return aChild.In - bChild.In;
+        }
+        return a.Out - b.Out;
+    });
+    rowEdgeCount[0] = row1;
+
+    //sorting each row iteratively
+    for(var i = 1; i < numSems; i += 1){
+        //sort by in edges
+        let row2 = rowEdgeCount[i];
+        row2.sort(function(a,b){
+            if (a.In == b.In && a.Outedges.length > 0 && b.Outedges.length > 0){
+                //get children in edges
+                let aChild = a.Outedges[0];
+                let bChild = b.Outedges[0];
+                return aChild.In - bChild.In;
+            }
+            return a.In - b.In;
+        });
+        //match nodes to as close as to parent as can
+        let prevRow = rowEdgeCount[i-1];
+        let currRow = rowEdgeCount[i];
+        //sort row by inedges
+        currRow.sort(function(a,b){
+            if (a.In == 0){
+                return -1;
+            } else {
+                if (a.In == b.In && a.Outedges.length > 0 && b.Outedges.length > 0){
+                    //get children in edges
+                    let aChild = a.Outedges[0];
+                    let bChild = b.Outedges[0];
+                    return aChild.In - bChild.In;
+                }
+                return a.In - b.In;
+            }
+        });
+
+        let updatedRow = [];
+        for (let size = 0; size < 4; size++) updatedRow.push({"Name":""});
+        let nodeIdx = 0;
+        //iterate through every node in currRow
+        while (nodeIdx < currRow.length){
+            let node = currRow[nodeIdx];
+            node.Inedges.sort(function(parent1,parent2){
+                return parent1.Out - parent2.Out;
+            });
+            let parent = node.Inedges[0];
+            let parentIdx = 0;
+            for (let j = 0; j < prevRow.length; j++){
+                let parentNode = prevRow[j];
+                if (parentNode.Name == parent){
+                    parentIdx = j;
+                    break;
+                }
+            }
+
+            //check if idx is already populated
+            function check(row, idx, node){
+                return row[idx].Name != "" ? false : true; 
+            }
+
+            let downIdx = parentIdx;
+            let upIdx = parentIdx;
+            while (true) {
+                if (check(updatedRow, downIdx, node)){
+                    updatedRow[downIdx] = node;
+                    break;
+                } else {
+                    downIdx = Math.max(0, downIdx - 1);
+                }
+                if (check(updatedRow, upIdx, node)){
+                    updatedRow[upIdx] = node;
+                    break;
+                } else {
+                    upIdx = Math.min(3, upIdx + 1);
+                }
+            }
+            nodeIdx++;
+        }
+        rowEdgeCount[i] = updatedRow;
+    }
+    
+    data = [];
+    for (let row = 0; row < numSems; row++){
+        let nodes = rowEdgeCount[row];
+        let col = 0;
+        for (let idx in nodes){
+            let node = nodes[idx];
+            if (node.Name != ""){
+                data.push({"Name":node["Name"], "Row":row, "Col":col});
+                col += 1;
+            }
+        }
+    }
+}
 
 //ALL INITIALIZATION CODE GOES HERE
 function init() {
