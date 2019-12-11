@@ -165,17 +165,29 @@ function card(course, displayAdd = true, displayRemove = true) {
         </div>
         <div class="card-body">
             <p class="card-text">${course.description}</p>
-            <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#${course.subject}${course.catalogNbr}-m">More Info</button>
+            <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#deets">More Info</button>
             ${(displayAdd) ? `<button class="btn btn-success btn-sm" onclick="add('${course.subject}${course.catalogNbr}')">Add</button>` : ""}
             ${(displayRemove) ? `<button class="btn btn-danger btn-sm" onclick="remove('${course.subject}${course.catalogNbr}')">Remove</button>` : ""}
         </div>`;
+
+    c.html(html)
+
+    c.select('button').on('click', () => preview_class(course));
+
+    return c.node();
+}
+
+
+function preview_class(course) {
+    let displayAdd = true;
+    let displayRemove = true;
 
     let m_html = `<div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <span class="code">${course.subject} ${course.catalogNbr}</span>
                 <h5 class="modal-title">${course.titleLong}</h5>
-                <span>${course.credits}</span>
+                <span class="credits">${course.credits}</span>
                 <button type="button" class="close" data-dismiss="modal">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -193,28 +205,8 @@ function card(course, displayAdd = true, displayRemove = true) {
             </div>
         </div>
     </div>`;
-
-    //let m_html = "<span>Hello</span>";
     
-
-    c.html(html)
-    //m.html("")
-
-    var m = d3.select("body").append("div")
-        .attr("id",`${course.subject}${course.catalogNbr}-m`)
-        .attr("class", "modal fade");
-
-    m.html(m_html);
-
-    console.log(m.node())
-
-    c.select('button').on('click', () => preview_class(course));
-
-    return c.node();
-}
-
-
-function preview_class(course) {
+    d3.select("#deets").html(m_html)
 }
 
 
