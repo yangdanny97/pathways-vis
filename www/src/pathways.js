@@ -58,7 +58,7 @@ var search_results = [];
 var pref = new Set()
 
 /* RHS add button, wraps addCourse */
-function add(code) {
+function add(code, details = undefined) {
     var reqbody = {
         Major: major.toLowerCase(),
         Course: code,
@@ -74,10 +74,10 @@ function add(code) {
         fetch(req)
             .then(resp => resp.json())
             .then(d => {
-                addCourse(code, d.Row, false);
+                addCourse(code, d.Row, false, details);
             });
     } else {
-        addCourse(code, selected_sem);
+        addCourse(code, selected_sem, details);
     }
 }
 
@@ -125,7 +125,7 @@ function render(courses, status, displayAdd = true, displayRemove = true) {
 
     deck.innerHTML = ""
     for (let card of cards) {
-        deck.innerHTML += card;
+        deck.append(card);
     }
     for (let el of d3.selectAll(".card-text").nodes()) {
         $clamp(el, {
@@ -144,7 +144,10 @@ function grok(course, semester) {
         titleShort: course.titleShort,
         description: course.description,
         link: `https://classes.cornell.edu/browse/roster/${semester}/class/${course.subject}/${course.catalogNbr}`,
-        credits: "? units"
+        credits: "? units",
+        whenOffered: course.catalogWhenOffered,
+        comments: course.catalogComments,
+        prereq: course.catalogPrereqCoreq
     }
     // apparently this credit selection doesn't always work
     try {
@@ -157,25 +160,61 @@ function grok(course, semester) {
 
 /* Get an html card for a grokked course */
 function card(course, displayAdd = true, displayRemove = true) {
-    let html = `<div class='card'>
-        <div class='card-header'>
+    let html = `<div class='card-header'>
             <div class='code'>${course.subject} ${course.catalogNbr}</div>
             <div class='name'><a href="${course.link}" target="_blank">${course.titleShort}</a></div>
             <div class='cred'>${course.credits}</div>
         </div>
         <div class="card-body">
             <p class="card-text">${course.description}</p>
-            <a class="btn btn-primary btn-sm" href="${course.link}" role="button" target="_blank">Details</a>
-            ${(displayAdd) ? `<button class="btn btn-success btn-sm" onclick="add('${course.subject}${course.catalogNbr}')">Add</button>` : ""}
-            ${(displayRemove) ? `<button class="btn btn-danger btn-sm" onclick="remove('${course.subject}${course.catalogNbr}')">Remove</button>` : ""}
+            <button class="btn btn-primary btn-sm info" data-toggle="modal" data-target="#deets">More Info</button>
+            ${(displayAdd) ? `<button class="btn btn-success btn-sm add">Add</button>` : ""}
+            ${(displayRemove) ? `<button class="btn btn-danger btn-sm remove">Remove</button>` : ""}
+        </div>`;
+
+    let c = d3.create("div").attr("class", "card").html(html);
+
+    c.select('button.info').on('click', () => preview_class(course, displayAdd, displayRemove));
+    c.select('button.add').on('click', () => add(course.subject + course.catalogNbr, course));
+    c.select('button.remove').on('click', () => remove(course.subject + course.catalogNbr));
+
+    return c.node();
+}
+
+/* Add the data for a grokked course into the modal overlay */
+function preview_class(course, displayAdd = true, displayRemove = true) {
+
+    let m_html = `<div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="code">${course.subject} ${course.catalogNbr}</span>
+                <h5 class="modal-title">${course.titleLong}</h5>
+                <span class="credits">${course.credits}</span>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class='link'>View this class on the <a href="${course.link}" target="_blank">course roster</a></p>
+                <p class='course-desc'>${course.description}</p>
+                <p class='when-offered'><strong>Offered in:</strong> ${course.whenOffered}</p>
+                ${course.comments ? `<p><strong>Comments:</strong> ${course.comments}</p>` : ""}
+                ${course.prereq ? `<p><strong>Prerequisites/Corequisites:</strong> ${course.prereq}</p>` : ""}
+            </div>
+            <div class="modal-footer">
+                ${(displayAdd) ? `<button class="btn btn-success" onclick="add('${course.subject}${course.catalogNbr}')" data-dismiss="modal">Add</button>` : ""}
+                ${(displayRemove) ? `<button class="btn btn-danger" onclick="remove('${course.subject}${course.catalogNbr}')" data-dismiss="modal">Remove</button>` : ""}
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
         </div>
     </div>`;
-    return html;
+    d3.select("#deets").html(m_html);
 }
 
 
 /* Get grokked course for a particular code */
 async function info(code) {
+    //console.log("Making request: ", code);
     let semesters = ["SP20", "FA19", "SP19", "FA18"];
     let dept = code.slice(0, -4);
     let num = code.slice(-4);
@@ -266,12 +305,13 @@ async function recommend(codes) {
 }
 
 // course and recommendation factory methods
-function COURSE(name, row, col) {
+function COURSE(name, row, col, details = undefined) {
     return {
         Type: "course",
         Name: name,
         Row: row,
-        Col: col
+        Col: col,
+        Details: details
     };
 }
 
@@ -306,7 +346,7 @@ async function updateRecs(callback) {
 }
 
 // add a course to the schedule: cname is string, row is int
-function addCourse(cname, row, focus_sem = true) {
+function addCourse(cname, row, focus_sem = true, details = undefined) {
     log(`add|${major}|${cname}`);
     pref.add(cname);
     window.pref = pref;
@@ -317,7 +357,7 @@ function addCourse(cname, row, focus_sem = true) {
     var rowsize = data.filter(x => x.Row == row).length;
     if (rowsize < 6) {
         sem_select.filter(x => x.Row == row)[0].Col++;
-        data.push(COURSE(cname, row, rowsize));
+        data.push(COURSE(cname, row, rowsize, details));
         if (focus_sem) {
             updateRecs(() => selectSem(c.Row));
         } else {
@@ -486,10 +526,12 @@ function displayCourses() {
         .attr("stroke", "black")
         .attr("stroke-width", 0)
         .attr("fill", "white")
+        .attr("data-toggle", "modal")
+        .attr("data-target", "deets")
         .style("opacity", 0)
-        .on("click", async d => {
-            d3.selectAll(".circle_class").attr("stroke", "black");
-            d3.selectAll(".link").attr("stroke", "black").attr("marker-mid", "url(#arrowhead)");
+        .on("click", d => {
+            // d3.selectAll(".circle_class").attr("stroke", "black");
+            // d3.selectAll(".link").attr("stroke", "black").attr("marker-mid", "url(#arrowhead)");
             if (selected_course === d.Name) {
                 // deselect
                 if (selected_sem !== undefined) {
@@ -501,15 +543,23 @@ function displayCourses() {
                 selected_course = undefined;
             } else {
                 //select
-                d3.select(`#circle_${d.Name}`).attr("stroke", "blue");
-                d3.selectAll(`.src_${d.Name}`).attr("stroke", "blue")
-                    .attr("marker-mid", "url(#arrowhead_selected)");
-                d3.selectAll(`.dst_${d.Name}`).attr("stroke", "blue")
-                    .attr("marker-mid", "url(#arrowhead_selected)");
+                if (d.Details === undefined) {
+                    info(d.Name)
+                        .then(i => preview_class(i, false, true))
+                        .then(() => $("#deets").modal("show"));
+                } else {
+                    preview_class(d.Details, false, true);
+                    $("#deets").modal("show");
+                }
+                // d3.select(`#circle_${d.Name}`).attr("stroke", "blue");
+                // d3.selectAll(`.src_${d.Name}`).attr("stroke", "blue")
+                //     .attr("marker-mid", "url(#arrowhead_selected)");
+                // d3.selectAll(`.dst_${d.Name}`).attr("stroke", "blue")
+                //     .attr("marker-mid", "url(#arrowhead_selected)");
                 selected_course = d.Name;
-                var c = await info(d.Name);
-                render_id = "Course Info";
-                render([c], "Course Info", false, true);
+                //var c = await info(d.Name);
+                //render_id = "Course Info";
+                //render([c], "Course Info", false, true);
             }
         });
 
@@ -590,9 +640,15 @@ function choosingCourses() {
         .then(resp => resp.json())
         .then(d => {
             d.Courses.forEach(course => majorCourses.push(course.Name));
-            let courses = {1:[],2:[],3:[],4:[],5:[]};
+            let courses = {
+                1: [],
+                2: [],
+                3: [],
+                4: [],
+                5: []
+            };
             majorCourses.forEach(function (course) {
-                let head = parseInt(course.match(/\d/)[0],10);
+                let head = parseInt(course.match(/\d/)[0], 10);
                 head = (head > 5) ? 5 : head;
                 head = (head < 1) ? 1 : head;
                 courses[head].push(course);
@@ -601,7 +657,7 @@ function choosingCourses() {
             let thead = table.select("thead");
             let headtr = thead.select("tr");
             let maxCourse = 0;
-            Object.keys(courses).forEach(function(section) {
+            Object.keys(courses).forEach(function (section) {
                 let th = headtr.append("th");
                 let sectionText = section.toString() + "000";
                 sectionText = (sectionText == "5000") ? "5000+" : sectionText;
@@ -610,11 +666,11 @@ function choosingCourses() {
             });
 
             let tbody = table.select("tbody");
-            for (let i = 0; i < maxCourse; i++){
+            for (let i = 0; i < maxCourse; i++) {
                 let tr = tbody.append("tr");
-                Object.keys(courses).forEach(function(s){
+                Object.keys(courses).forEach(function (s) {
                     let td = tr.append("td").text(courses[s][i]);
-                    td.on("click", function(){
+                    td.on("click", function () {
                         let ele = d3.select(this);
                         if (ele.attr("class") == "hover" || ele.text() == "") {
                             ele.attr("class", "");
@@ -663,18 +719,24 @@ function choosingCourses() {
     })
 }
 
-function resort(){
+function resort() {
     let edgeCount = {};
     let nodeMap = {};
     data.forEach(d => {
-        edgeCount[d.Name] =  {"Row":d.Row,"Out":0, "In":0,"Outedges":[],"Inedges":[]};
+        edgeCount[d.Name] = {
+            "Row": d.Row,
+            "Out": 0,
+            "In": 0,
+            "Outedges": [],
+            "Inedges": []
+        };
         nodeMap[d.Name] = {};
     });
 
     let edgeSet = new Set();
-    data_edges.forEach(d =>{
+    data_edges.forEach(d => {
         let check = d.Source + d.Destination + d.Weight;
-        if (!edgeSet.has(check)){
+        if (!edgeSet.has(check)) {
             edgeCount[d.Source]["Out"] += 1;
             edgeCount[d.Source]["Outedges"].push(d.Destination);
             edgeCount[d.Destination]["In"] += 1;
@@ -683,21 +745,34 @@ function resort(){
         edgeSet.add(check);
     });
 
-    let rowEdgeCount = {0:[],1:[],2:[],3:[],4:[],5:[],6:[],7:[]};
+    let rowEdgeCount = {
+        0: [],
+        1: [],
+        2: [],
+        3: [],
+        4: [],
+        5: [],
+        6: [],
+        7: []
+    };
     Object.keys(edgeCount).forEach(node => {
         let value = edgeCount[node];
         value["Name"] = node;
         value["Diff"] = value.Out - value.In;
-        let newNode = {"Diff":value.Out-value.In,"Inedges":value.Inedges,"Outedges":value.Outedges};
+        let newNode = {
+            "Diff": value.Out - value.In,
+            "Inedges": value.Inedges,
+            "Outedges": value.Outedges
+        };
         rowEdgeCount[value.Row].push(value);
         nodeMap[node] = newNode;
     })
-    
+
     let numSems = 8;
     //sort first row: first sort by out edges, then move first ele to back
     let row1 = rowEdgeCount[0]
-    row1 = row1.sort(function(a,b){
-        if(a.Out == b.Out){
+    row1 = row1.sort(function (a, b) {
+        if (a.Out == b.Out) {
             //get children in edges
             let aChild = a.Outedges[0];
             let bChild = b.Outedges[0];
@@ -708,11 +783,11 @@ function resort(){
     rowEdgeCount[0] = row1;
 
     //sorting each row iteratively
-    for(var i = 1; i < numSems; i += 1){
+    for (var i = 1; i < numSems; i += 1) {
         //sort by in edges
         let row2 = rowEdgeCount[i];
-        row2.sort(function(a,b){
-            if (a.In == b.In && a.Outedges.length > 0 && b.Outedges.length > 0){
+        row2.sort(function (a, b) {
+            if (a.In == b.In && a.Outedges.length > 0 && b.Outedges.length > 0) {
                 //get children in edges
                 let aChild = a.Outedges[0];
                 let bChild = b.Outedges[0];
@@ -721,14 +796,14 @@ function resort(){
             return a.In - b.In;
         });
         //match nodes to as close as to parent as can
-        let prevRow = rowEdgeCount[i-1];
+        let prevRow = rowEdgeCount[i - 1];
         let currRow = rowEdgeCount[i];
         //sort row by inedges
-        currRow.sort(function(a,b){
-            if (a.In == 0){
+        currRow.sort(function (a, b) {
+            if (a.In == 0) {
                 return -1;
             } else {
-                if (a.In == b.In && a.Outedges.length > 0 && b.Outedges.length > 0){
+                if (a.In == b.In && a.Outedges.length > 0 && b.Outedges.length > 0) {
                     //get children in edges
                     let aChild = a.Outedges[0];
                     let bChild = b.Outedges[0];
@@ -739,39 +814,41 @@ function resort(){
         });
 
         let updatedRow = [];
-        for (let size = 0; size < 4; size++) updatedRow.push({"Name":""});
+        for (let size = 0; size < 4; size++) updatedRow.push({
+            "Name": ""
+        });
         let nodeIdx = 0;
         //iterate through every node in currRow
-        while (nodeIdx < currRow.length){
+        while (nodeIdx < currRow.length) {
             let node = currRow[nodeIdx];
-            node.Inedges.sort(function(parent1,parent2){
+            node.Inedges.sort(function (parent1, parent2) {
                 return parent1.Out - parent2.Out;
             });
             let parent = node.Inedges[0];
             let parentIdx = 0;
-            for (let j = 0; j < prevRow.length; j++){
+            for (let j = 0; j < prevRow.length; j++) {
                 let parentNode = prevRow[j];
-                if (parentNode.Name == parent){
+                if (parentNode.Name == parent) {
                     parentIdx = j;
                     break;
                 }
             }
 
             //check if idx is already populated
-            function check(row, idx, node){
-                return row[idx].Name != "" ? false : true; 
+            function check(row, idx, node) {
+                return row[idx].Name != "" ? false : true;
             }
 
             let downIdx = parentIdx;
             let upIdx = parentIdx;
             while (true) {
-                if (check(updatedRow, downIdx, node)){
+                if (check(updatedRow, downIdx, node)) {
                     updatedRow[downIdx] = node;
                     break;
                 } else {
                     downIdx = Math.max(0, downIdx - 1);
                 }
-                if (check(updatedRow, upIdx, node)){
+                if (check(updatedRow, upIdx, node)) {
                     updatedRow[upIdx] = node;
                     break;
                 } else {
@@ -782,15 +859,19 @@ function resort(){
         }
         rowEdgeCount[i] = updatedRow;
     }
-    
+
     data = [];
-    for (let row = 0; row < numSems; row++){
+    for (let row = 0; row < numSems; row++) {
         let nodes = rowEdgeCount[row];
         let col = 0;
-        for (let idx in nodes){
+        for (let idx in nodes) {
             let node = nodes[idx];
-            if (node.Name != ""){
-                data.push({"Name":node["Name"], "Row":row, "Col":col});
+            if (node.Name != "") {
+                data.push({
+                    "Name": node["Name"],
+                    "Row": row,
+                    "Col": col
+                });
                 col += 1;
             }
         }
@@ -815,6 +896,7 @@ function init() {
         .then(resp => resp.json())
         .then(d => {
             data = d.Courses;
+            data.forEach(d => info(d.Name).then(i => d.Details = i));
             data.forEach(c => pref.add(c.Name));
             for (var i = 0; i < 8; i++) {
                 var c_sem = data.filter(c => c.Row === i).map(c => c.Col);
@@ -854,7 +936,7 @@ function init() {
         .attr("d", "M0,-5 L10,0 L0,5")
         .attr('fill', "blue")
         .style('stroke', 'none');
-    
+
     //initialize course selection modal
     choosingCourses();
 
@@ -887,6 +969,11 @@ function init() {
         }
         updateRecs();
     });
+    // d3.select("#deets").on('hidden.bs.modal', () => {
+    //     alert("modal closed");
+    //     d3.selectAll(".circle_class").attr("stroke", "black");
+    //     d3.selectAll(".link").attr("stroke", "black").attr("marker-mid", "url(#arrowhead)");
+    // });
 }
 //NO FUNCTIONS BELOW THIS LINE
 init();

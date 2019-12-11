@@ -24,7 +24,7 @@ $cornell_red: #B31B1B;
     #major {
         color: white;
         font-size: 20px;
-        padding-left:10px;
+        padding-left: 10px;
         padding-right: 10px;
     }
 
@@ -96,7 +96,7 @@ $cornell_red: #B31B1B;
             line-height: $height;
         }
 
-        div.code {
+        .code {
             font-weight: bold;
             font-size: 14px;
             flex-basis: content;
@@ -148,12 +148,14 @@ $cornell_red: #B31B1B;
     }
 
     .table {
-        margin:auto;
+        margin: auto;
         text-align: center;
     }
+
     td:hover {
         background-color: #4677f8;
     }
+
     .hover {
         background-color: #4677f8;
     }
@@ -220,8 +222,47 @@ $cornell_red: #B31B1B;
         opacity: 0;
         transform: translateX(20px);
     }
+
     100% {
         opacity: 1;
         transform: translateX(0);
+    }
+}
+
+.modal {
+    .modal-header {
+        flex-direction: row;
+        align-items: center;
+
+        font-size: 24px;
+
+        .modal-title {
+            margin-left: 10px;
+            flex-grow: 1;
+        }
+
+        .code {
+            font-weight: bold;
+            flex-basis: content;
+            flex-shrink: 0;
+            font-size: 20px;
+        }
+
+        .credits {
+            flex-basis: content;
+            flex-shrink: 0;
+            font-size: 20px;
+        }
+    }
+
+    .modal-body {
+
+        .course-desc {
+            font-family: nunito;
+        }
+
+        .link {
+            font-style: italic;
+        }
     }
 }
