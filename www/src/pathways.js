@@ -175,6 +175,7 @@ function card(course, displayAdd = true, displayRemove = true) {
             <div class="modal-header">
                 <span class="code">${course.subject} ${course.catalogNbr}</span>
                 <h5 class="modal-title">${course.titleLong}</h5>
+                <span>${course.credits}</span>
                 <button type="button" class="close" data-dismiss="modal">
                     <span aria-hidden="true">&times;</span>
                 </button>
