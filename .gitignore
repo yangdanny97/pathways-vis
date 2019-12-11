@@ -32,3 +32,5 @@ env/
 */.DS_Store
 
 __pycache__
+
+/www/logging/pathways_logging.db

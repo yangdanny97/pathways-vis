@@ -1,8 +1,8 @@
 package main
 
 import (
-	"context"
 	"crypto/sha1"
+	"database/sql"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -16,8 +16,7 @@ import (
 	"strconv"
 	"strings"
 
-	"cloud.google.com/go/logging"
-	"google.golang.org/api/option"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 type Edge struct {
@@ -546,7 +545,7 @@ func recHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(responseJSON)
 }
 
-//return semester with fewer courses
+//return semester with fewer courses (prioritizing the first argument on ties)
 func findSmallerSem(semMap *map[int][]string, a int, b int) int {
 	if len((*semMap)[a]) > len((*semMap)[b]) {
 		return b
@@ -554,9 +553,33 @@ func findSmallerSem(semMap *map[int][]string, a int, b int) int {
 	return a
 }
 
-func findSemester(courses []Course, semMap map[int][]string,
-	semKeys []int, cnames []string, coGraph *Graph, postGraph *Graph,
-	semPoints map[int]int, course string) int {
+//return semester with fewest courses (prioritizing the first argument on ties)
+func findSmallestSem(semMap *map[int][]string, a int, b int, c int) int {
+	return findSmallerSem(semMap, a, findSmallerSem(semMap, b, c))
+}
+
+func findSemester(courses []Course, coGraph *Graph, postGraph *Graph, course string) int {
+	cnames := []string{}
+	semMap := make(map[int][]string)
+	semKeys := []int{}
+	semPoints := make(map[int]int)
+
+	// build semester -> courses mapping, build excluded courses set
+	for _, c := range courses {
+		_, ok := semMap[c.Row]
+		if !ok {
+			semKeys = append(semKeys, c.Row)
+		}
+		semMap[c.Row] = append(semMap[c.Row], c.Name)
+		cnames = append(cnames, c.Name)
+	}
+	for i := 0; i < 8; i++ {
+		_, ok := semMap[i]
+		if !ok {
+			semKeys = append(semKeys, i)
+			semMap[i] = []string{}
+		}
+	}
 	// build semester -> courses mapping, build excluded courses set
 	for _, c := range courses {
 		_, ok := semMap[c.Row]
@@ -578,7 +601,7 @@ func findSemester(courses []Course, semMap map[int][]string,
 	for _, e := range coGraph.Edges {
 		for _, k := range semKeys {
 			if contains(semMap[k], e.Source) && e.Destination == course {
-				semPoints[k] = semPoints[k] + e.Weight/len(semMap[k])
+				semPoints[k] = semPoints[k] + e.Weight ^ 2 // /len(semMap[k])
 			}
 		}
 	}
@@ -586,10 +609,10 @@ func findSemester(courses []Course, semMap map[int][]string,
 	for _, e := range postGraph.Edges {
 		for _, k := range semKeys {
 			if contains(semMap[k], e.Source) && e.Destination == course && containsint(semKeys, k+1) {
-				semPoints[k+1] = semPoints[k+1] + e.Weight/len(semMap[k])
+				semPoints[k+1] = semPoints[k+1] + e.Weight ^ 2 // /len(semMap[k]) //max(len(semMap[k+1]), 1)
 			}
 			if contains(semMap[k], e.Destination) && e.Source == course && containsint(semKeys, k-1) {
-				semPoints[k-1] = semPoints[k-1] + e.Weight/len(semMap[k])
+				semPoints[k-1] = semPoints[k-1] + e.Weight ^ 2 // /len(semMap[k]) //max(len(semMap[k+1]), 1)
 			}
 		}
 	}
@@ -598,7 +621,7 @@ func findSemester(courses []Course, semMap map[int][]string,
 	addSem := 0
 	maxWt := 0
 	for k, v := range semPoints {
-		if v > maxWt {
+		if v > maxWt && len(semMap[k]) < 6 {
 			maxWt = v
 			addSem = k
 		}
@@ -610,11 +633,11 @@ func findSemester(courses []Course, semMap map[int][]string,
 	if maxWt == 0 {
 		courseNum, _ := strconv.Atoi(digits.FindString(course))
 		if courseNum > 4000 {
-			addSem = findSmallerSem(&semMap, 6, 7)
+			addSem = findSmallestSem(&semMap, 5, 6, 7)
 		} else if courseNum > 3000 {
-			addSem = findSmallerSem(&semMap, 4, 5)
+			addSem = findSmallestSem(&semMap, 3, 4, 5)
 		} else if courseNum > 2000 {
-			addSem = findSmallerSem(&semMap, 2, 3)
+			addSem = findSmallestSem(&semMap, 1, 2, 3)
 		} else {
 			addSem = findSmallerSem(&semMap, 0, 1)
 		}
@@ -644,20 +667,21 @@ func addMultipleHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	addCourses := req.Selected
-	courses := req.Courses
-	cnames := []string{}
-	semMap := make(map[int][]string)
-	semKeys := []int{}
-	semPoints := make(map[int]int)
-
+	reFull := regexp.MustCompile("[0-9]+")
+	sort.SliceStable(addCourses, func(i, j int) bool {
+		courseNum1, _ := strconv.Atoi(reFull.FindString(addCourses[i]))
+		courseNum2, _ := strconv.Atoi(reFull.FindString(addCourses[j]))
+		return courseNum1 < courseNum2
+	})
+	// courses := req.Courses
 	finalCourses := []Course{}
+
 	rowColCount := []int{0, 0, 0, 0, 0, 0, 0, 0}
-	for _, course := range addCourses {
-		row := findSemester(courses, semMap, semKeys, cnames, coGraph, postGraph, semPoints, course)
+	for _, addCourse := range addCourses {
+		row := findSemester(finalCourses, coGraph, postGraph, addCourse)
 		col := rowColCount[row]
 		rowColCount[row] = rowColCount[row] + 1
-		finalCourses = append(finalCourses, Course{Name: course, Row: row, Col: col})
-		courses = append(finalCourses, Course{Name: course, Row: row, Col: col})
+		finalCourses = append(finalCourses, Course{Name: addCourse, Row: row, Col: col})
 	}
 
 	response := CourseResponse{Courses: finalCourses}
@@ -695,29 +719,7 @@ func addHandler(w http.ResponseWriter, r *http.Request) {
 
 	addCourse := req.Course
 	courses := req.Courses
-	cnames := []string{}
-	semMap := make(map[int][]string)
-	semKeys := []int{}
-	semPoints := make(map[int]int)
-
-	// build semester -> courses mapping, build excluded courses set
-	for _, c := range courses {
-		_, ok := semMap[c.Row]
-		if !ok {
-			semKeys = append(semKeys, c.Row)
-		}
-		semMap[c.Row] = append(semMap[c.Row], c.Name)
-		cnames = append(cnames, c.Name)
-	}
-	for i := 0; i < 8; i++ {
-		_, ok := semMap[i]
-		if !ok {
-			semKeys = append(semKeys, i)
-			semMap[i] = []string{}
-		}
-	}
-
-	addSem := findSemester(courses, semMap, semKeys, cnames, coGraph, postGraph, semPoints, addCourse)
+	addSem := findSemester(courses, coGraph, postGraph, addCourse)
 
 	response := AddResponse{Row: addSem}
 	responseJSON, err := json.Marshal(response)
@@ -757,25 +759,27 @@ func logHandler(w http.ResponseWriter, r *http.Request) {
 		// in production, hash the NetID
 		h := sha1.New()
 		h.Write([]byte(netid))
-		netid = hex.Dump(h.Sum(nil))
+		netid = hex.EncodeToString([]byte(netid))
 	}
 	msg := "log: " + netid + "|" + req.Message
-	ctx := context.Background()
-	projectID := "pathways-logging"
-
-	// create logging client (for now, non-fatal error if it fails)
-	client, err := logging.NewClient(ctx, projectID, option.WithCredentialsFile("pathways-logging.json"))
+	database, err := sql.Open("sqlite3", "logging/pathways_logging.db")
 	if err != nil {
-		fmt.Println("Failed to create client: ", err)
+		fmt.Println(err)
+		fmt.Println("logging DB open error")
 		return
 	}
-	defer client.Close()
+	statement, err := database.Prepare("INSERT INTO logs (user, log) VALUES (?, ?)")
+	if err != nil {
+		fmt.Println(err)
+		fmt.Println("logging prepare error")
+		return
+	}
+	_, err = statement.Exec(netid, req.Message)
+	if err != nil {
+		fmt.Println(err)
+		fmt.Println("logging execute error")
+	}
 	fmt.Println(msg)
-
-	// log the message
-	logName := "pathways-log"
-	logger := client.Logger(logName).StandardLogger(logging.Info)
-	logger.Println(msg)
 
 	// empty response (placeholder)
 	response := RecResponse{}

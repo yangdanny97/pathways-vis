@@ -3,8 +3,13 @@ visualization project of pathways through cornell CIS
 
 ## Directory:
 - `unused_vis` - unused visualization code for alternative ideas that we explored, retained for reference
-- `exploratory` - files for exploratory data analysis (python notebooks, data extraction script). of these, `extract_script.py`, `explore.py`, and `graph.py` are relevant for pre-processing data
+- `exploratory` - files for exploratory data analysis (python notebooks, data extraction script). of these, `extract_script.py` pre-processses the data, using `extract.py` to load the original CSV and `graph.py` to model the graph
 - `www` - source code for pathways webapp (see README in that directory for more info)
+
+## Data Preprocessing
+- make sure you have python3 and the various packages that our preprocessing uses (nothing fancy)
+- cd into `exploratory` and run `python extract_script.py` (you can edit the constants at the top of the file to change how the script runs)
+- output JSON files will be in `exploratory/data`, to use them in the production app copy it to `www/data`
 
 ## Journal:
 
@@ -247,9 +252,10 @@ move the selected major down into the page body, add a label that says "XXX Majo
 - ~Optimize frontend compilation performance, reduce dependencies~
 - ~Optimize webpack CSS loading (right now CSS loads after JS, which loads after the body, resulting in no styling for 1/2 sec after page load)~
 - ~Brainstorm and implement intuitive user flow for L-R pane interaction~
-- Log using local DB instead of StackDriver
+- ~Log using local DB instead of StackDriver~
 - Reach out to CourseCrafter for API/data scraping script access (maybe)
 - optimization to response time - reduce graph size
 - Code cleanup
+- Add details view
 - ~automatic data extraction script instead of using notebooks~
 - ~Fix tuning option selection~
