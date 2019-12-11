@@ -84,6 +84,7 @@ $cornell_red: #B31B1B;
 
 #deck .card {
     margin: 10px;
+    animation: card-anim 0.4s ease;
 
     .card-header {
         display: flex;
@@ -212,4 +213,15 @@ $cornell_red: #B31B1B;
 
 .tune-info:hover .tooltiptext {
     visibility: visible;
+}
+
+@keyframes card-anim {
+    0% {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
