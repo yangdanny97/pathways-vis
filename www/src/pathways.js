@@ -157,7 +157,6 @@ function grok(course, semester) {
 
 /* Get an html card for a grokked course */
 function card(course, displayAdd = true, displayRemove = true) {
-    let c = d3.create("div").attr("class","card")
     let html = `<div class='card-header'>
             <div class='code'>${course.subject} ${course.catalogNbr}</div>
             <div class='name'><a href="${course.link}" target="_blank">${course.titleShort}</a></div>
@@ -170,17 +169,17 @@ function card(course, displayAdd = true, displayRemove = true) {
             ${(displayRemove) ? `<button class="btn btn-danger btn-sm" onclick="remove('${course.subject}${course.catalogNbr}')">Remove</button>` : ""}
         </div>`;
 
-    c.html(html)
-
-    c.select('button').on('click', () => preview_class(course));
+    let c = d3.create("div").attr("class","card").html(html);
+    
+    c.select('button').on('click', () => preview_class(course, displayAdd, displayRemove));
 
     return c.node();
 }
 
 
-function preview_class(course) {
-    let displayAdd = true;
-    let displayRemove = true;
+function preview_class(course, displayAdd=true, displayRemove=true) {
+    //let displayAdd = true;
+    //let displayRemove = true;
 
     let m_html = `<div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
