@@ -95,7 +95,7 @@ $cornell_red: #B31B1B;
             line-height: $height;
         }
 
-        div.code {
+        .code {
             font-weight: bold;
             font-size: 14px;
             flex-basis: content;
@@ -212,4 +212,34 @@ $cornell_red: #B31B1B;
 
 .tune-info:hover .tooltiptext {
     visibility: visible;
+}
+
+.modal {
+    .modal-header {
+        flex-direction: row;
+        align-items: center;
+
+        font-size: 24px;
+
+        .modal-title {
+            margin-left: 10px;
+        }
+
+        .code {
+            font-weight: bold;
+            flex-basis: content;
+            flex-shrink: 0;
+        }
+    }
+
+    .modal-body {
+
+        .course-desc {
+            font-family: nunito;
+        }
+
+        .link {
+            font-style: italic;
+        }
+    }
 }
