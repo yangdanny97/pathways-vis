@@ -144,7 +144,8 @@ function grok(course, semester) {
         link: `https://classes.cornell.edu/browse/roster/${semester}/class/${course.subject}/${course.catalogNbr}`,
         credits: "? units",
         whenOffered: course.catalogWhenOffered,
-        comments: course.catalogComments
+        comments: course.catalogComments,
+        prereq: course.catalogPrereqCoreq
     }
     // apparently this credit selection doesn't always work
     try {
@@ -196,6 +197,7 @@ function preview_class(course, displayAdd=true, displayRemove=true) {
                 <p class='course-desc'>${course.description}</p>
                 <p class='when-offered'><strong>Offered in:</strong> ${course.whenOffered}</p>
                 ${course.comments ? `<p><strong>Comments:</strong> ${course.comments}</p>` : ""}
+                ${course.prereq ? `<p><strong>Prerequisites/Corequisites:</strong> ${course.prereq}</p>` : ""}
             </div>
             <div class="modal-footer">
                 ${(displayAdd) ? `<button class="btn btn-success" onclick="add('${course.subject}${course.catalogNbr}')" data-dismiss="modal">Add</button>` : ""}
