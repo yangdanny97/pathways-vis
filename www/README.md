@@ -1,8 +1,14 @@
 ## Architecture:
 
-1. Apache: exposes server to internet by forwarding requests to the server which listens on `localhost:8000`, as well as handling NetID authentication. Apache files and confs are in `etc/apache2/`.
-2. Server: implemented in GoLang, in `home/dzy4/go/pathways-vis/www/`. Data is stored in JSON format. 
+1. Apache: exposes server to internet by forwarding requests to the server which listens on `localhost:8000`, as well as handling NetID authentication. Apache files and confs are in `etc/apache2/` in the production server.
+2. Server: implemented in GoLang, in `home/dzy4/go/pathways-vis/www/` on the production server. Data is stored in JSON format. 
 3. Client: makes several types of requests to the server, such as: load core courses, generate recommendations, logging (our logging flow requires the client to tell the server to log something). The frontend is built using webpack, and uses SASS, Bootstrap/JQuery, and D3 in addition to several other JS libraries.
+
+#### Source Files:
+
+- Server: `pathways_server.go` gets compiled to the `pathways_server` executable.
+
+- Client: Javascript `src/*.js` and SCSS `style/*.scss` get bundled by Webpack  into `static/dist/*.bundle.js` and `static/style/*.css` which is what gets actually loaded by the webapp. Making changes to the client code requires rebuilding. HTML source files are in `static/` as well; changing those does not require rebuilding.
 
 ## Requirements:
 
@@ -10,7 +16,6 @@
 - all required javascript packages in `package.json`
 - GoLang
 - SQlite3
-- ~Google Cloud logging package (install with `go get -u cloud.google.com/go/logging`)~
 - Golang SQLITE3 package (`go get github.com/mattn/go-sqlite3` then `go install github.com/mattn/go-sqlite3`) (note that you need GCC and cgo needs to be enabled, for details see https://github.com/mattn/go-sqlite3)
 
 ### Note: due to the odd permissions setup on the server, it is probably best to run `sudo bash` after you log in and use the root shell for everything

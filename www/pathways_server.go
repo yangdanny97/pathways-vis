@@ -19,46 +19,58 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+// Edge : an edge in a course graph
+// source and dest are course codes
 type Edge struct {
 	Source      string
 	Destination string
 	Weight      int
 }
 
+// Graph : course graph
 type Graph struct {
 	Nodes []string
 	Edges []Edge
 }
 
+// Course : represents a course tile on the vis
 type Course struct {
 	Name string
 	Row  int
 	Col  int
 }
 
+// CourseResponse : list of course objects
 type CourseResponse struct {
 	Courses []Course
 }
 
+// CourseCodes : list of course codes
 type CourseCodes struct {
 	Codes []string
 }
 
+// AddResponse : format for smart-add response (which row to add it to)
 type AddResponse struct {
 	Row int
 }
 
+// RecTile : recommendation tile
+// (the row/col structure is unused, legacy)
 type RecTile struct {
 	Recs []string
 	Row  int
 	Col  int
 }
 
+// RecResponse : response to recommendation request
+// (list of recommendations + edges connecting nodes)
 type RecResponse struct {
 	Recs  []RecTile
 	Edges []Edge
 }
 
+// PathwaysRequest : format for general recommendation requests
 type PathwaysRequest struct {
 	Major     string
 	Courses   []Course
@@ -73,10 +85,12 @@ type SelectPathwaysRequest struct {
 	LimitDept bool
 }
 
+// LogRequest : format for logging requests
 type LogRequest struct {
 	Message string
 }
 
+// returns if [s] contains [e]
 func contains(s []string, e string) bool {
 	for _, a := range s {
 		if a == e {
@@ -86,6 +100,7 @@ func contains(s []string, e string) bool {
 	return false
 }
 
+// returns if [s] contains [e]
 func containsint(s []int, e int) bool {
 	for _, a := range s {
 		if a == e {
@@ -95,6 +110,7 @@ func containsint(s []int, e int) bool {
 	return false
 }
 
+// return new list with the values of [vs] that satisfy predicate [f]
 func filter(vs []string, f func(string) bool) []string {
 	vsf := make([]string, 0)
 	for _, v := range vs {
@@ -105,6 +121,7 @@ func filter(vs []string, f func(string) bool) []string {
 	return vsf
 }
 
+// min of 2 ints
 func min(x, y int) int {
 	if x < y {
 		return x
@@ -112,6 +129,7 @@ func min(x, y int) int {
 	return y
 }
 
+// max of 2 ints
 func max(x, y int) int {
 	if x < y {
 		return y
@@ -119,6 +137,8 @@ func max(x, y int) int {
 	return x
 }
 
+// returns [a] with the element at index [i] removed
+// ordering is not preserved
 func remove(a []string, i int) []string {
 	a[i] = a[len(a)-1]
 	a[len(a)-1] = ""
@@ -126,6 +146,7 @@ func remove(a []string, i int) []string {
 	return a
 }
 
+// helper function for rendering static HTML
 func renderStaticTemplate(w http.ResponseWriter, tmpl string) {
 	t, err := template.ParseFiles("static/" + tmpl + ".html")
 	if err != nil {
@@ -142,7 +163,7 @@ func renderStaticTemplate(w http.ResponseWriter, tmpl string) {
 	}
 }
 
-// endpoint handler for vis (HTML response)
+// endpoint handler for main vis page (HTML response)
 func visHandler(w http.ResponseWriter, r *http.Request) {
 	renderStaticTemplate(w, "vis")
 }
@@ -152,17 +173,22 @@ func splashHandler(w http.ResponseWriter, r *http.Request) {
 	renderStaticTemplate(w, "index")
 }
 
+// endpoint handler for about page (HTML response)
 func aboutHandler(w http.ResponseWriter, r *http.Request) {
 	renderStaticTemplate(w, "about")
 }
 
+// serve list of majors
 func majorHandler(w http.ResponseWriter, r *http.Request) {
 	fp := path.Join("data", "majors.json")
 	http.ServeFile(w, r, fp)
 }
 
-// generate up to n recommendations based on a course graph, a list of courses,
-// an excluded courses map
+// generate up to [n] recommendations based on a course graph [graph], a list of courses [semCourses],
+// and an excluded courses map [excl]
+// [reverse] to reverse the edges of the graph,
+// [limitDept] to limit to max 1 course recommended per department
+// returns: a single RecTile representing a list of recommendations
 func genRec(graph *Graph, semCourses []string, excl *map[string]bool, n int, reverse bool, limitDept bool) *RecTile {
 	points := make(map[string]int)
 	candidates := []string{}
@@ -226,6 +252,8 @@ func genRec(graph *Graph, semCourses []string, excl *map[string]bool, n int, rev
 	return &RecTile{Recs: top}
 }
 
+// returns JSON of list of all courses in a specific major
+// used to populate bulk-add list
 func majorCoursesHandler(w http.ResponseWriter, r *http.Request) {
 	req := PathwaysRequest{}
 	err := json.NewDecoder(r.Body).Decode(&req)
@@ -375,7 +403,8 @@ func coreClassesHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(responseJSON)
 }
 
-// treats list of courses as unordered, generates 10 recs for everything
+// treats list of courses sent in requests as unordered,
+// generates 10 recs for everything
 func unorderedRecHandler(w http.ResponseWriter, r *http.Request) {
 	req := PathwaysRequest{}
 	err := json.NewDecoder(r.Body).Decode(&req)
@@ -421,7 +450,8 @@ func unorderedRecHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(responseJSON)
 }
 
-// list of post-enrollment edges between courses
+// return list of post-enrollment edges between courses
+// inputs: course graph, map of semester # -> courses
 func edgeGenerator(graph *Graph, semMap map[int][]string) []Edge {
 	cMap := make(map[string]int) //map from course -> semester
 	preEdge := make(map[string]Edge)
@@ -558,6 +588,8 @@ func findSmallestSem(semMap *map[int][]string, a int, b int, c int) int {
 	return findSmallerSem(semMap, a, findSmallerSem(semMap, b, c))
 }
 
+// find semester to add [course] based on the currently selected [courses]
+// and the co-enrollment/post-enrollment graphs
 func findSemester(courses []Course, coGraph *Graph, postGraph *Graph, course string) int {
 	cnames := []string{}
 	semMap := make(map[int][]string)
@@ -645,6 +677,7 @@ func findSemester(courses []Course, coGraph *Graph, postGraph *Graph, course str
 	return addSem
 }
 
+// response handler for multi-smart-add (placement for bulk-added courses)
 func addMultipleHandler(w http.ResponseWriter, r *http.Request) {
 	req := SelectPathwaysRequest{}
 	err := json.NewDecoder(r.Body).Decode(&req)
@@ -696,6 +729,7 @@ func addMultipleHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(responseJSON)
 }
 
+// handler for smart-add
 func addHandler(w http.ResponseWriter, r *http.Request) {
 	req := PathwaysRequest{}
 	err := json.NewDecoder(r.Body).Decode(&req)
@@ -745,6 +779,7 @@ func loadGraph(name string) (*Graph, error) {
 	return &graph, nil
 }
 
+// handler for logging requests
 func logHandler(w http.ResponseWriter, r *http.Request) {
 	req := LogRequest{}
 	err := json.NewDecoder(r.Body).Decode(&req)

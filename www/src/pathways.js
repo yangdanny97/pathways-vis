@@ -89,7 +89,7 @@ function remove(code) {
     }
 }
 
-//logging to google Stackdriver
+/* send logging request to server */
 function log(message) {
     var reqbody = {
         Message: message,
@@ -304,7 +304,7 @@ async function recommend(codes) {
     return recs;
 }
 
-// course and recommendation factory methods
+// course and semester-select factory methods
 function COURSE(name, row, col, details = undefined) {
     return {
         Type: "course",
@@ -323,6 +323,7 @@ function SELECT(row, col) {
     };
 }
 
+/* get updated list of recommendations from server */
 async function updateRecs(callback) {
     var reqbody = {
         Major: major.toLowerCase(),
@@ -345,7 +346,7 @@ async function updateRecs(callback) {
         });
 }
 
-// add a course to the schedule: cname is string, row is int
+/* add a course to the schedule: cname is string, row is int */
 function addCourse(cname, row, focus_sem = true, details = undefined) {
     log(`add|${major}|${cname}`);
     pref.add(cname);
@@ -368,7 +369,7 @@ function addCourse(cname, row, focus_sem = true, details = undefined) {
     }
 }
 
-//delete a course from the schedule: c is a Course object
+/* delete a course from the schedule: c is a Course object */
 function deleteCourse(c, focus_sem = true) {
     log(`delete|${major}|${c.Name}`);
     var row = c.Row,
@@ -400,7 +401,8 @@ function getY(d) {
     return 35 + d.Row * grid * 1.5 + grid / 2;
 }
 
-// when user selects a semester to add courses
+// handler for semester selection
+// n is the semester that was selected
 async function selectSem(n) {
     log(`selectsem|${major}|${n}`);
     selected_sem = n;
@@ -416,7 +418,7 @@ async function selectSem(n) {
     render(rec_info, `Semester ${n+1} Recommendations`, true, false);
 }
 
-// main display function
+// main display function for course graph, called when graph configuration changes
 function displayCourses() {
     resort();
     let data_links = [];
@@ -471,7 +473,7 @@ function displayCourses() {
     selectbtns = vis.selectAll(".sem_select").data(sem_select, d => d.Row);
     courses.exit().remove();
 
-    //update position
+    // update position of existing courses and select buttons
     courses.transition()
         .attr("transform", d => `translate(${getX(d)} ${getY(d)})`)
         .duration(500);
@@ -490,7 +492,7 @@ function displayCourses() {
     courses.moveToFront();
     selectbtns.moveToFront();
 
-    // add course
+    // display newly added courses
     var course = courses.enter().append("g")
         .attr("class", "course")
         .attr("transform", d => `translate(${getX(d)} ${getY(d)})`)
@@ -530,8 +532,6 @@ function displayCourses() {
         .attr("data-target", "deets")
         .style("opacity", 0)
         .on("click", d => {
-            // d3.selectAll(".circle_class").attr("stroke", "black");
-            // d3.selectAll(".link").attr("stroke", "black").attr("marker-mid", "url(#arrowhead)");
             if (selected_course === d.Name) {
                 // deselect
                 if (selected_sem !== undefined) {
@@ -551,18 +551,11 @@ function displayCourses() {
                     preview_class(d.Details, false, true);
                     $("#deets").modal("show");
                 }
-                // d3.select(`#circle_${d.Name}`).attr("stroke", "blue");
-                // d3.selectAll(`.src_${d.Name}`).attr("stroke", "blue")
-                //     .attr("marker-mid", "url(#arrowhead_selected)");
-                // d3.selectAll(`.dst_${d.Name}`).attr("stroke", "blue")
-                //     .attr("marker-mid", "url(#arrowhead_selected)");
                 selected_course = d.Name;
-                //var c = await info(d.Name);
-                //render_id = "Course Info";
-                //render([c], "Course Info", false, true);
             }
         });
 
+    // display select button for each row
     var selectbtn = selectbtns.enter().append("g")
         .attr("class", "sem_select")
         .on("click", d => {
@@ -719,6 +712,7 @@ function choosingCourses() {
     })
 }
 
+// custom sorting function for nodes to minimize edge overlap
 function resort() {
     let edgeCount = {};
     let nodeMap = {};
@@ -969,11 +963,6 @@ function init() {
         }
         updateRecs();
     });
-    // d3.select("#deets").on('hidden.bs.modal', () => {
-    //     alert("modal closed");
-    //     d3.selectAll(".circle_class").attr("stroke", "black");
-    //     d3.selectAll(".link").attr("stroke", "black").attr("marker-mid", "url(#arrowhead)");
-    // });
 }
 //NO FUNCTIONS BELOW THIS LINE
 init();
