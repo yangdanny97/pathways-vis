@@ -1,27 +1,41 @@
 # Report:
 
 ### Overall Progress:
-This semester we developed webapp for students to explore majors/courses at Cornell [LINK](pathway.cis.cornell.edu). Working with Prof Rene Kizilcec and getting constant feedback from his research group as well as the rest of CDS, this project went from just a file of registrar data (3 months ago) to a functioning webapp (1.5 months ago) and has undergone several iterations of design and functionality improvements since then. Development was planned in 1 week sprints with weekly planning meetings, summaries of each sprint can be found in the journal (below).
+This semester we developed webapp for students to explore majors/courses at Cornell [LINK](pathway.cis.cornell.edu). The app is designed for the following 3 use cases:
+
+1. Freshman who does not know what major to pick, want to see typical courses for each major
+2. Upperclassman who wants to know what classes to take next semester
+3. Upperclassman who wants suggestions for fun classes outside of major
+
+We worked with Prof Rene Kizilcec and got constant feedback from his research group as well as the rest of CDS. We started essentially from scratch with the raw registrar data - the previous Pathways webapp was built on a different stack and we felt our idea was different enough that it didn't make sense to build off of their code.
+
+Development was planned in 1 week sprints with weekly planning meetings, summaries of each sprint can be found in the journal (below).
 
 #### Highlights:
-1. graph-based recommendation system based on post-enrollment and co-enrollment graphs for each major
+1. **graph-based recommendation system** based on post-enrollment and co-enrollment graphs for each major (user can tune suggestion **diversity v.s. relevance**, use case #3)
 2. server written in GoLang, a first for CDS
-3. interactive/dynamic grid-based visualization, edge bundling heuristics
-4. hierarchical UI layout based on feedback, robust search functionality which wraps the course roster API
+3. interactive/dynamic grid-based visualization allowing users to manipulate courses and focus on a specific semester (use case #2), **edge-overlap-reduction** heuristics
+4. **hierarchical UI layout** based on feedback, robust search functionality which wraps the course roster API
+5. **user interaction logging** (including hashed NetID for privacy)
+6. QOL/ease-of-use features like **auto-fill example** schedule (use case #1), **bulk add** courses
+7. **smart-add** - user specifies a course and we apply the recommendation system in reverse to make a guess for which semester it belongs in)
 
 ### Lessons:
-1. Good preprocessing -> easier to make good recommendations: by preprocessing our data first into a bipartite students/courses graph and then further processing it into post-enrollment and co-enrollment graphs, it became much easier to understand our data and allowed us to make recommendations just by looking at a node's neighbors and their weights
-2. Don't discount heuristics: our recommendation system is based on heuristics, and our edge-overlap-reducing layout is also a heuristic - both may not be objectively optimal, but they are "good enough" and more importantly very fast, which makes them more suitable for our task
-3. User Feedback is important: in general 
-4. Bridging the gap between "working" and "usable/useful" is hard: 
+1. **Good preprocessing -> easier to make good recommendations**: by preprocessing our data first into a bipartite students/courses graph and then further processing it into post-enrollment and co-enrollment graphs, it became much easier to understand our data and allowed us to make recommendations just by looking at a node's neighbors and their weights
+
+2. **Don't discount heuristics**: our recommendation system is based on heuristics, and our edge-overlap-reducing layout is also a heuristic - both may not be objectively optimal, but they are "good enough" and more importantly very fast, which makes them more suitable for our task
+
+3. **User Feedback is important**: as developers, we know how a system is supposed to work and when we click around it feels perfectly natural, but users who have never seen the system before might not agree. Getting feedback from users in the form of "I didn't expect this to happen" or "I didn't know how to do X" or "I don't know what Y does" is very valuable, because it exposes parts of the interface that are unintuitive to new users.
+
+4. **Bridging the gap between "working" and "usable/useful" is hard**: it's one thing to have all the features in the backend and no bugs (which is what developers usually aim for), and another thing entirely to make an intuitive interface so that people will actually use them. This project made us appreciate how much thought goes into designing interfaces that are easy to understand for users.
 
 ### Future Work:
 Features where the effort v.s. impact tradeoff didn't make sense in a 3 person team with time constraints.
 
-1. building an IR system instead of relying on course roster API for course search (this would require scraping the course roster data every semester)
+1. building an **IR system** instead of relying on course roster API for course search (this would require scraping the course roster data every semester)
 2. saving user data between sessions (probably as cookies)
 3. more extensive user testing (requires larger user-base and A/B testing setup)
-4. improvements to modeling. examples: prevent crosslisted courses from appearing in recommendations, anti-coreqs (courses which should be taken around a certain time but not simultaneously, like 3110/3410)
+4. improvements to modeling. examples: prevent **crosslisted courses** from appearing in recommendations, **anti-corequisites** (courses which should be taken around a certain time but not simultaneously, like 3110/3410)
 
 # Journal:
 
