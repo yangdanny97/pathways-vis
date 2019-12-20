@@ -1,4 +1,6 @@
-# Pathways: Data Driven Course Recommender
+# Pathways: a Data Driven Course Recommender
+
+#### Danny Yang, Eric Sun, Sam Fuchs - CDS Insights
 
 visualization project of pathways through cornell CIS
 
@@ -14,6 +16,6 @@ visualization project of pathways through cornell CIS
 - cd into `exploratory` and run `python extract_script.py` (you can edit the constants at the top of the file to change how the script runs)
 - output JSON files will be in `exploratory/data`, to use them in the production app copy it to `www/data`
 
-# Report/Journal
+# Final Report/Journal
 
 see report.md

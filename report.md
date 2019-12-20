@@ -1,4 +1,7 @@
-# Report:
+# Pathways: a Data Driven Course Recommender
+## Final Report
+
+#### Danny Yang, Eric Sun, Sam Fuchs - CDS Insights
 
 ### Overall Progress:
 This semester we developed webapp for students to explore majors/courses at Cornell [LINK](pathway.cis.cornell.edu). The app is designed for the following 3 use cases:
