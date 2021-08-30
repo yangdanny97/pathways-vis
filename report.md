@@ -4,7 +4,7 @@
 #### Danny Yang, Eric Sun, Sam Fuchs - CDS Insights
 
 ### Overall Progress:
-This semester we developed webapp for students to explore majors/courses at Cornell [LINK](pathway.cis.cornell.edu). The app is designed for the following 3 use cases:
+This semester we developed a webapp for students to explore majors/courses at Cornell. View it [HERE](pathway.cis.cornell.edu). The app is designed for the following 3 use cases:
 
 1. Freshman who does not know what major to pick, want to see typical courses for each major
 2. Upperclassman who wants to know what classes to take next semester

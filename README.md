@@ -2,7 +2,9 @@
 
 #### Danny Yang, Eric Sun, Sam Fuchs - CDS Insights
 
-visualization project of pathways through cornell CIS
+Interactive visualization of course progressions through cornell CIS, based on anonymized registrar data. Recommendation system for what courses to take + when to take them.
+
+Update: The website is no longer online or up-to-date, as it was intended as a short-term research project. See [this blog post](https://yangdanny97.github.io/blog/2020/05/02/course-recommender-system) for a writeup about the design and learnings.
 
 # Repo Description
 
