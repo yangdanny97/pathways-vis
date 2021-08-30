@@ -34,3 +34,4 @@ env/
 __pycache__
 
 /www/logging/pathways_logging.db
+.vscode/
